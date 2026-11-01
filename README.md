@@ -1,14 +1,16 @@
-# Hermès iOS
+# NeoOS
 
 **A quiet, native iOS home for your Hermes agent.**
 
-Hermès iOS connects directly to [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Research. Your agent stays on your server; Hermès iOS gives it a small, thoughtful interface on your iPhone. Built with SwiftUI and Apple's networking frameworks. Native WebRTC powers GPT-Live; there is no hosted relay, analytics, or Hermès iOS account.
+NeoOS is a customized version of [Hermès iOS](https://github.com/Molliex05/hermes-ios).
+
+NeoOS connects directly to [Hermes Agent](https://github.com/NousResearch/hermes-agent) by Nous Research. Your agent stays on your server; NeoOS gives it a small, thoughtful interface on your iPhone. Built with SwiftUI and Apple's networking frameworks. Native WebRTC powers GPT-Live; there is no hosted relay, analytics, or NeoOS account.
 
 <p>
-  <img src="docs/images/welcome.png" width="240" alt="Hermès iOS welcome screen" />
-  <img src="docs/images/chat.png" width="240" alt="Native Hermès iOS chat" />
+  <img src="docs/images/welcome.png" width="240" alt="NeoOS welcome screen" />
+  <img src="docs/images/chat.png" width="240" alt="Native NeoOS chat" />
   <img src="docs/images/spaces.png" width="240" alt="Thumb-reachable tools drawer" />
-  <img src="docs/images/agents.png" width="240" alt="Hermes profiles in Hermès iOS" />
+  <img src="docs/images/agents.png" width="240" alt="Hermes profiles in NeoOS" />
 </p>
 
 ## What works
@@ -34,8 +36,9 @@ Hermès iOS connects directly to [Hermes Agent](https://github.com/NousResearch/
 - Automatic voice conversations: open voice and speak naturally, hear the agent through its configured TTS provider, and continue without holding or tapping a send button. Live transcription shows your words while you speak (when the profile streams STT), the reply starts speaking during generation with chunked-PCM providers, and you can interrupt the agent while it thinks or speaks. A mute button and an end-call button stay within thumb reach. Written drafts and attachments remain separate.
 - A warm animated voice presence, clear listening/thinking/speaking states and an expandable transcript. The small Canvas animation is isolated from streaming text, uses a 24 fps clock and respects Reduce Motion.
 - Light/dark appearance, native controls, VoiceOver labels and an offline interactive preview.
+- Three interface languages — French (the source copy), English and Simplified Chinese — picked in **Menu › App › Langue** and applied immediately, without relaunching.
 
-The first UI is in French. Contributions for localization are welcome.
+French is the source language: every user-facing literal in the code is the key, so a missing entry simply falls back to French. English and Simplified Chinese live in `HermesIOS/Resources/en.lproj` and `HermesIOS/Resources/zh-Hans.lproj` as `Localizable.strings` (plus `InfoPlist.strings` for the permission prompts). To add a language, add its `.lproj` folder and one case to `AppLanguage` in `HermesIOS/Core/Localization.swift`.
 
 Before the addition of WebRTC, the last measured installed device build was: approximately **6.3 MB**, unpacked and development-signed. [Validation results](docs/VALIDATION.md).
 
@@ -62,11 +65,32 @@ xcodebuild -scheme HermesIOS -destination 'platform=iOS Simulator,name=iPhone 17
 
 Keep simulator signing enabled when testing authentication: the Keychain needs the application entitlement. Building with `CODE_SIGNING_ALLOWED=NO` is suitable only for a compile check.
 
+## iCloud asynchronous mode (new)
+
+A second, independent transport: the iPhone drops a text request into a **private CloudKit** mailbox, a
+small native macOS app (`NeoOSBridge`, in this repository) pulls it, sends it to the local
+`hermes serve` over loopback, and publishes the final answer back. Useful when the phone cannot reach
+the Mac's port at all.
+
+- Separate mode, separate model, separate storage. The direct connection is untouched; switching modes
+  never rewrites a saved connection, and a queued cloud message is never re-sent over WebSocket.
+- Scope of this first release: conversation list, text sending, final answer, failure and *uncertain*
+  states, and "the Mac has not been in touch" hints. No approvals, no voice, no attachments, no
+  configuration, no cross-channel takeover.
+- CloudKit tells you a record was *uploaded*. Only Hermes can tell you a turn was *accepted*, and only
+  a stored result proves it *completed*. The interface keeps those three apart.
+- Hermes 0.22.2's `/api/ws` has no durable input id and no admission lookup (verified — see
+  [compatibility](docs/CLOUDKIT_HERMES_COMPATIBILITY.md)), so a connection lost *after* a send becomes
+  **uncertain** and is never automatically replayed.
+- Setup needs an iCloud container, a signed App ID and the same iCloud user on both devices:
+  [setup and operation](docs/CLOUDKIT_HERMES_SETUP.md). What was actually tested, and what was not, is
+  in the [validation record](docs/CLOUDKIT_HERMES_VALIDATION.md).
+
 ## Hermes compatibility
 
-Validated on October 13, 2026 against Hermes **0.21.7**, commit [`71d34ba`](https://github.com/NousResearch/hermes-agent/commit/71d34bad1045610252eda02ee79549436896e784), with every RPC, event and server request checked against its typed contract catalog. Hermes 0.21.7 requires clients to declare `client.capabilities`; earlier builds of this app did not, so approvals and questions never reached them. Build 15 added native management and bidirectional interactive requests against Hermes **0.21.3**, commit `9326d9c`, on September 16, 2026. The initial client was researched and integration-tested against Hermes **0.21.2**, commit [`b7b35a8`](https://github.com/NousResearch/hermes-agent/commit/b7b35a84b7fbe1aa2e223a6ce726a2471300d0a4), on September 12, 2026. Hermes evolves rapidly. Hermès iOS uses native capability checks for Bot Mode, profile-scoped routines and hosted groups; an old or incompatible backend may need updating.
+Validated on October 13, 2026 against Hermes **0.21.7**, commit [`71d34ba`](https://github.com/NousResearch/hermes-agent/commit/71d34bad1045610252eda02ee79549436896e784), with every RPC, event and server request checked against its typed contract catalog. Hermes 0.21.7 requires clients to declare `client.capabilities`; earlier builds of this app did not, so approvals and questions never reached them. Build 15 added native management and bidirectional interactive requests against Hermes **0.21.3**, commit `9326d9c`, on September 16, 2026. The initial client was researched and integration-tested against Hermes **0.21.2**, commit [`b7b35a8`](https://github.com/NousResearch/hermes-agent/commit/b7b35a84b7fbe1aa2e223a6ce726a2471300d0a4), on September 12, 2026. Hermes evolves rapidly. NeoOS uses native capability checks for Bot Mode, profile-scoped routines and hosted groups; an old or incompatible backend may need updating.
 
-Hermès iOS uses `/api/ws`, Hermes' JSON-RPC methods and its authenticated REST routes. Kanban requires the native Kanban plugin on the server. It does **not** reimplement Hermes behind an OpenAI-compatible chat proxy. Memory, prompts, tools, profiles, permissions, scheduled work and durable conversation history remain owned by Hermes. [Protocol research and exact methods](docs/HERMES_PROTOCOL.md).
+NeoOS uses `/api/ws`, Hermes' JSON-RPC methods and its authenticated REST routes. Kanban requires the native Kanban plugin on the server. It does **not** reimplement Hermes behind an OpenAI-compatible chat proxy. Memory, prompts, tools, profiles, permissions, scheduled work and durable conversation history remain owned by Hermes. [Protocol research and exact methods](docs/HERMES_PROTOCOL.md).
 
 ## Honest boundaries
 
@@ -78,13 +102,13 @@ OAuth/Nous Portal browser sign-in, message editing/regeneration, rich tool-resul
 
 Unread markers describe activity observed by this iPhone; they are not server-synchronized read receipts. The initial history stays quiet, and message counts take precedence over preview text and refresh timestamps. The expandable tool summary keeps at most 40 steps from the live/replayed turn; it is not a persisted execution log or a rich tool-result viewer.
 
-iOS suspends network work in the background. The agent keeps working on the server; Hermès iOS reconnects on return. Hermes' replay ring is finite and its transcript snapshots do not carry an atomic event cursor. Normal reconnects replay exactly; after a ring overflow, Hermès iOS rebases from history/in-flight text, retaining the known partial answer when overlap cannot be proven until the authoritative final answer arrives. “Invisible sync” is a UX objective, not a promise that an offline phone receives live tokens. See [architecture](docs/ARCHITECTURE.md).
+iOS suspends network work in the background. The agent keeps working on the server; NeoOS reconnects on return. Hermes' replay ring is finite and its transcript snapshots do not carry an atomic event cursor. Normal reconnects replay exactly; after a ring overflow, NeoOS rebases from history/in-flight text, retaining the known partial answer when overlap cannot be proven until the authoritative final answer arrives. “Invisible sync” is a UX objective, not a promise that an offline phone receives live tokens. See [architecture](docs/ARCHITECTURE.md).
 
 ## Contribute
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) and [the testing guide](docs/TESTING.md). Protocol changes should include a behavioral test and evidence from the official Hermes implementation. Keep the app small. Don't add a replacement backend, a private sync service, or provider credentials to the client.
 
-MIT licensed. Hermès iOS is an independent community project, not an official Nous Research product. Hermes Agent retains its own license and branding.
+MIT licensed. NeoOS is an independent community project, not an official Nous Research product. Hermes Agent retains its own license and branding.
 
 ## iPhone notifications
 
