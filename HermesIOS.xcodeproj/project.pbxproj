@@ -13,23 +13,29 @@
 		05CE3F5ED070F71DF1B114CD /* ChatRequestCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF7E91170403F14C2AEA4311 /* ChatRequestCards.swift */; };
 		0742F26E4EBEF387D2AEDF27 /* AppChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7494750F87AE1DE4FCD29840 /* AppChrome.swift */; };
 		0799FACAFF21D17D20153DE2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4B6516CD29F52E374AAF519F /* PrivacyInfo.xcprivacy */; };
+		0AA629ACC8A22B870C1E8E98 /* CloudBridgeSync in Frameworks */ = {isa = PBXBuildFile; productRef = F70BB2B97EC52DBCD588736C /* CloudBridgeSync */; };
+		0AF7F1417CAA934C37B8031C /* BridgeRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A5EC5F4D1391A21943A6158 /* BridgeRequestsView.swift */; };
 		0BED67CD4A587DA4DCD37D66 /* VoiceBench.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2717CCF90B5F1FC42676E709 /* VoiceBench.swift */; };
 		0EAAC808AC8CD5F546371AFE /* PhotoAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEEDE2B035F0E274D1A677E0 /* PhotoAttachment.swift */; };
 		11258E6C86A1C839693F1627 /* MessagingSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0560CDB37DB5361F6266DB9 /* MessagingSettingsView.swift */; };
+		139FE4B406CDEB2174C62246 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB744CA53FFC5C882D5162F3 /* LanguageSettingsView.swift */; };
 		1401D88BADB2CE45AD67B6E1 /* AgentToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76ACDEB64D082DA4095A0544 /* AgentToolsView.swift */; };
 		17800636EBA794D33C9DF515 /* HermesVoiceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4248E82756F62E76CFBD2FC3 /* HermesVoiceWidget.swift */; };
 		1C0F76837800CB263FE2F9FA /* NativeToolSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851E43F4DDB4C85BF0F4C3EB /* NativeToolSession.swift */; };
 		1D6BA5CFD24AA3160DEFA81E /* HermesLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAB709D8C5E3108719E06C0 /* HermesLiveActivity.swift */; };
+		1E3208255BA80741AB3B144D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2B28E7477A08EFF0117B2D05 /* Localizable.strings */; };
 		2268CBC67094747ADE780909 /* SlashInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45F8C117680E3093D826D5D3 /* SlashInput.swift */; };
 		2385223B5DEAB01545E54893 /* ApprovalsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08734E14815870F155D2113F /* ApprovalsSettingsView.swift */; };
 		23C8F8F7F37C15AED2812D64 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66B00D49A62F7932717F5453 /* Haptics.swift */; };
 		23E92A41D7BC145F4759684D /* StreamingTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = C090E451DBD450770375EC1E /* StreamingTranscriber.swift */; };
+		23EF965F2585C8565016B135 /* ConnectionMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F548146967B80D8C11ED153 /* ConnectionMode.swift */; };
 		2447BF28A55D3BB3FF00FF45 /* LocalSpeech.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0975D60362A6E3F22B2DA9C /* LocalSpeech.swift */; };
 		27316298D68C4B149E54621E /* AttachSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B786F5F6662DB91C33D678 /* AttachSheet.swift */; };
 		28423163919A6E21C7FB224D /* VoiceFiller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F3CDA374E42BBFCE84A4F6 /* VoiceFiller.swift */; };
 		292D6A3F22704C5977086389 /* AgentsHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E003103ABED5DE7BD3D43B /* AgentsHubView.swift */; };
 		2995C37CAC738935C3CB0A6C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 476734DA2FC09D7F7E0875DC /* SettingsView.swift */; };
 		2B026ECDD1205EBD9E38FD62 /* ServerRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C0675CE4216DC70C01FAB81 /* ServerRequests.swift */; };
+		2D7840F52125DFFA751B516E /* CloudRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CA65E71B2B817FBBFC8839 /* CloudRuntime.swift */; };
 		2DFA705484B15701021AC6AF /* OrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE8B5391134DE1081572A11 /* OrbView.swift */; };
 		310DFB70B3DD5F4DA5D1F973 /* ChatComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B989A6021842DF3745AC235 /* ChatComposer.swift */; };
 		3183427FCD19DE10DA400471 /* LiveActivities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A63F8F4353EC7F32A9C2FF8 /* LiveActivities.swift */; };
@@ -37,6 +43,7 @@
 		37CFBBB3D7D38EB3436802A3 /* verifie.pcm in Resources */ = {isa = PBXBuildFile; fileRef = E25C741CE17EFE626CE896FC /* verifie.pcm */; };
 		38DD9166CFB8C130D4EE0ECB /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23406111A6D8CD5FE59A411C /* Theme.swift */; };
 		39F02898F9AB8D7E1D1C3A02 /* noriven_chaine.wav in Resources */ = {isa = PBXBuildFile; fileRef = 607A67220A1FD6A6196696CA /* noriven_chaine.wav */; };
+		3AB159C45379B4D60F1158A9 /* CloudBridgeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 29733C7E62833BC36C6E6AA9 /* CloudBridgeCore */; };
 		3BEA13A1BB98D1A6C05EBB73 /* blague.wav in Resources */ = {isa = PBXBuildFile; fileRef = E66D84540101AC5A1E6C9BBA /* blague.wav */; };
 		3C71872B6874298E0B73C4F5 /* ChatHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DFB43B3E8A94574E7859F89 /* ChatHeader.swift */; };
 		3D6A1F7AFED4B023479B8E9A /* SettingsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB26E0333D8D564B91C7D21F /* SettingsCatalog.swift */; };
@@ -44,11 +51,15 @@
 		4246833D876E50E61234963B /* AgentConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224CAC4570952840E57256D5 /* AgentConfigStore.swift */; };
 		4360124DB73B3B91DC9DBC8E /* noriven_compare.wav in Resources */ = {isa = PBXBuildFile; fileRef = 41C5AE38319FEB1DF5D09D55 /* noriven_compare.wav */; };
 		439A876888E485FB158CB840 /* PresenceBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88CDF5DC1D8A5E35BD92E7BF /* PresenceBeacon.swift */; };
+		48C1016D848ECF86DF99E887 /* CloudBridgeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4FA1835C4C5A3BD6F0A15D2E /* CloudBridgeCore */; };
 		48C38EA4D6AF9C7DE6F2E160 /* CredentialsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8FE4D6E2F7E5F6C796C928 /* CredentialsSettingsView.swift */; };
+		4D96EC868F952F1D8492059D /* BridgeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739DC15DB051E2637959A4CA /* BridgeSettingsView.swift */; };
 		4F12D4CF4D888EA890A98BF3 /* HistoryRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C910078020A4AF8014712019 /* HistoryRequests.swift */; };
 		4F7E457B9EC1B22606C5986B /* ActivityIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 085BE96A8289B836A61EB9B0 /* ActivityIntents.swift */; };
+		52773C4C9315465A79539992 /* CloudBridgeSync in Frameworks */ = {isa = PBXBuildFile; productRef = E1219472C104AD0EED7D27D5 /* CloudBridgeSync */; };
 		52F6850354DB1AB081A270AF /* AccountsSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3906C589B66E594172121A15 /* AccountsSupport.swift */; };
 		5361803BAD431458B37A663B /* HermesHTTP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F6FE9D7F1FBAB1A65EDA562 /* HermesHTTP.swift */; };
+		553023EF4F338EE719B883E3 /* CloudChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3771A36AC91EF331103DF183 /* CloudChatView.swift */; };
 		5757F16F224868FE2B6565D2 /* VoiceNoiseFloor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2BB106302AD38E8FB4767 /* VoiceNoiseFloor.swift */; };
 		59454233EF00BAB95B5995BC /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA403258EBDBCDA2BBA568D1 /* Endpoint.swift */; };
 		59F6414EAF16F5E0369B5342 /* ProvidersSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEB3EDB5A972E8E368140A40 /* ProvidersSettingsView.swift */; };
@@ -63,6 +74,7 @@
 		6791B4012468C461CA03A0D3 /* AgentSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C1CA4BD09AAD37D7D849AF6 /* AgentSettingsView.swift */; };
 		67C754CC229DCAB172A48748 /* ConfigFieldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3356B2AA5CDED860A54BD12A /* ConfigFieldRow.swift */; };
 		67D1D9310384B74414E2E884 /* HermesActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A78B874AD786825A250979 /* HermesActivityAttributes.swift */; };
+		68E9AE4929690085FC208C11 /* BridgeEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AEA502682A842E173DE012 /* BridgeEnvironment.swift */; };
 		6BFB8C889762F2E5B4F1571F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CF3A3E8B03FC0663B7C6FA0 /* Assets.xcassets */; };
 		6E1D84376F9131F849773102 /* instant.pcm in Resources */ = {isa = PBXBuildFile; fileRef = 59BEB0EAB17FDB28F14A85B2 /* instant.pcm */; };
 		73B2167D11DF44147AD7EC05 /* VoiceStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5B594D96A6A55C14D98BA /* VoiceStreams.swift */; };
@@ -75,16 +87,20 @@
 		7CAFFBE7DD445AEA64B552BF /* pluie.wav in Resources */ = {isa = PBXBuildFile; fileRef = 015E6A4BBA3A7DB442F51E9A /* pluie.wav */; };
 		7D8C3F7C47D12C3797098D52 /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C3D4CBCE21007427CF5346 /* NotificationsView.swift */; };
 		7E3BD893B78BE11087AAB00E /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2978808F5B483F1D8D9CD9D6 /* WidgetSnapshot.swift */; };
+		7E89FA80BC5FFAFCD6C8BE1B /* CloudChatUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B387EA61169D046B11E05B76 /* CloudChatUITests.swift */; };
 		7EFE62313F42242EB94E4FA3 /* PhoneAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87974C486547A508B8622998 /* PhoneAudio.swift */; };
 		7FF4A09C14A27BFC619F7D3B /* NotificationKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8BBC0720EC796E9C661E8B0 /* NotificationKeyStore.swift */; };
 		82F7366D2BEEAC1336ACB473 /* VoiceTextCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33653FCB4712F78B59195DEF /* VoiceTextCursor.swift */; };
 		83C379CC804844BE37694A45 /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BB0F5CE1F8FF278DE6053 /* GroupsView.swift */; };
+		840D066E2AA2574015FE6049 /* NeoOSBridgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3918DCBBA5EDDFA854985A7B /* NeoOSBridgeApp.swift */; };
 		87CF654D7D7185292175380D /* Transcript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0133611339BB4310770DF600 /* Transcript.swift */; };
+		88ECC836D598DFCED5937C63 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E76070C1533F1FB62B30DDAB /* InfoPlist.strings */; };
 		8C0DDCAC1E38E1662C7E3A25 /* ConversationActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FEFFF5E8E53C4E477676BDD /* ConversationActions.swift */; };
 		8C9C5143998CC7920E16F040 /* HermesIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C508AA7C9E85121414A024E /* HermesIOSApp.swift */; };
 		8EE9F3A05EAB8F20BB6B895E /* OrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE8B5391134DE1081572A11 /* OrbView.swift */; };
 		91B47DA6CE82BCEAA9A6E8F7 /* VoiceLiveTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94007CB33EECD7455229853A /* VoiceLiveTransportTests.swift */; };
 		929BC6AD83AD2EB73CC6A24E /* fichiers.wav in Resources */ = {isa = PBXBuildFile; fileRef = 412AFB769F89519D51306D58 /* fichiers.wav */; };
+		946515E8A0133D80CE95CB89 /* CloudChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773602F4F3FF97394160F5BF /* CloudChatModel.swift */; };
 		96BB901CF1D7F75F57E206A4 /* ChatTranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B95AADFCA8B42EAEAAFECD /* ChatTranscriptView.swift */; };
 		9772E0457C80C9E24FB69D1B /* VoiceActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B1ABEA9AE1C021FC85A2204 /* VoiceActivity.swift */; };
 		97929EF5F7B7AAF45EE32EF9 /* WorkspaceFilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F836B8FAB56D3E5A0BBD6BD2 /* WorkspaceFilesView.swift */; };
@@ -94,23 +110,28 @@
 		A126D118743D5F3FB318EC9F /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4FC914201C38D1A165638D /* ChatView.swift */; };
 		A316AA200AD7147B4FD29A3D /* HermesIOSNotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0C228C9EF339468B8F713539 /* HermesIOSNotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A65B1AFBDE1BEE9C71B20D2A /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4140F253F6342BD71320743C /* MenuView.swift */; };
+		A7A383146F5D0EB3033B2572 /* BridgeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B373B988E830ADA16ABB8583 /* BridgeController.swift */; };
 		A860795CE92E02D458FCD7F9 /* VoiceAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C74EF888F8261E4F8C205D2 /* VoiceAudioEngine.swift */; };
 		A9067A76C700ABE1CBC373E9 /* VoiceLiveProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FFBB999CB80F593A702DC86 /* VoiceLiveProtocol.swift */; };
 		A95A1A969026C220303DA621 /* DraftAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B083DF2BEBD828CF266749E2 /* DraftAttachment.swift */; };
+		AC12E66DA1860B80443C7A26 /* BridgeControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2D3251C21BF95617006630 /* BridgeControllerTests.swift */; };
 		AD68B66A2C390D8BFACA6842 /* serveur.wav in Resources */ = {isa = PBXBuildFile; fileRef = 03798866749FB588780AC10D /* serveur.wav */; };
 		AF6C7D38F74FA92DCF7CF64C /* WidgetRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = B056C8FD81F3AB48622A70C0 /* WidgetRefresh.swift */; };
 		B2C665BB05FF342AF14A2213 /* VoiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F08E647D8D7185F6DC6AD56 /* VoiceDiagnostics.swift */; };
 		B3E754254F266AC7A3A72788 /* LocalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69DD335D5BB61C6A77C2EC6 /* LocalCache.swift */; };
 		B4F7674BD7E40625FFA1833A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4EE51D78FA0482C1CE5323 /* OnboardingView.swift */; };
 		B8683193F9756EE676D1E4DB /* NotificationEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42A71A430869150B40B16D6 /* NotificationEnvelope.swift */; };
+		B91AEB5A4DD638A45EF7D3EB /* HermesBridgeClient in Frameworks */ = {isa = PBXBuildFile; productRef = B073837EB2E7A6FAB5D0A38D /* HermesBridgeClient */; };
 		B9769A1645106A420D44BF99 /* web.wav in Resources */ = {isa = PBXBuildFile; fileRef = 79C37338BEC56A3322AAC1CF /* web.wav */; };
 		B9DA3EA44216ED0D80BEA3F7 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2978808F5B483F1D8D9CD9D6 /* WidgetSnapshot.swift */; };
 		BA651A22F5C0CF5320C4E383 /* RoutinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B015E03D9D8F60B51C9F3C89 /* RoutinesView.swift */; };
 		BACC5A498A68882663AD5B37 /* VoiceMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C40E207DFACCFAA12FE387 /* VoiceMetrics.swift */; };
 		BDE7E9AD8486B77176875B30 /* ConversationIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5045723AB4101C15BB122A44 /* ConversationIndex.swift */; };
 		C0F97796889C0EF73909DE34 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6736CBC0AB49572EDDC3502 /* AppModel.swift */; };
+		C1C1D4858DBA062BDBBED514 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B54D77576EA344E1C2CE9E /* Localization.swift */; };
 		C414AC803088CB868E2A7381 /* WebRTC-LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 191FD2CA28F784715C57C83D /* WebRTC-LICENSE.txt */; };
 		C4E5F98CEC41BFB069485A78 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 185269B34B53A2F564E2CD38 /* Keychain.swift */; };
+		C5501483FEE078252FB0E616 /* CloudConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D550A60F02F3C8B200D0B8 /* CloudConnectionView.swift */; };
 		C64A73C0EABAD25C4AB4E961 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A462CE3A3E115F981A5C76 /* Models.swift */; };
 		C699CD55E914BDE9B33E3C81 /* manteau.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3D4CA639A161E5614648C6E /* manteau.wav */; };
 		C767CFA0BE1B9B44C5CF7399 /* NorivenFinanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A330062E815C996DC29C9E8 /* NorivenFinanceWidget.swift */; };
@@ -122,6 +143,7 @@
 		D681AB6A78A919CC947068D4 /* HermesIOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E603ABD353FD2203064ED4D6 /* HermesIOSUITests.swift */; };
 		D7BE10234689EE99042A0352 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03771C2DF46F958CA751A93C /* JSONValue.swift */; };
 		DDCED966D0CD49F0861AC32D /* NativeSpeechStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6E4B7452159378C20628C7D /* NativeSpeechStream.swift */; };
+		E081B95C4B66B9E8153523C8 /* CloudFixtureSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EDA6C67102F80D88D34347 /* CloudFixtureSupport.swift */; };
 		E3BDA5080F70B105FDDA04F3 /* MarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8C2642D7ADE3DDF465C6E89 /* MarkdownText.swift */; };
 		E4687AFCE99263487AB19A15 /* AgentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4E2583813D830A3E900B68 /* AgentsView.swift */; };
 		E682AF397D313D2571AE371F /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3308B375BD035EA756531419 /* WidgetSnapshotStore.swift */; };
@@ -172,6 +194,13 @@
 			remoteGlobalIDString = 2D8D5AEB993E1553A824E18B;
 			remoteInfo = HermesIOSNotificationService;
 		};
+		F91E34066C3ADB12EA5DA8E8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AF054738A80FFFF2F67365FA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BECB7CD7F0DEAEAB064BF20F;
+			remoteInfo = NeoOSBridge;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -195,14 +224,15 @@
 		02A462CE3A3E115F981A5C76 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		03771C2DF46F958CA751A93C /* JSONValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONValue.swift; sourceTree = "<group>"; };
 		03798866749FB588780AC10D /* serveur.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = serveur.wav; sourceTree = "<group>"; };
+		081932EC5EEA8D0E139A5392 /* NeoOSBridge.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NeoOSBridge.entitlements; sourceTree = "<group>"; };
 		085BE96A8289B836A61EB9B0 /* ActivityIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIntents.swift; sourceTree = "<group>"; };
 		08734E14815870F155D2113F /* ApprovalsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprovalsSettingsView.swift; sourceTree = "<group>"; };
-		08FCED906E5D5607C188EFFC /* HermesIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HermesIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0950720749BFDC7C3C5A89A9 /* HermesIOSWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = HermesIOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		08FCED906E5D5607C188EFFC /* HermesIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HermesIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0950720749BFDC7C3C5A89A9 /* HermesIOSWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HermesIOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A330062E815C996DC29C9E8 /* NorivenFinanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NorivenFinanceWidget.swift; sourceTree = "<group>"; };
 		0B1ABEA9AE1C021FC85A2204 /* VoiceActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceActivity.swift; sourceTree = "<group>"; };
 		0B53C79BCCEEDFBAEE6E54DE /* HermesIOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HermesIOSWidgets.entitlements; sourceTree = "<group>"; };
-		0C228C9EF339468B8F713539 /* HermesIOSNotificationService.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = HermesIOSNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C228C9EF339468B8F713539 /* HermesIOSNotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HermesIOSNotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C74EF888F8261E4F8C205D2 /* VoiceAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAudioEngine.swift; sourceTree = "<group>"; };
 		13A78B874AD786825A250979 /* HermesActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesActivityAttributes.swift; sourceTree = "<group>"; };
 		185269B34B53A2F564E2CD38 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
@@ -213,19 +243,24 @@
 		1FEFFF5E8E53C4E477676BDD /* ConversationActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationActions.swift; sourceTree = "<group>"; };
 		224CAC4570952840E57256D5 /* AgentConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfigStore.swift; sourceTree = "<group>"; };
 		23406111A6D8CD5FE59A411C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		25B54D77576EA344E1C2CE9E /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		2717CCF90B5F1FC42676E709 /* VoiceBench.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceBench.swift; sourceTree = "<group>"; };
 		2978808F5B483F1D8D9CD9D6 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
 		2BFBAC9B6E331893F7ADA152 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2C0675CE4216DC70C01FAB81 /* ServerRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerRequests.swift; sourceTree = "<group>"; };
 		2C4EE51D78FA0482C1CE5323 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		2F2D3251C21BF95617006630 /* BridgeControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeControllerTests.swift; sourceTree = "<group>"; };
 		2F7621658C8097D0BF7AFF62 /* VoiceLiveTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLiveTransport.swift; sourceTree = "<group>"; };
 		2FA5B594D96A6A55C14D98BA /* VoiceStreams.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceStreams.swift; sourceTree = "<group>"; };
 		3308B375BD035EA756531419 /* WidgetSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotStore.swift; sourceTree = "<group>"; };
 		3356B2AA5CDED860A54BD12A /* ConfigFieldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigFieldRow.swift; sourceTree = "<group>"; };
 		33653FCB4712F78B59195DEF /* VoiceTextCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTextCursor.swift; sourceTree = "<group>"; };
 		362C9954B7F70E3D5BFA2C9F /* memoire.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = memoire.wav; sourceTree = "<group>"; };
+		3771A36AC91EF331103DF183 /* CloudChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudChatView.swift; sourceTree = "<group>"; };
 		37886968AE83A88E7E1B9678 /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
+		37CA65E71B2B817FBBFC8839 /* CloudRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudRuntime.swift; sourceTree = "<group>"; };
 		3906C589B66E594172121A15 /* AccountsSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsSupport.swift; sourceTree = "<group>"; };
+		3918DCBBA5EDDFA854985A7B /* NeoOSBridgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeoOSBridgeApp.swift; sourceTree = "<group>"; };
 		399BB0F5CE1F8FF278DE6053 /* GroupsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsView.swift; sourceTree = "<group>"; };
 		3CF3A3E8B03FC0663B7C6FA0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3F08E647D8D7185F6DC6AD56 /* VoiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceDiagnostics.swift; sourceTree = "<group>"; };
@@ -238,25 +273,34 @@
 		45F8C117680E3093D826D5D3 /* SlashInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlashInput.swift; sourceTree = "<group>"; };
 		46031F875793783DE776A6F7 /* ConversationActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationActivity.swift; sourceTree = "<group>"; };
 		476734DA2FC09D7F7E0875DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		47D550A60F02F3C8B200D0B8 /* CloudConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudConnectionView.swift; sourceTree = "<group>"; };
 		4B1B07CAFC53C700A7E55E59 /* VoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceView.swift; sourceTree = "<group>"; };
-		4B6516CD29F52E374AAF519F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		4B6516CD29F52E374AAF519F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		5045723AB4101C15BB122A44 /* ConversationIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationIndex.swift; sourceTree = "<group>"; };
 		5129C2C9C5CCE39CD9C692C0 /* Skeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skeleton.swift; sourceTree = "<group>"; };
 		5380C4BA29841FE2C644991E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		59BEB0EAB17FDB28F14A85B2 /* instant.pcm */ = {isa = PBXFileReference; path = instant.pcm; sourceTree = "<group>"; };
+		5922E1C7AE0FAE690641F2D4 /* NeoOSBridgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeoOSBridgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		59BEB0EAB17FDB28F14A85B2 /* instant.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = instant.pcm; sourceTree = "<group>"; };
 		5AFED7BFEFF9E73E8742F99A /* meteo.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = meteo.wav; sourceTree = "<group>"; };
 		5EAF91D4EE15D71A06822725 /* PluginsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginsSettingsView.swift; sourceTree = "<group>"; };
+		5F548146967B80D8C11ED153 /* ConnectionMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionMode.swift; sourceTree = "<group>"; };
+		5F56E68988F1FF5CE1E3591B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		5FFBB999CB80F593A702DC86 /* VoiceLiveProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLiveProtocol.swift; sourceTree = "<group>"; };
 		607A67220A1FD6A6196696CA /* noriven_chaine.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = noriven_chaine.wav; sourceTree = "<group>"; };
 		638546B579DE55B294254F19 /* PushNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotifications.swift; sourceTree = "<group>"; };
 		65EE6AD3D1CC1C3D44551CF2 /* FinanceWidgetShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceWidgetShared.swift; sourceTree = "<group>"; };
 		66B00D49A62F7932717F5453 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		67BA2D68200DA06A0A310D33 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6DFB43B3E8A94574E7859F89 /* ChatHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHeader.swift; sourceTree = "<group>"; };
 		70C3D4CBCE21007427CF5346 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		739DC15DB051E2637959A4CA /* BridgeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeSettingsView.swift; sourceTree = "<group>"; };
 		7494750F87AE1DE4FCD29840 /* AppChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppChrome.swift; sourceTree = "<group>"; };
 		753087B8E41F0A5AED4D3DC0 /* VoiceSamples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSamples.swift; sourceTree = "<group>"; };
+		7644917527AE0E48892E6CE9 /* NeoOSBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeoOSBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		76ACDEB64D082DA4095A0544 /* AgentToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentToolsView.swift; sourceTree = "<group>"; };
+		773602F4F3FF97394160F5BF /* CloudChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudChatModel.swift; sourceTree = "<group>"; };
 		79C37338BEC56A3322AAC1CF /* web.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = web.wav; sourceTree = "<group>"; };
+		7A5EC5F4D1391A21943A6158 /* BridgeRequestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeRequestsView.swift; sourceTree = "<group>"; };
 		7A87F904778F7AD694B573F1 /* HermesSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesSocket.swift; sourceTree = "<group>"; };
 		7C4FC914201C38D1A165638D /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		7F6FE9D7F1FBAB1A65EDA562 /* HermesHTTP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesHTTP.swift; sourceTree = "<group>"; };
@@ -264,16 +308,20 @@
 		8659E5441FEDEAF35AA3E772 /* HermesIOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HermesIOS.entitlements; sourceTree = "<group>"; };
 		87974C486547A508B8622998 /* PhoneAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAudio.swift; sourceTree = "<group>"; };
 		88CDF5DC1D8A5E35BD92E7BF /* PresenceBeacon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceBeacon.swift; sourceTree = "<group>"; };
+		89EE3AF6F6F4CFA4501E2C38 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8A63F8F4353EC7F32A9C2FF8 /* LiveActivities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivities.swift; sourceTree = "<group>"; };
 		8B989A6021842DF3745AC235 /* ChatComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatComposer.swift; sourceTree = "<group>"; };
 		92A2BB106302AD38E8FB4767 /* VoiceNoiseFloor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoiseFloor.swift; sourceTree = "<group>"; };
 		94007CB33EECD7455229853A /* VoiceLiveTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceLiveTransportTests.swift; sourceTree = "<group>"; };
 		94E003103ABED5DE7BD3D43B /* AgentsHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsHubView.swift; sourceTree = "<group>"; };
+		9879327C60430913FBBA911F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9FE8B5391134DE1081572A11 /* OrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbView.swift; sourceTree = "<group>"; };
+		9FF8F652BBACB0F05ACB27B3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		A0560CDB37DB5361F6266DB9 /* MessagingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagingSettingsView.swift; sourceTree = "<group>"; };
 		A115C0D0A171E6BD05F89DB5 /* FinanceViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceViews.swift; sourceTree = "<group>"; };
 		A2B786F5F6662DB91C33D678 /* AttachSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachSheet.swift; sourceTree = "<group>"; };
 		A35FCE467300937D0131D0EF /* RoutineSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineSchedule.swift; sourceTree = "<group>"; };
+		A4EDA6C67102F80D88D34347 /* CloudFixtureSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudFixtureSupport.swift; sourceTree = "<group>"; };
 		AE4F2E495217FD87EC1192B3 /* noriven_depenses.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = noriven_depenses.wav; sourceTree = "<group>"; };
 		B015E03D9D8F60B51C9F3C89 /* RoutinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutinesView.swift; sourceTree = "<group>"; };
 		B056C8FD81F3AB48622A70C0 /* WidgetRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRefresh.swift; sourceTree = "<group>"; };
@@ -282,6 +330,8 @@
 		B104A4361ECD7B91A321759C /* NativeVoiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeVoiceAPI.swift; sourceTree = "<group>"; };
 		B19818CCC8AD6C15BBC328BA /* ConfigurationValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationValue.swift; sourceTree = "<group>"; };
 		B1B95AADFCA8B42EAEAAFECD /* ChatTranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTranscriptView.swift; sourceTree = "<group>"; };
+		B373B988E830ADA16ABB8583 /* BridgeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeController.swift; sourceTree = "<group>"; };
+		B387EA61169D046B11E05B76 /* CloudChatUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudChatUITests.swift; sourceTree = "<group>"; };
 		BB4E2583813D830A3E900B68 /* AgentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsView.swift; sourceTree = "<group>"; };
 		BBAAD9CB1B93F3090CFE6326 /* ChatMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMarkdown.swift; sourceTree = "<group>"; };
 		BC8FE4D6E2F7E5F6C796C928 /* CredentialsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsSettingsView.swift; sourceTree = "<group>"; };
@@ -290,7 +340,7 @@
 		BFB1DB514EF6A36E1A2334FF /* HermesIOSWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesIOSWidgetsBundle.swift; sourceTree = "<group>"; };
 		C090E451DBD450770375EC1E /* StreamingTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingTranscriber.swift; sourceTree = "<group>"; };
 		C910078020A4AF8014712019 /* HistoryRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRequests.swift; sourceTree = "<group>"; };
-		CE92F3CCA9C168E1636289CF /* regarde.pcm */ = {isa = PBXFileReference; path = regarde.pcm; sourceTree = "<group>"; };
+		CE92F3CCA9C168E1636289CF /* regarde.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = regarde.pcm; sourceTree = "<group>"; };
 		CEAB709D8C5E3108719E06C0 /* HermesLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesLiveActivity.swift; sourceTree = "<group>"; };
 		CEEDE2B035F0E274D1A677E0 /* PhotoAttachment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoAttachment.swift; sourceTree = "<group>"; };
 		CF7E91170403F14C2AEA4311 /* ChatRequestCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRequestCards.swift; sourceTree = "<group>"; };
@@ -302,34 +352,48 @@
 		DB56049C88F161EF3BA08C67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DCC12C319AE764336787C8A1 /* NotificationCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCrypto.swift; sourceTree = "<group>"; };
 		E1F3CDA374E42BBFCE84A4F6 /* VoiceFiller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceFiller.swift; sourceTree = "<group>"; };
-		E25C741CE17EFE626CE896FC /* verifie.pcm */ = {isa = PBXFileReference; path = verifie.pcm; sourceTree = "<group>"; };
+		E25C741CE17EFE626CE896FC /* verifie.pcm */ = {isa = PBXFileReference; lastKnownFileType = file; path = verifie.pcm; sourceTree = "<group>"; };
 		E36DE38AF4ABDF2227F4C599 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		E42A71A430869150B40B16D6 /* NotificationEnvelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationEnvelope.swift; sourceTree = "<group>"; };
-		E49551EA6592A9C0C6AD1E4D /* HermesIOSVoiceTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HermesIOSVoiceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E49551EA6592A9C0C6AD1E4D /* HermesIOSVoiceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HermesIOSVoiceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E603ABD353FD2203064ED4D6 /* HermesIOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HermesIOSUITests.swift; sourceTree = "<group>"; };
 		E66D84540101AC5A1E6C9BBA /* blague.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = blague.wav; sourceTree = "<group>"; };
 		E6736CBC0AB49572EDDC3502 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		E6AEA502682A842E173DE012 /* BridgeEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeEnvironment.swift; sourceTree = "<group>"; };
 		E6E4B7452159378C20628C7D /* NativeSpeechStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeSpeechStream.swift; sourceTree = "<group>"; };
 		E8BBC0720EC796E9C661E8B0 /* NotificationKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationKeyStore.swift; sourceTree = "<group>"; };
 		EA19D67E64E6BC861BA6083F /* BackgroundLease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundLease.swift; sourceTree = "<group>"; };
 		EA403258EBDBCDA2BBA568D1 /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
 		EB26E0333D8D564B91C7D21F /* SettingsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCatalog.swift; sourceTree = "<group>"; };
+		EB744CA53FFC5C882D5162F3 /* LanguageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettingsView.swift; sourceTree = "<group>"; };
 		EB77C4015371E1075BEE95F0 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		EEB3EDB5A972E8E368140A40 /* ProvidersSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersSettingsView.swift; sourceTree = "<group>"; };
 		F25C8AEBDE66DBDA9B9AF8D4 /* VoiceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsView.swift; sourceTree = "<group>"; };
 		F3D4CA639A161E5614648C6E /* manteau.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = manteau.wav; sourceTree = "<group>"; };
 		F836B8FAB56D3E5A0BBD6BD2 /* WorkspaceFilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceFilesView.swift; sourceTree = "<group>"; };
-		F9CE976027FBF5395EF1C01C /* HermesIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HermesIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9CE976027FBF5395EF1C01C /* HermesIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HermesIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAE26FF8CAD8052D3A341332 /* NotificationTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTarget.swift; sourceTree = "<group>"; };
 		FD17FA2A027A1EE3C4D37805 /* ModelSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSettingsView.swift; sourceTree = "<group>"; };
 		FF9D68B321A3EAD8790792A8 /* ConfigPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigPageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7935EB5AF6403D53685F2559 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48C1016D848ECF86DF99E887 /* CloudBridgeCore in Frameworks */,
+				52773C4C9315465A79539992 /* CloudBridgeSync in Frameworks */,
+				B91AEB5A4DD638A45EF7D3EB /* HermesBridgeClient in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C6950CC553E7EC99DF86017D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AB159C45379B4D60F1158A9 /* CloudBridgeCore in Frameworks */,
+				0AA629ACC8A22B870C1E8E98 /* CloudBridgeSync in Frameworks */,
 				9874167913400E71562873FD /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -370,6 +434,8 @@
 				87DB305296DB0BA407D4834A /* HermesIOSUITests */,
 				97BBF47AE6A812400EBBEF40 /* HermesIOSVoiceTests */,
 				1E7F5EC57CB7315E89A5C1F3 /* HermesIOSWidgets */,
+				D996906303AE74E4CF82D373 /* NeoOSBridge */,
+				DEE2848CA8434559B34516B8 /* NeoOSBridgeTests */,
 				53D3F01D3EBC6A92635B9684 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -377,6 +443,8 @@
 		2F70FF112480D3C6FE42D631 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				2B28E7477A08EFF0117B2D05 /* Localizable.strings */,
+				E76070C1533F1FB62B30DDAB /* InfoPlist.strings */,
 				3CF3A3E8B03FC0663B7C6FA0 /* Assets.xcassets */,
 				8659E5441FEDEAF35AA3E772 /* HermesIOS.entitlements */,
 				2BFBAC9B6E331893F7ADA152 /* Info.plist */,
@@ -398,9 +466,18 @@
 			path = HermesIOSNotificationService;
 			sourceTree = "<group>";
 		};
+		4E6622968077AADC4AE88399 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				89EE3AF6F6F4CFA4501E2C38 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		51B7412825D43DF353A324F5 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				37CA65E71B2B817FBBFC8839 /* CloudRuntime.swift */,
 				EA19D67E64E6BC861BA6083F /* BackgroundLease.swift */,
 				7F6FE9D7F1FBAB1A65EDA562 /* HermesHTTP.swift */,
 				7A87F904778F7AD694B573F1 /* HermesSocket.swift */,
@@ -426,6 +503,8 @@
 				08FCED906E5D5607C188EFFC /* HermesIOSUITests.xctest */,
 				E49551EA6592A9C0C6AD1E4D /* HermesIOSVoiceTests.xctest */,
 				0950720749BFDC7C3C5A89A9 /* HermesIOSWidgets.appex */,
+				7644917527AE0E48892E6CE9 /* NeoOSBridge.app */,
+				5922E1C7AE0FAE690641F2D4 /* NeoOSBridgeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -433,6 +512,7 @@
 		7F7D81CC082CC4E9640116A5 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				EB744CA53FFC5C882D5162F3 /* LanguageSettingsView.swift */,
 				3906C589B66E594172121A15 /* AccountsSupport.swift */,
 				224CAC4570952840E57256D5 /* AgentConfigStore.swift */,
 				94E003103ABED5DE7BD3D43B /* AgentsHubView.swift */,
@@ -463,6 +543,7 @@
 		87DB305296DB0BA407D4834A /* HermesIOSUITests */ = {
 			isa = PBXGroup;
 			children = (
+				B387EA61169D046B11E05B76 /* CloudChatUITests.swift */,
 				E603ABD353FD2203064ED4D6 /* HermesIOSUITests.swift */,
 			);
 			path = HermesIOSUITests;
@@ -508,6 +589,7 @@
 		AA536AEDC870E5C6BF73E0CA /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				BBB1EC3C9E89B899C37E8D19 /* Cloud */,
 				1C1CA4BD09AAD37D7D849AF6 /* AgentSettingsView.swift */,
 				BB4E2583813D830A3E900B68 /* AgentsView.swift */,
 				76ACDEB64D082DA4095A0544 /* AgentToolsView.swift */,
@@ -548,9 +630,22 @@
 			path = Features;
 			sourceTree = "<group>";
 		};
+		BBB1EC3C9E89B899C37E8D19 /* Cloud */ = {
+			isa = PBXGroup;
+			children = (
+				A4EDA6C67102F80D88D34347 /* CloudFixtureSupport.swift */,
+				773602F4F3FF97394160F5BF /* CloudChatModel.swift */,
+				3771A36AC91EF331103DF183 /* CloudChatView.swift */,
+				47D550A60F02F3C8B200D0B8 /* CloudConnectionView.swift */,
+			);
+			path = Cloud;
+			sourceTree = "<group>";
+		};
 		D0CFD82F4F8493D2EDBCA6C1 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				5F548146967B80D8C11ED153 /* ConnectionMode.swift */,
+				25B54D77576EA344E1C2CE9E /* Localization.swift */,
 				BBAAD9CB1B93F3090CFE6326 /* ChatMarkdown.swift */,
 				B19818CCC8AD6C15BBC328BA /* ConfigurationValue.swift */,
 				46031F875793783DE776A6F7 /* ConversationActivity.swift */,
@@ -581,6 +676,28 @@
 				3308B375BD035EA756531419 /* WidgetSnapshotStore.swift */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		D996906303AE74E4CF82D373 /* NeoOSBridge */ = {
+			isa = PBXGroup;
+			children = (
+				3918DCBBA5EDDFA854985A7B /* NeoOSBridgeApp.swift */,
+				B373B988E830ADA16ABB8583 /* BridgeController.swift */,
+				E6AEA502682A842E173DE012 /* BridgeEnvironment.swift */,
+				739DC15DB051E2637959A4CA /* BridgeSettingsView.swift */,
+				7A5EC5F4D1391A21943A6158 /* BridgeRequestsView.swift */,
+				081932EC5EEA8D0E139A5392 /* NeoOSBridge.entitlements */,
+				4E6622968077AADC4AE88399 /* Resources */,
+			);
+			path = NeoOSBridge;
+			sourceTree = "<group>";
+		};
+		DEE2848CA8434559B34516B8 /* NeoOSBridgeTests */ = {
+			isa = PBXGroup;
+			children = (
+				2F2D3251C21BF95617006630 /* BridgeControllerTests.swift */,
+			);
+			path = NeoOSBridgeTests;
 			sourceTree = "<group>";
 		};
 		E57268F9856D1223A18BAA74 /* HermesIOS */ = {
@@ -669,6 +786,28 @@
 			productReference = 08FCED906E5D5607C188EFFC /* HermesIOSUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		BECB7CD7F0DEAEAB064BF20F /* NeoOSBridge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C6451E028BD640F30933AEB /* Build configuration list for PBXNativeTarget "NeoOSBridge" */;
+			buildPhases = (
+				69F4CE6F3FEF2EF555DB47CA /* Sources */,
+				10168FE7ADF8323BD55AFD4F /* Resources */,
+				7935EB5AF6403D53685F2559 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NeoOSBridge;
+			packageProductDependencies = (
+				4FA1835C4C5A3BD6F0A15D2E /* CloudBridgeCore */,
+				E1219472C104AD0EED7D27D5 /* CloudBridgeSync */,
+				B073837EB2E7A6FAB5D0A38D /* HermesBridgeClient */,
+			);
+			productName = NeoOSBridge;
+			productReference = 7644917527AE0E48892E6CE9 /* NeoOSBridge.app */;
+			productType = "com.apple.product-type.application";
+		};
 		CDBCE2E3BABBD3FF1069603C /* HermesIOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AAFA8A2CC3F995E6F685DBCE /* Build configuration list for PBXNativeTarget "HermesIOS" */;
@@ -687,10 +826,30 @@
 			name = HermesIOS;
 			packageProductDependencies = (
 				0C286819D281C36E12B151EF /* WebRTC */,
+				29733C7E62833BC36C6E6AA9 /* CloudBridgeCore */,
+				F70BB2B97EC52DBCD588736C /* CloudBridgeSync */,
 			);
 			productName = HermesIOS;
 			productReference = F9CE976027FBF5395EF1C01C /* HermesIOS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		DD930B046F2623FD2B651558 /* NeoOSBridgeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 556274D640D92D8A9282E49D /* Build configuration list for PBXNativeTarget "NeoOSBridgeTests" */;
+			buildPhases = (
+				7047507F597A067F01747994 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EE7038BC478FD1721E7FD962 /* PBXTargetDependency */,
+			);
+			name = NeoOSBridgeTests;
+			packageProductDependencies = (
+			);
+			productName = NeoOSBridgeTests;
+			productReference = 5922E1C7AE0FAE690641F2D4 /* NeoOSBridgeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -699,28 +858,30 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					2D8D5AEB993E1553A824E18B = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					2E193E8F0473B9DDF4DAC1E6 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					9F03F3BB0258AC1B8423F5A8 = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					A408AB7B73A825E284FBCEBF = {
-						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 						TestTargetID = CDBCE2E3BABBD3FF1069603C;
 					};
-					CDBCE2E3BABBD3FF1069603C = {
-						DevelopmentTeam = "";
+					BECB7CD7F0DEAEAB064BF20F = {
 						ProvisioningStyle = Automatic;
+					};
+					CDBCE2E3BABBD3FF1069603C = {
+						ProvisioningStyle = Automatic;
+					};
+					DD930B046F2623FD2B651558 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = BECB7CD7F0DEAEAB064BF20F;
 					};
 				};
 			};
@@ -729,12 +890,15 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				fr,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = 2C4698CB1DEC47FA6D2F2728;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CBDF09291C7F7B4794398F30 /* XCRemoteSwiftPackageReference "WebRTC" */,
+				C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 53D3F01D3EBC6A92635B9684 /* Products */;
@@ -746,6 +910,8 @@
 				2E193E8F0473B9DDF4DAC1E6 /* HermesIOSWidgets */,
 				9F03F3BB0258AC1B8423F5A8 /* HermesIOSVoiceTests */,
 				A408AB7B73A825E284FBCEBF /* HermesIOSUITests */,
+				BECB7CD7F0DEAEAB064BF20F /* NeoOSBridge */,
+				DD930B046F2623FD2B651558 /* NeoOSBridgeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -755,6 +921,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E3208255BA80741AB3B144D /* Localizable.strings in Resources */,
+				88ECC836D598DFCED5937C63 /* InfoPlist.strings in Resources */,
 				6BFB8C889762F2E5B4F1571F /* Assets.xcassets in Resources */,
 				0799FACAFF21D17D20153DE2 /* PrivacyInfo.xcprivacy in Resources */,
 				C414AC803088CB868E2A7381 /* WebRTC-LICENSE.txt in Resources */,
@@ -773,6 +941,13 @@
 				AD68B66A2C390D8BFACA6842 /* serveur.wav in Resources */,
 				37CFBBB3D7D38EB3436802A3 /* verifie.pcm in Resources */,
 				B9769A1645106A420D44BF99 /* web.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		10168FE7ADF8323BD55AFD4F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -803,6 +978,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E081B95C4B66B9E8153523C8 /* CloudFixtureSupport.swift in Sources */,
+				23EF965F2585C8565016B135 /* ConnectionMode.swift in Sources */,
+				2D7840F52125DFFA751B516E /* CloudRuntime.swift in Sources */,
+				946515E8A0133D80CE95CB89 /* CloudChatModel.swift in Sources */,
+				553023EF4F338EE719B883E3 /* CloudChatView.swift in Sources */,
+				C5501483FEE078252FB0E616 /* CloudConnectionView.swift in Sources */,
+				C1C1D4858DBA062BDBBED514 /* Localization.swift in Sources */,
+				139FE4B406CDEB2174C62246 /* LanguageSettingsView.swift in Sources */,
 				52F6850354DB1AB081A270AF /* AccountsSupport.swift in Sources */,
 				4F7E457B9EC1B22606C5986B /* ActivityIntents.swift in Sources */,
 				4246833D876E50E61234963B /* AgentConfigStore.swift in Sources */,
@@ -901,10 +1084,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		69F4CE6F3FEF2EF555DB47CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				840D066E2AA2574015FE6049 /* NeoOSBridgeApp.swift in Sources */,
+				A7A383146F5D0EB3033B2572 /* BridgeController.swift in Sources */,
+				68E9AE4929690085FC208C11 /* BridgeEnvironment.swift in Sources */,
+				4D96EC868F952F1D8492059D /* BridgeSettingsView.swift in Sources */,
+				0AF7F1417CAA934C37B8031C /* BridgeRequestsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7047507F597A067F01747994 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC12E66DA1860B80443C7A26 /* BridgeControllerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C85692CF23898F853BCD5090 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E89FA80BC5FFAFCD6C8BE1B /* CloudChatUITests.swift in Sources */,
 				D681AB6A78A919CC947068D4 /* HermesIOSUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -940,6 +1144,11 @@
 			target = CDBCE2E3BABBD3FF1069603C /* HermesIOS */;
 			targetProxy = 4E926E9DD969E671FB37C56D /* PBXContainerItemProxy */;
 		};
+		EE7038BC478FD1721E7FD962 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BECB7CD7F0DEAEAB064BF20F /* NeoOSBridge */;
+			targetProxy = F91E34066C3ADB12EA5DA8E8 /* PBXContainerItemProxy */;
+		};
 		F1CA65341340F9A5B3758121 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2D8D5AEB993E1553A824E18B /* HermesIOSNotificationService */;
@@ -952,18 +1161,40 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		2B28E7477A08EFF0117B2D05 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9879327C60430913FBBA911F /* en */,
+				5F56E68988F1FF5CE1E3591B /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		E76070C1533F1FB62B30DDAB /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				67BA2D68200DA06A0A310D33 /* en */,
+				9FF8F652BBACB0F05ACB27B3 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		06FF7497E43B6FEF24B3A520 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HermesIOSWidgets/HermesIOSWidgets.entitlements;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOSWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS.Widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS.Widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -974,18 +1205,55 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOSVoiceTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOSVoiceTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HermesIOS.app/HermesIOS";
 			};
 			name = Debug;
+		};
+		20D8A08A01CE8CB2831C5D5D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NeoOSBridge/NeoOSBridge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
+				INFOPLIST_FILE = NeoOSBridge/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.NeoOSBridge;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		3095E0E8C1A609038989F32B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.NeoOSBridgeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NeoOSBridge.app/Contents/MacOS/NeoOSBridge";
+			};
+			name = Release;
 		};
 		50DB0F4D684651C89CFA1CDA /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1043,6 +1311,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -1056,12 +1325,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HermesIOS/Resources/HermesIOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOS/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1073,12 +1343,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HermesIOS/Resources/HermesIOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOS/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1088,47 +1359,86 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HermesIOSWidgets/HermesIOSWidgets.entitlements;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOSWidgets/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS.Widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS.Widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
+		7784C6D1AFE8C56F64F9FC51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.NeoOSBridgeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NeoOSBridge.app/Contents/MacOS/NeoOSBridge";
+			};
+			name = Debug;
+		};
 		8FEAE744C8F887406F9F2C0E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOSUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOSUITests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = HermesIOS;
 			};
 			name = Debug;
 		};
+		9D9580E20CA73A4F7AF47600 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NeoOSBridge/NeoOSBridge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
+				INFOPLIST_FILE = NeoOSBridge/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.NeoOSBridge;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		ACDBA31B16F209E7F7B63C2A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HermesIOSNotificationService/HermesIOSNotificationService.entitlements;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOSNotificationService/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS.NotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS.NotificationService;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1139,13 +1449,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOSVoiceTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOSVoiceTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HermesIOS.app/HermesIOS";
@@ -1215,6 +1526,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -1226,13 +1538,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HermesIOSNotificationService/HermesIOSNotificationService.entitlements;
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				INFOPLIST_FILE = HermesIOSNotificationService/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOS.NotificationService;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOS.NotificationService;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1243,13 +1556,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = S8X8W7J77M;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.hermesios.HermesIOSUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.neil.HermesIOSUITests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = HermesIOS;
@@ -1264,6 +1578,24 @@
 			buildConfigurations = (
 				1F07D76F5E441B8987FA9589 /* Debug */,
 				BDA5513547C290588CAF4034 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		556274D640D92D8A9282E49D /* Build configuration list for PBXNativeTarget "NeoOSBridgeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7784C6D1AFE8C56F64F9FC51 /* Debug */,
+				3095E0E8C1A609038989F32B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5C6451E028BD640F30933AEB /* Build configuration list for PBXNativeTarget "NeoOSBridge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				20D8A08A01CE8CB2831C5D5D /* Debug */,
+				9D9580E20CA73A4F7AF47600 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -1315,6 +1647,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/NeoCloudBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		CBDF09291C7F7B4794398F30 /* XCRemoteSwiftPackageReference "WebRTC" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1331,6 +1670,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CBDF09291C7F7B4794398F30 /* XCRemoteSwiftPackageReference "WebRTC" */;
 			productName = WebRTC;
+		};
+		29733C7E62833BC36C6E6AA9 /* CloudBridgeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */;
+			productName = CloudBridgeCore;
+		};
+		4FA1835C4C5A3BD6F0A15D2E /* CloudBridgeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */;
+			productName = CloudBridgeCore;
+		};
+		B073837EB2E7A6FAB5D0A38D /* HermesBridgeClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */;
+			productName = HermesBridgeClient;
+		};
+		E1219472C104AD0EED7D27D5 /* CloudBridgeSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */;
+			productName = CloudBridgeSync;
+		};
+		F70BB2B97EC52DBCD588736C /* CloudBridgeSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C597D61CB79CD2A0DBD774BA /* XCLocalSwiftPackageReference "Packages/NeoCloudBridge" */;
+			productName = CloudBridgeSync;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

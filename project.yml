@@ -17,6 +17,10 @@ packages:
   WebRTC:
     url: https://github.com/stasel/WebRTC.git
     exactVersion: 153.0.0
+  # The CloudKit mailbox and the loopback Hermes adapter. Local, so the bridge and the iOS app share
+  # exactly one implementation of the wire and storage rules.
+  NeoCloudBridge:
+    path: Packages/NeoCloudBridge
 targets:
   HermesIOS:
     type: application
@@ -78,6 +82,51 @@ targets:
         CODE_SIGN_ENTITLEMENTS: HermesIOSWidgets/HermesIOSWidgets.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: YES
+  # macOS bridge app: pulls the mailbox, runs one turn at a time against the local `hermes serve`
+  # and publishes the answer. Not embedded in the iOS app; it is a separate, user-launched app.
+  NeoOSBridge:
+    type: application
+    platform: macOS
+    sources:
+      - path: NeoOSBridge
+        excludes:
+          - Resources/Info.plist
+          - NeoOSBridge.entitlements
+    dependencies:
+      - package: NeoCloudBridge
+        product: CloudBridgeCore
+      - package: NeoCloudBridge
+        product: CloudBridgeSync
+      - package: NeoCloudBridge
+        product: HermesBridgeClient
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.neil.NeoOSBridge
+        INFOPLIST_FILE: NeoOSBridge/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: NeoOSBridge/NeoOSBridge.entitlements
+        DEVELOPMENT_TEAM: S8X8W7J77M
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        COMBINE_HIDPI_IMAGES: YES
+  NeoOSBridgeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [NeoOSBridgeTests]
+    dependencies:
+      - target: NeoOSBridge
+      - package: NeoCloudBridge
+        product: CloudBridgeCore
+      - package: NeoCloudBridge
+        product: CloudBridgeSync
+      - package: NeoCloudBridge
+        product: HermesBridgeClient
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.neil.NeoOSBridgeTests
+        GENERATE_INFOPLIST_FILE: YES
+        DEVELOPMENT_TEAM: S8X8W7J77M
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/NeoOSBridge.app/Contents/MacOS/NeoOSBridge"
+        BUNDLE_LOADER: "$(TEST_HOST)"
   HermesIOSVoiceTests:
     type: bundle.unit-test
     platform: iOS
@@ -110,6 +159,14 @@ schemes:
       targets: [HermesIOSUITests, HermesIOSVoiceTests]
       environmentVariables:
         HERMES_IOS_INTEGRATION: "1"
+  # The macOS bridge: build and run the controller tests from the same scheme.
+  NeoOSBridge:
+    build:
+      targets:
+        NeoOSBridge: all
+        NeoOSBridgeTests: [test]
+    test:
+      targets: [NeoOSBridgeTests]
   HermesIOS:
     build:
       targets:
