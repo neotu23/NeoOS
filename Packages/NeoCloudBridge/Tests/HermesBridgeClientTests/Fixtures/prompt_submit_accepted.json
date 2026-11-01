@@ -1,0 +1,13 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "prompt.submit",
+    "note": "no admission_id, input_id or idempotency field is returned by this build; user_row_id is a database row, not a delivery identity"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-4",
+  "result": {
+    "status": "streaming",
+    "user_row_id": 3
+  }
+}

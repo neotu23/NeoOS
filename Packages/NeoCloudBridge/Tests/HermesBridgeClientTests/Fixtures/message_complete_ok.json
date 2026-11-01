@@ -1,0 +1,23 @@
+{
+  "_fixture": {
+    "kind": "synthesized",
+    "event": "message.complete",
+    "note": "same payload class as message_complete_error.json with a successful turn. Field names are observed; the values are illustrative. This is NOT a recorded successful turn: the isolated verification instance had no reachable provider (see docs/CLOUDKIT_HERMES_COMPATIBILITY.md).",
+    "observed_in": "message_complete_error.json"
+  },
+  "method": "event",
+  "params": {
+    "type": "message.complete",
+    "session_id": "0f0a0f0a",
+    "seq": 7,
+    "payload": {
+      "text": "OK",
+      "usage": {"input_tokens": 0, "output_tokens": 0},
+      "status": "ok",
+      "persisted_turn": true,
+      "error": null,
+      "recoverable": null,
+      "error_surface": null
+    }
+  }
+}

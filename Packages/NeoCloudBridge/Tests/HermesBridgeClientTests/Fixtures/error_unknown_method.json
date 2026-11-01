@@ -1,0 +1,13 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "methods": ["runtime.describe", "prompt.receipt", "prompt.cancel", "prompt.resolve_unknown", "session.mutate"],
+    "note": "the canonical hermes-gateway-v1 methods are not served by the /api/ws sidecar on this build; adapters must not depend on them"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-5",
+  "error": {
+    "code": -32601,
+    "message": "unknown method: prompt.receipt — the client and the Hermes backend are out of sync (different versions); run `hermes update` and restart both"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "event": "message.complete",
+    "note": "captured from a profile with an unreachable provider, so status is error; `usage` was not printed by the capture script and is nullable either way"
+  },
+  "method": "event",
+  "params": {
+    "type": "message.complete",
+    "session_id": "0f0a0f0a",
+    "seq": 3,
+    "payload": {
+      "text": "The request failed. Your message was not answered.\nDetails: Hermes is not connected to any AI provider yet.",
+      "usage": null,
+      "status": "error",
+      "error": "HTTP 401: Invalid API Key",
+      "recoverable": true,
+      "error_surface": "provider"
+    }
+  }
+}

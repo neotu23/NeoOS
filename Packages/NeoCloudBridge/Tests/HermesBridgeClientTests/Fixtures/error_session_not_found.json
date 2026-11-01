@@ -1,0 +1,10 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "session.resume",
+    "note": "sent with the runtime id instead of the stored id; the runtime id is not a durable handle"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-6",
+  "error": {"code": 4007, "message": "session not found"}
+}

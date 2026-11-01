@@ -1,0 +1,24 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "session.events.since",
+    "note": "replay is scoped to one runtime session and its epoch; events are event objects, not JSON-RPC envelopes"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-7",
+  "result": {
+    "events": [
+      {
+        "type": "error",
+        "session_id": "0f0a0f0a",
+        "payload": {"message": "Hermes could not start the assistant for this session."},
+        "seq": 1
+      }
+    ],
+    "latest_seq": 3,
+    "truncated": false,
+    "count": 3,
+    "epoch": "0000000000000000000000000000beef",
+    "open_requests": []
+  }
+}

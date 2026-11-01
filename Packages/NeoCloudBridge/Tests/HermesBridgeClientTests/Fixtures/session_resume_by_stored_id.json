@@ -1,0 +1,16 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "session.resume",
+    "trimmed": ["info", "messages"],
+    "note": "request used the stored id; the reply keeps the same runtime id while the backend process lives, and issues a new one after a restart"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-3",
+  "result": {
+    "session_id": "0f0a0f0a",
+    "stored_session_id": "20260101_000000_000000",
+    "message_count": 0,
+    "messages": []
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_fixture": {"kind": "real", "method": "client.capabilities", "transport": "ws /api/ws"},
+  "jsonrpc": "2.0",
+  "id": "fh-1",
+  "result": {
+    "server_requests": [
+      "approval",
+      "clarify",
+      "display.install.sudo",
+      "preview.act",
+      "preview.read",
+      "secret",
+      "setup_beat",
+      "sudo",
+      "terminal.read",
+      "theme.apply",
+      "theme.pick",
+      "tour",
+      "vault.code",
+      "vault.save_login",
+      "vault.unlock_prompt",
+      "window.read"
+    ],
+    "declines_not_shown": true
+  }
+}

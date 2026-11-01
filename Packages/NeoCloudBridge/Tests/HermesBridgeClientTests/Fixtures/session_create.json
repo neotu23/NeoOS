@@ -1,0 +1,17 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "session.create",
+    "trimmed": ["info"],
+    "note": "session_id is the runtime id and is reissued after a backend restart; stored_session_id is the durable one"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-2",
+  "result": {
+    "session_id": "0f0a0f0a",
+    "stored_session_id": "20260101_000000_000000",
+    "message_count": 0,
+    "messages": [],
+    "info": {}
+  }
+}

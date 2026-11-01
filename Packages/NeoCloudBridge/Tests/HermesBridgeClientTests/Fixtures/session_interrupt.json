@@ -1,0 +1,10 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "session.interrupt",
+    "note": "reported status, not a proof that the turn stopped producing output; the adapter still waits for the terminal frame"
+  },
+  "jsonrpc": "2.0",
+  "id": "fh-8",
+  "result": {"status": "interrupted"}
+}

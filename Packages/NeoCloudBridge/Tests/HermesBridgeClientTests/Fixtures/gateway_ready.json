@@ -1,0 +1,22 @@
+{
+  "_fixture": {
+    "kind": "real",
+    "method": "event gateway.ready",
+    "transport": "ws /api/ws",
+    "note": "skin trimmed to its framing keys"
+  },
+  "method": "event",
+  "params": {
+    "type": "gateway.ready",
+    "payload": {
+      "skin": {
+        "name": "default",
+        "change_events": true,
+        "heartbeat": true
+      },
+      "change_events": true,
+      "heartbeat": true,
+      "replay_epoch": "0000000000000000000000000000beef"
+    }
+  }
+}
