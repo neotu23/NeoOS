@@ -10,7 +10,7 @@ struct HermesVoiceWidget: Widget {
             VoiceWidgetView().widgetURL(URL(string: "hermesios://voice"))
                 .containerBackground(for: .widget) { WidgetBackground() }
         }
-        .configurationDisplayName("Parler à Hermès")
+        .configurationDisplayName("NeoOS · Voix")
         .description("Démarre une conversation vocale en un geste.")
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
         .contentMarginsDisabled()
@@ -38,7 +38,7 @@ private struct VoiceWidgetView: View {
             HStack(spacing: 10) {
                 Image(systemName: "waveform").font(.title2.weight(.semibold))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Hermès").font(.headline)
+                    Text("NeoOS").font(.headline)
                     Text("Appel vocal").font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
@@ -49,7 +49,7 @@ private struct VoiceWidgetView: View {
                     Circle().fill(WidgetPalette.accent.gradient).frame(width: 58, height: 58)
                     Image(systemName: "waveform").font(.system(size: 26, weight: .semibold)).foregroundStyle(.white)
                 }
-                Text("Parler à Hermès").font(.subheadline.weight(.semibold))
+                Text("NeoOS · Voix").font(.subheadline.weight(.semibold))
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }

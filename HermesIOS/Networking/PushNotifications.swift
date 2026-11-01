@@ -35,7 +35,7 @@ final class PushNotifications {
         let settings = await UNUserNotificationCenter.current().notificationSettings()
         authorized = [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus)
         if !authorized {
-            for id in enabled { statuses[id] = "Autorisez les notifications dans les réglages de l’iPhone." }
+            for id in enabled { statuses[id] = L("Autorisez les notifications dans les réglages de l’iPhone.") }
         }
         if authorized && !enabled.isEmpty { UIApplication.shared.registerForRemoteNotifications() }
         // Registering rotates the encryption key and costs one request per connection: only when something changed,
@@ -61,7 +61,7 @@ final class PushNotifications {
     }
 
     func registrationFailed() {
-        for id in enabled { statuses[id] = "L’enregistrement auprès d’Apple a échoué. Réessayez." }
+        for id in enabled { statuses[id] = L("L’enregistrement auprès d’Apple a échoué. Réessayez.") }
     }
 
     func open(_ target: NotificationTarget) {
@@ -83,24 +83,24 @@ final class PushNotifications {
         do {
             if value {
                 let status = try await http.request(Self.path + "/status")
-                guard status["ready"].bool else { throw RPCFailure("Les notifications Apple restent à configurer sur ce serveur Hermes.") }
+                guard status["ready"].bool else { throw RPCFailure(L("Les notifications Apple restent à configurer sur ce serveur Hermes.")) }
                 let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
                 authorized = granted
-                guard granted else { throw RPCFailure("Autorisez les notifications dans les réglages de l’iPhone.") }
+                guard granted else { throw RPCFailure(L("Autorisez les notifications dans les réglages de l’iPhone.")) }
                 enabled.insert(connection.id); save()
-                statuses[connection.id] = "Connexion aux notifications Apple…"
+                statuses[connection.id] = L("Connexion aux notifications Apple…")
                 UIApplication.shared.registerForRemoteNotifications()
                 if deviceToken != nil { await synchronize() }
             } else {
                 // Revoke on the server first: a local switch alone cannot stop APNs.
                 _ = try await http.request(Self.path + "/devices/" + installationID + "/" + connection.id.uuidString, method: "DELETE")
-                enabled.remove(connection.id); save(); statuses[connection.id] = "Désactivées"
+                enabled.remove(connection.id); save(); statuses[connection.id] = L("Désactivées")
                 NotificationKeyStore.remove(for: connection.id)
                 await synchronize() // A registration already in flight must observe the new preference.
             }
         } catch {
             statuses[connection.id] = (error as? RPCFailure)?.code == 404
-                ? "Installez l’extension Hermès iOS Push sur ce serveur."
+                ? L("Installez l’extension Hermès iOS Push sur ce serveur.")
                 : error.localizedDescription
         }
     }
@@ -144,22 +144,22 @@ final class PushNotifications {
                         let key = secure ? NotificationKeyStore.generateKey() : nil
                         if let key { body["key"] = .string(key.base64EncodedString()) }
                         let result = try await http.request(Self.path + "/devices", method: "PUT", body: .object(body))
-                        guard result["registered"].bool else { throw RPCFailure("Le serveur n’a pas confirmé l’inscription aux notifications.") }
+                        guard result["registered"].bool else { throw RPCFailure(L("Le serveur n’a pas confirmé l’inscription aux notifications.")) }
                         // The server now holds the new key: keep the same one on this side. If the keychain
                         // refuses it, the next registration rotates again and pushes stay generic until then.
                         let stored = key.map { NotificationKeyStore.store($0, for: connection.id) } ?? false
                         if !stored { NotificationKeyStore.remove(for: connection.id) }
                         if enabled.contains(connection.id) {
                             statuses[connection.id] = !secure
-                                ? "Activées · aperçu chiffré indisponible : cette adresse n’est pas sécurisée (HTTPS ou Tailscale requis)."
-                                : stored ? "Activées · réponses et messages programmés" : "Activées · aperçu chiffré indisponible sur cet iPhone."
+                                ? L("Activées · aperçu chiffré indisponible : cette adresse n’est pas sécurisée (HTTPS ou Tailscale requis).")
+                                : stored ? L("Activées · réponses et messages programmés") : L("Activées · aperçu chiffré indisponible sur cet iPhone.")
                         } else { resync = true }
                     } else {
                         _ = try await http.request(Self.path + "/devices/" + installationID + "/" + connection.id.uuidString, method: "DELETE")
                         NotificationKeyStore.remove(for: connection.id)
                     }
                 } catch {
-                    if enabled.contains(connection.id) { statuses[connection.id] = "Enregistrement à reprendre : " + error.localizedDescription }
+                    if enabled.contains(connection.id) { statuses[connection.id] = L("Enregistrement à reprendre : ") + error.localizedDescription }
                 }
             }
         } while resync
@@ -172,7 +172,7 @@ final class PushNotifications {
            let data = try? Data(contentsOf: url),
            let start = data.range(of: Data("<?xml".utf8)), let end = data.range(of: Data("</plist>".utf8)),
            let plist = try? PropertyListSerialization.propertyList(from: data[start.lowerBound..<end.upperBound], format: nil) as? [String: Any],
-           let entitlements = plist["Entitlements"] as? [String: Any],
+           let entitlements = plist[L("Entitlements")] as? [String: Any],
            let environment = entitlements["aps-environment"] as? String {
             return environment == "production" ? "production" : "sandbox"
         }
@@ -188,6 +188,9 @@ final class NotificationAppDelegate: NSObject, UIApplicationDelegate, UNUserNoti
 
     /// The server's hourly silent push: refresh the widgets' figures, no UI and no alert.
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async -> UIBackgroundFetchResult {
+        // CloudKit's mailbox notification: a hint to pull, never a task. Routed through the same
+        // delegate so the app keeps exactly one remote-notification entry point.
+        if await CloudRuntime.shared.handleRemoteNotification(userInfo) { return .newData }
         guard (userInfo["hermes"] as? [String: Any])?["kind"] as? String == "widgets" else { return .noData }
         return await WidgetRefresh.runInBackground() ? .newData : .failed
     }

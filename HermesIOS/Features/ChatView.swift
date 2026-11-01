@@ -64,13 +64,13 @@ struct ChatView: View {
                 .overlay { NoticeDialog(model: model) }
                 .sheetChrome()
             }
-            .appConfirm("Résumer le contexte de cette conversation ?", isPresented: $compressing) {
-                Button("Résumer avec Hermes") { Task { await model.compactConversation() } }
-            } message: { Text("Hermes conserve l’historique et réduit le contexte utilisé pour les prochaines réponses.") }
+            .appConfirm(L("Résumer le contexte de cette conversation ?"), isPresented: $compressing) {
+                Button(L("Résumer avec Hermes")) { Task { await model.compactConversation() } }
+            } message: { Text(L("Hermes conserve l’historique et réduit le contexte utilisé pour les prochaines réponses.")) }
             .sheet(isPresented: Binding(get: { model.commandOutput != nil }, set: { if !$0 { model.commandOutput = nil } })) {
                 NavigationStack {
                     ScrollView { MarkdownText(text: model.commandOutput ?? "").textSelection(.enabled).padding(24).frame(maxWidth: .infinity, alignment: .leading) }
-                        .background(AppTheme.background).navigationTitle("Réponse de Hermes").navigationBarTitleDisplayMode(.inline)
+                        .background(AppTheme.background).navigationTitle(L("Réponse de Hermes")).navigationBarTitleDisplayMode(.inline)
                         .toolbar { AppToolbarItem(placement: .confirmationAction) { AppCloseButton { model.commandOutput = nil } } }
                 }.presentationBackground(AppTheme.background).presentationCornerRadius(30).presentationDragIndicator(.visible)
             }
@@ -88,7 +88,7 @@ struct ChatView: View {
                             let access = url.startAccessingSecurityScopedResource()
                             defer { if access { url.stopAccessingSecurityScopedResource() } }
                             let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-                            guard size <= DraftAttachment.maximumBytes else { throw RPCFailure("Choisissez un fichier de 10 Mo maximum.") }
+                            guard size <= DraftAttachment.maximumBytes else { throw RPCFailure(L("Choisissez un fichier de 10 Mo maximum.")) }
                             let data = try await Task.detached { try Data(contentsOf: url) }.value
                             try await model.addAttachment(data: data, name: url.lastPathComponent, mimeType: UTType(filenameExtension: url.pathExtension)?.preferredMIMEType ?? "application/octet-stream", context: context)
                         }
@@ -104,7 +104,7 @@ struct ChatView: View {
                     defer { model.importingAttachments = false; photos = [] }
                     do {
                         for item in items {
-                            guard let data = try await item.loadTransferable(type: Data.self) else { throw RPCFailure("Cette photo n’est pas disponible.") }
+                            guard let data = try await item.loadTransferable(type: Data.self) else { throw RPCFailure(L("Cette photo n’est pas disponible.")) }
                             let jpeg = try await Task.detached { try PhotoAttachment.jpeg(data) }.value
                             try await model.addAttachment(data: jpeg, name: "Photo-\(UUID().uuidString.prefix(8)).jpg", mimeType: "image/jpeg", context: context)
                         }

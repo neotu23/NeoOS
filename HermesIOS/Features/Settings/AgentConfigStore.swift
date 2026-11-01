@@ -25,7 +25,7 @@ final class AgentConfigStore {
     var demo: Bool { app.demo }
     var loaded: Bool { !fields.isEmpty }
     var title: String { app.profiles.first { $0.name == profile }?.title ?? (profile == "default" ? "Hermes" : profile.capitalized) }
-    var serverName: String { app.activeConnection?.name ?? "Aperçu interactif" }
+    var serverName: String { app.activeConnection?.name ?? L("Aperçu interactif") }
 
     /// Fields the desktop shows although `DEFAULT_CONFIG` does not declare them.
     private static let extraFields: [String: JSONValue] = ["agent.reasoning_effort": ["type": "string"]]
@@ -158,7 +158,7 @@ final class AgentConfigStore {
         let result = try await tools.request("/api/model/set", method: "POST", body: body)
         if result["confirm_required"].bool {
             let message = result["confirm_message"].string
-            return .needsConfirmation(message.isEmpty ? "Ce modèle peut entraîner des coûts élevés. Hermes demande votre confirmation avant de l’utiliser." : message)
+            return .needsConfirmation(message.isEmpty ? L("Ce modèle peut entraîner des coûts élevés. Hermes demande votre confirmation avant de l’utiliser.") : message)
         }
         return .done
     }
@@ -265,9 +265,9 @@ enum SettingsDemo {
         case "/api/model/options": [
             "model": "Hermes", "provider": "nous",
             "providers": [
-                ["slug": "nous", "name": "Nous Research", "models": ["Hermes", "Hermes-4-405B"], "is_current": true,
+                ["slug": "nous", "name": .string(L("Nous Research")), "models": ["Hermes", "Hermes-4-405B"], "is_current": true,
                  "capabilities": ["Hermes": ["reasoning": true, "fast": false]]],
-                ["slug": "openrouter", "name": "OpenRouter", "models": ["anthropic/claude-sonnet-4.6", "openai/gpt-5.5", "google/gemini-3-flash"]]
+                ["slug": "openrouter", "name": .string(L("OpenRouter")), "models": ["anthropic/claude-sonnet-4.6", "openai/gpt-5.5", "google/gemini-3-flash"]]
             ]]
         case "/api/model/auxiliary": [
             "main": ["provider": "nous", "model": "Hermes"],

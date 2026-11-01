@@ -78,6 +78,8 @@ public struct RPCFailure: Error, LocalizedError, Sendable {
         (4000...4999).contains(code) || [401, 403, 5070, 5071, 5072, -32601, -32602].contains(code)
     }
     public var retryableSessionResume: Bool { code == 4007 || code == 4009 }
+    /// Kept as the untranslated source text: it is also compared against `notice` to recognise the case,
+    /// and translated when displayed (see `NoticeDialog`).
     public static let ownershipMessage = "Ce fil est encore ouvert dans une autre interface Hermes. Votre message n’a pas été envoyé et votre brouillon est conservé. Fermez ce fil dans l’interface qui le détient, puis réessayez ici. Vous pouvez aussi continuer dans un nouveau fil avec ce brouillon."
     public var errorDescription: String? { message }
 }

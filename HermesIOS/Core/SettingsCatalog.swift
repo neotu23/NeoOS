@@ -96,7 +96,19 @@ enum StringListEditing {
 enum SettingsCatalog {
     // MARK: Pages
 
-    static let sections: [SettingsSection] = [
+    /// Sections whose titles and summaries follow the selected interface language. The French copy
+    /// stays in `sourceSections`; `L(_:)` translates on the way out.
+    static var sections: [SettingsSection] {
+        sourceSections.map { section in
+            SettingsSection(id: section.id, title: L(section.title), symbol: section.symbol, summary: L(section.summary),
+                            pages: section.pages.map { page in
+                                SettingsPage(id: page.id, title: L(page.title), symbol: page.symbol, summary: L(page.summary),
+                                             fields: page.fields, prefixes: page.prefixes)
+                            })
+        }
+    }
+
+    private static let sourceSections: [SettingsSection] = [
         SettingsSection(id: "model", title: "Modèle", symbol: "cpu", summary: "Principal, secours, auxiliaires", pages: [
             SettingsPage(id: "model.main", title: "Modèle principal", symbol: "shippingbox", summary: "Fournisseur, raisonnement, vitesse",
                          fields: ["model", "model_context_length", "agent.reasoning_effort", "agent.service_tier", "agent.fast_auto_seconds"], prefixes: ["model."]),
@@ -167,7 +179,7 @@ enum SettingsCatalog {
         ])
     ]
 
-    static let pages: [SettingsPage] = sections.flatMap(\.pages)
+    static var pages: [SettingsPage] { sections.flatMap(\.pages) }
 
     static func page(id: String) -> SettingsPage? { pages.first { $0.id == id } }
     static func section(of pageID: String) -> SettingsSection? { sections.first { $0.pages.contains { $0.id == pageID } } }
@@ -201,7 +213,7 @@ enum SettingsCatalog {
     }
 
     static func groupTitle(_ id: String) -> String {
-        groupTitles[id] ?? id.replacingOccurrences(of: "_", with: " ").capitalized
+        L(groupTitles[id] ?? id.replacingOccurrences(of: "_", with: " ").capitalized)
     }
 
     private static let groupTitles: [String: String] = [
@@ -364,22 +376,22 @@ enum SettingsCatalog {
     static func location(of key: String) -> String {
         if let id = pageID(for: key), let page = page(id: id), let section = section(of: id) { return "\(section.title) › \(page.title)" }
         let group = key.contains(".") ? String(key.split(separator: ".")[0]) : "general"
-        return "Autres réglages › \(groupTitle(group))"
+        return L("Autres réglages") + " › " + groupTitle(group)
     }
 
     // MARK: Copy
 
     static func label(_ key: String) -> String {
-        if let label = labels[key] { return label }
+        if let label = labels[key] { return L(label) }
         let last = key.split(separator: ".").last.map(String.init) ?? key
-        if let label = componentLabels[last] { return label }
+        if let label = componentLabels[last] { return L(label) }
         let words = last.replacingOccurrences(of: "_", with: " ")
         return words.prefix(1).uppercased() + words.dropFirst()
     }
 
     /// French copy first, then the server description unless it only restates the key.
     static func description(_ key: String, schema: JSONValue) -> String? {
-        if let text = descriptions[key] { return text }
+        if let text = descriptions[key] { return L(text) }
         let server = schema["description"].string.trimmingCharacters(in: .whitespacesAndNewlines)
         let squash: (String) -> String = { normalized($0).filter { $0.isLetter || $0.isNumber } }
         guard !server.isEmpty, squash(server) != squash(key), squash(server) != squash(label(key)) else { return nil }
@@ -387,14 +399,14 @@ enum SettingsCatalog {
     }
 
     static func optionLabel(_ option: String, key: String) -> String {
-        if let label = optionLabels[key]?[option] { return label }
-        if key.hasSuffix("reasoning_effort"), let label = reasoningLabels[option] { return label }
+        if let label = optionLabels[key]?[option] { return L(label) }
+        if key.hasSuffix("reasoning_effort"), let label = reasoningLabels[option] { return L(label) }
         if option.isEmpty {
             switch key {
-            case "display.personality": return "Aucune"
-            case "memory.provider": return "Mémoire intégrée uniquement"
-            case "timezone": return "Fuseau du système"
-            default: return "Aucun"
+            case "display.personality": return L("Aucune")
+            case "memory.provider": return L("Mémoire intégrée uniquement")
+            case "timezone": return L("Fuseau du système")
+            default: return L("Aucun")
             }
         }
         return option

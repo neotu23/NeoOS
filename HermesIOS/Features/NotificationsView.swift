@@ -6,9 +6,9 @@ struct NotificationsView: View {
     var body: some View {
         List {
             Section {
-                Label("Retrouvez le bon fil", systemImage: "bell.badge")
+                Label(L("Retrouvez le bon fil"), systemImage: "bell.badge")
                     .font(.headline).padding(.vertical, 6)
-                Text("Recevez les réponses et les messages de vos routines, même lorsque l’app est fermée. Touchez une notification pour ouvrir sa conversation.")
+                Text(L("Recevez les réponses et les messages de vos routines, même lorsque l’app est fermée. Touchez une notification pour ouvrir sa conversation."))
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             Section {
@@ -22,16 +22,16 @@ struct NotificationsView: View {
                         }
                     }.padding(.vertical, 4)
                 }
-            } header: { Text("Vos serveurs") } footer: {
-                Text("L’aperçu est chiffré de bout en bout : Apple ne voit qu’un avis générique, et seul cet iPhone le déchiffre. Il exige une adresse HTTPS ou Tailscale ; sinon l’avis reste générique. Leur envoi nécessite l’extension Hermès iOS Push sur chaque serveur.")
+            } header: { Text(L("Vos serveurs")) } footer: {
+                Text(L("L’aperçu est chiffré de bout en bout : Apple ne voit qu’un avis générique, et seul cet iPhone le déchiffre. Il exige une adresse HTTPS ou Tailscale ; sinon l’avis reste générique. Leur envoi nécessite l’extension Hermès iOS Push sur chaque serveur."))
             }
             Section {
-                Button("Réessayer la connexion") { Task { await push.configure(connections) } }
-                Button("Réglages des notifications iPhone") {
+                Button(L("Réessayer la connexion")) { Task { await push.configure(connections) } }
+                Button(L("Réglages des notifications iPhone")) {
                     if let url = URL(string: UIApplication.openNotificationSettingsURLString) { UIApplication.shared.open(url) }
                 }
             }
-        }.modernList().navigationTitle("Notifications").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Notifications")).navigationBarTitleDisplayMode(.inline)
             .task { await push.configure(connections) }
     }
 }

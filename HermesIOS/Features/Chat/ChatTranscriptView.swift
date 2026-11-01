@@ -18,14 +18,14 @@ struct ChatTranscriptView: View {
         if transcript.messages.isEmpty && transcript.approval == nil && transcript.clarification == nil && transcript.credential == nil {
             // Opening a conversation with nothing cached: its shape, not the welcome suggestions.
             if model.opening && model.selected != nil { SkeletonBubbles() }
-            else { EmptyChatView(suggest: suggest, agentName: model.agent?.name ?? "default", agentTitle: model.agent?.title ?? "Hermes").equatable() }
+            else { EmptyChatView(suggest: suggest, agentName: model.agent?.name ?? "default", agentTitle: model.agent?.title ?? L("Hermes")).equatable() }
         } else {
             messages(transcript)
         }
     }
 
     private func messages(_ transcript: Transcript) -> some View {
-        let agent = model.agent?.title ?? "Hermes"
+        let agent = model.agent?.title ?? L("Hermes")
         // The streamed message is rendered on its own; the history before it then compares equal
         // on every flush and the 500-row ForEach is not diffed again.
         let live = transcript.messages.last.flatMap { $0.streaming ? $0 : nil }
@@ -97,7 +97,7 @@ struct ChatTranscriptView: View {
                 }
                 .overlay(alignment: .bottomTrailing) {
                     if !pinnedToBottom {
-                        RoundButton(symbol: "arrow.down", label: "Dernier message") {
+                        RoundButton(symbol: "arrow.down", label: L("Dernier message")) {
                             pinnedToBottom = true
                             follower.didScroll()
                             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { proxy.scrollTo("bottom", anchor: .bottom) }
@@ -190,9 +190,9 @@ private struct ActivityRow: View, Equatable {
                 .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
                 .accessibilityHidden(true)
             TimelineView(.periodic(from: .now, by: 1)) { context in
-                Text(sending ? "Transmission à Hermès…"
+                Text(sending ? L("Transmission à Hermès…")
                      : connected && waitingFrom.map { context.date >= $0 } == true
-                     ? "En attente de la réponse du modèle…" : title)
+                     ? L("En attente de la réponse du modèle…") : title)
                     .lineLimit(2)
             }
         }.font(.caption).foregroundStyle(.secondary).padding(.leading, 2)
@@ -211,11 +211,11 @@ private struct ToolActivityView: View, Equatable {
             Button { toggle() } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "wrench.and.screwdriver")
-                    Text("\(steps.count) outil\(steps.count > 1 ? "s" : "") utilisé\(steps.count > 1 ? "s" : "")")
+                    Text(L("%lld outil(s) utilisé(s)", steps.count))
                     Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.caption2)
                 }.font(.caption).foregroundStyle(.secondary).frame(minHeight: 44)
-            }.buttonStyle(.plain).accessibilityLabel("Activité des outils")
-                .accessibilityValue(expanded ? "Développée" : "Réduite").accessibilityIdentifier("tool-activity")
+            }.buttonStyle(.plain).accessibilityLabel(L("Activité des outils"))
+                .accessibilityValue(expanded ? L("Développée") : L("Réduite")).accessibilityIdentifier("tool-activity")
             if expanded {
                 ForEach(steps) { step in
                     HStack(alignment: .firstTextBaseline, spacing: 9) {
@@ -223,7 +223,7 @@ private struct ToolActivityView: View, Equatable {
                             .foregroundStyle(step.state == .running ? AppTheme.accent : .secondary)
                         Text(step.title)
                         Spacer(minLength: 8)
-                        Text(step.state == .completed ? "Terminé" : step.state == .stopped ? "Arrêté" : "En cours")
+                        Text(step.state == .completed ? "Terminé" : step.state == .stopped ? L("Arrêté") : L("En cours"))
                             .foregroundStyle(.secondary)
                     }.font(.caption).padding(.vertical, 5)
                 }
@@ -237,26 +237,26 @@ private struct ToolActivityView: View, Equatable {
 struct EmptyChatView: View, Equatable {
     let suggest: (String) -> Void
     var agentName = "default"
-    var agentTitle = "Hermes"
+    var agentTitle = L("Hermes")
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.agentName == rhs.agentName && lhs.agentTitle == rhs.agentTitle }
 
     private var greeting: String {
         switch Calendar.current.component(.hour, from: .now) {
-        case 5..<12: "Bonjour"
-        case 12..<18: "Bon après-midi"
-        default: "Bonsoir"
+        case 5..<12: L("Bonjour")
+        case 12..<18: L("Bon après-midi")
+        default: L("Bonsoir")
         }
     }
 
     private struct Idea: Identifiable { let id: String; let title: String; let subtitle: String; let symbol: String; let prompt: String }
 
     private var ideas: [Idea] {
-        let weather = Idea(id: "weather", title: "Météo du jour", subtitle: "Aujourd’hui et demain", symbol: "cloud.sun", prompt: "Quelle météo fait-il aujourd’hui et demain ?")
-        let overview = Idea(id: "overview", title: "Faire le point", subtitle: "Ce qui compte aujourd’hui", symbol: "sun.max", prompt: "Aide-moi à faire le point et à choisir mes priorités pour aujourd’hui.")
+        let weather = Idea(id: "weather", title: L("Météo du jour"), subtitle: L("Aujourd’hui et demain"), symbol: "cloud.sun", prompt: L("Quelle météo fait-il aujourd’hui et demain ?"))
+        let overview = Idea(id: "overview", title: L("Faire le point"), subtitle: L("Ce qui compte aujourd’hui"), symbol: "sun.max", prompt: L("Aide-moi à faire le point et à choisir mes priorités pour aujourd’hui."))
         let third = agentName == "noriven"
-            ? Idea(id: "noriven", title: "Où en est Noriven ?", subtitle: "Revenu, dépenses et profit du mois", symbol: "chart.bar", prompt: "Où en est Noriven ce mois-ci ? Donne-moi le revenu, les dépenses et le profit, et compare avec le mois dernier.")
-            : Idea(id: "idea", title: "Explorer une idée", subtitle: "Laisser la curiosité faire son chemin", symbol: "sparkle", prompt: "J’ai une idée à explorer. Aide-moi à la préciser.")
+            ? Idea(id: "noriven", title: L("Où en est Noriven ?"), subtitle: L("Revenu, dépenses et profit du mois"), symbol: "chart.bar", prompt: L("Où en est Noriven ce mois-ci ? Donne-moi le revenu, les dépenses et le profit, et compare avec le mois dernier."))
+            : Idea(id: "idea", title: L("Explorer une idée"), subtitle: L("Laisser la curiosité faire son chemin"), symbol: "sparkle", prompt: L("J’ai une idée à explorer. Aide-moi à la préciser."))
         return [weather, overview, third]
     }
 
@@ -268,7 +268,7 @@ struct EmptyChatView: View, Equatable {
                     VStack(spacing: 14) {
                         OrbView(phase: .idle, breathesWhenIdle: true).frame(width: 104, height: 104)
                         Text(greeting).font(.system(size: 34, weight: .regular, design: .serif)).tracking(-0.8)
-                        Text("Que puis-je faire pour vous ?").font(.title3).foregroundStyle(.secondary)
+                        Text(L("Que puis-je faire pour vous ?")).font(.title3).foregroundStyle(.secondary)
                     }.multilineTextAlignment(.center)
                     Spacer(minLength: 24)
                     VStack(spacing: 8) {
@@ -349,16 +349,16 @@ struct MessageView: View, Equatable {
                     .background(user ? AppTheme.surface : .clear, in: RoundedRectangle(cornerRadius: 21))
                     .overlay(RoundedRectangle(cornerRadius: 21).strokeBorder(user ? AppTheme.line : .clear))
                 if message.delivery != .confirmed {
-                    Text(message.delivery == .sending ? "Envoi…" : message.delivery == .uncertain ? "Réception à vérifier dans l’historique" : "Non envoyé · copiez pour réessayer")
+                    Text(message.delivery == .sending ? "Envoi…" : message.delivery == .uncertain ? L("Réception à vérifier dans l’historique") : L("Non envoyé · copiez pour réessayer"))
                         .font(.caption2).foregroundStyle(message.delivery == .sending ? Color.secondary : AppTheme.accent)
                 }
             }
             if !user { Spacer(minLength: 5) }
         }
         .appContextMenu {
-            AppMenuButton("Copier", systemImage: "doc.on.doc") { UIPasteboard.general.string = message.text }
+            AppMenuButton(L("Copier"), systemImage: "doc.on.doc") { UIPasteboard.general.string = message.text }
             ShareLink(item: message.text) {
-                AppMenuLabel(title: "Partager", systemImage: "square.and.arrow.up").padding(.horizontal, 16).frame(maxWidth: .infinity, minHeight: 46, alignment: .leading)
+                AppMenuLabel(title: L("Partager"), systemImage: "square.and.arrow.up").padding(.horizontal, 16).frame(maxWidth: .infinity, minHeight: 46, alignment: .leading)
             }.buttonStyle(.plain)
         }
         .accessibilityElement(children: .combine)

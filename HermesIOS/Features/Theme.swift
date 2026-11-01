@@ -98,7 +98,7 @@ struct ConnectionIndicator: View {
     var body: some View {
         HStack(spacing: 6) {
             Circle().fill(model.state == .connected ? Color.green.opacity(0.8) : Color.orange).frame(width: 5, height: 5)
-            Text(model.demo ? "Aperçu interactif" : model.state == .connected ? "Connecté à Hermes" : model.state == .signInRequired ? "Connexion expirée" : model.state == .connecting ? "Reconnexion…" : "Hors ligne · brouillon conservé")
+            Text(model.demo ? "Aperçu interactif" : model.state == .connected ? "Connecté à Hermes" : model.state == .signInRequired ? "Connexion expirée" : model.state == .connecting ? L("Reconnexion…") : L("Hors ligne · brouillon conservé"))
                 .font(.caption).foregroundStyle(.secondary)
         }.accessibilityElement(children: .combine)
     }

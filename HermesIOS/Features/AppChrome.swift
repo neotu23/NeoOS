@@ -35,7 +35,7 @@ struct AppToolbarItem<Content: View>: ToolbarContent {
 
 /// Plain close glyph for sheets: 44pt hit target, no background circle.
 struct AppCloseButton: View {
-    var label = "Fermer"
+    var label = L("Fermer")
     var action: () -> Void
     var body: some View {
         Button(action: action) {
@@ -80,7 +80,7 @@ private struct AppNavigationBarModifier: ViewModifier {
                         Button { dismiss() } label: {
                             Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold)).foregroundStyle(.primary)
                                 .frame(width: 44, height: 44).contentShape(Rectangle())
-                        }.buttonStyle(.plain).accessibilityLabel("Retour").accessibilityIdentifier("nav-back")
+                        }.buttonStyle(.plain).accessibilityLabel(L("Retour")).accessibilityIdentifier("nav-back")
                     }
                 }
             }
@@ -118,7 +118,7 @@ struct AppSearchField: View {
             if !text.isEmpty {
                 Button { text = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary).frame(width: 44, height: 44).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityLabel("Effacer la recherche").accessibilityIdentifier("app-search-clear")
+                }.buttonStyle(.plain).accessibilityLabel(L("Effacer la recherche")).accessibilityIdentifier("app-search-clear")
             }
         }
         .padding(.leading, 14).padding(.trailing, text.isEmpty ? 14 : 0).frame(minHeight: 46)
@@ -409,10 +409,10 @@ extension View {
     func appAlert<A: View>(_ title: String, isPresented: Binding<Bool>, cancel: String? = nil, @ViewBuilder actions: @escaping () -> A) -> some View {
         appAlert(title, isPresented: isPresented, cancel: cancel, actions: actions) { EmptyView() }
     }
-    func appConfirm<A: View, M: View>(_ title: String, isPresented: Binding<Bool>, cancel: String? = "Annuler", @ViewBuilder actions: @escaping () -> A, @ViewBuilder message: @escaping () -> M) -> some View {
+    func appConfirm<A: View, M: View>(_ title: String, isPresented: Binding<Bool>, cancel: String? = L("Annuler"), @ViewBuilder actions: @escaping () -> A, @ViewBuilder message: @escaping () -> M) -> some View {
         appAlert(title, isPresented: isPresented, cancel: cancel, actions: actions, message: message)
     }
-    func appConfirm<A: View>(_ title: String, isPresented: Binding<Bool>, cancel: String? = "Annuler", @ViewBuilder actions: @escaping () -> A) -> some View {
+    func appConfirm<A: View>(_ title: String, isPresented: Binding<Bool>, cancel: String? = L("Annuler"), @ViewBuilder actions: @escaping () -> A) -> some View {
         appAlert(title, isPresented: isPresented, cancel: cancel, actions: actions) { EmptyView() }
     }
 }

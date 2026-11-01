@@ -46,7 +46,7 @@ struct ProvidersSettingsView: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher des fournisseurs…")
+            AppSearchSection(text: $search, prompt: L("Rechercher des fournisseurs…"))
             if app.demo { AccountsDemoNotice() }
             AccountsScopeSection(app: app, profile: $scope,
                 note: "Comptes, clés et points de terminaison de « \(profileTitle) ». Les clés vont dans le .env de ce profil sur le serveur ; les points de terminaison dans son config.yaml.")
@@ -55,7 +55,7 @@ struct ProvidersSettingsView: View {
             if search.isEmpty { accountsSection }
             keysSection
             if search.isEmpty { endpointsSection }
-        }.modernList().navigationTitle("Fournisseurs").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Fournisseurs")).navigationBarTitleDisplayMode(.inline)
             .task(id: scope) { await reload() }
             .refreshable { await reload() }
             .sheet(item: Binding(get: { signingIn.map(AccountsIdentified.init) }, set: { signingIn = $0?.value })) { item in
@@ -65,24 +65,24 @@ struct ProvidersSettingsView: View {
             .sheet(item: Binding(get: { editing.map(AccountsIdentified.init) }, set: { editing = $0?.value })) { item in
                 AccountsEndpointForm(tools: tools, endpoint: item.value) { response in apply(response) }
             }
-            .appConfirm("Déconnecter \(disconnecting?["name"].string ?? "") ?", isPresented: Binding(get: { disconnecting != nil }, set: { if !$0 { disconnecting = nil } })) {
-                Button("Déconnecter", role: .destructive) {
+            .appConfirm(L("Déconnecter %@ ?", disconnecting?["name"].string ?? ""), isPresented: Binding(get: { disconnecting != nil }, set: { if !$0 { disconnecting = nil } })) {
+                Button(L("Déconnecter"), role: .destructive) {
                     guard let provider = disconnecting else { return }; disconnecting = nil
                     Task { await tools.perform {
                         _ = try await tools.request("/api/providers/oauth/" + Accounts.segment(provider["id"].string), method: "DELETE")
-                        notice = "\(provider["name"].string) a été supprimé."
+                        notice = L("%@ a été supprimé.", provider["name"].string)
                         await loadOAuth()
                     } }
                 }
-            } message: { Text("Les identifiants enregistrés par Hermes pour ce compte seront retirés de « \(profileTitle) ».") }
-            .appConfirm("Supprimer \(deleting?["name"].string ?? "") ?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
-                Button("Supprimer le point de terminaison", role: .destructive) {
+            } message: { Text(L("Les identifiants enregistrés par Hermes pour ce compte seront retirés de « %@ ».", profileTitle)) }
+            .appConfirm(L("Supprimer %@ ?", deleting?["name"].string ?? ""), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
+                Button(L("Supprimer le point de terminaison"), role: .destructive) {
                     guard let endpoint = deleting else { return }; deleting = nil
                     Task { await tools.perform {
                         apply(try await tools.request("/api/providers/custom-endpoints/" + Accounts.segment(endpoint["id"].string), method: "DELETE"))
                     } }
                 }
-            } message: { Text("Sa clé API éventuelle est aussi retirée du .env de ce profil.") }
+            } message: { Text(L("Sa clé API éventuelle est aussi retirée du .env de ce profil.")) }
     }
 
     // MARK: Accounts (OAuth)
@@ -92,11 +92,11 @@ struct ProvidersSettingsView: View {
             if !oauthLoaded && !app.demo {
                 SkeletonRows(count: 3)
             } else if oauth.isEmpty {
-                Text(app.demo ? "Nous Portal, ChatGPT/Codex, xAI…" : "Aucun fournisseur compatible OAuth détecté.").font(.subheadline).foregroundStyle(.secondary)
+                Text(app.demo ? L("Nous Portal, ChatGPT/Codex, xAI…") : L("Aucun fournisseur compatible OAuth détecté.")).font(.subheadline).foregroundStyle(.secondary)
             }
             ForEach(oauth, id: \.["id"].string) { provider in oauthRow(provider) }
-        } header: { Text("Connecter un compte") } footer: {
-            Text("Connectez-vous avec un abonnement, sans clé API à copier. Les connexions par code d’appareil se font depuis cet iPhone ; celles gérées par une CLI externe se lancent sur le serveur (desktop ou terminal).")
+        } header: { Text(L("Connecter un compte")) } footer: {
+            Text(L("Connectez-vous avec un abonnement, sans clé API à copier. Les connexions par code d’appareil se font depuis cet iPhone ; celles gérées par une CLI externe se lancent sur le serveur (desktop ou terminal)."))
         }
     }
 
@@ -113,26 +113,26 @@ struct ProvidersSettingsView: View {
                 Spacer(minLength: 8)
                 if connected {
                     if provider["disconnectable"].bool {
-                        Button("Déconnecter") { disconnecting = provider }.font(.caption).buttonStyle(.borderless).disabled(tools.busy || app.demo)
+                        Button(L("Déconnecter")) { disconnecting = provider }.font(.caption).buttonStyle(.borderless).disabled(tools.busy || app.demo)
                     }
                 } else if flow == "device_code" {
-                    Button("Connexion") { notice = nil; signingIn = provider }.font(.caption.weight(.semibold)).buttonStyle(.borderless)
+                    Button(L("Connexion")) { notice = nil; signingIn = provider }.font(.caption.weight(.semibold)).buttonStyle(.borderless)
                         .disabled(app.demo)
                 }
             }
             if !connected && flow != "device_code" && !provider["cli_command"].string.isEmpty {
-                Text("Géré en externe : exécutez sur le serveur").font(.caption).foregroundStyle(.secondary)
+                Text(L("Géré en externe : exécutez sur le serveur")).font(.caption).foregroundStyle(.secondary)
                 AccountsCommandRow(command: provider["cli_command"].string)
             } else if connected, !provider["disconnect_hint"].string.isEmpty, !provider["disconnectable"].bool {
-                Text(status["source"].string == "env_var" ? "Configuré depuis une clé API : supprimez-la dans les clés ci-dessous." : "Géré par sa propre CLI : déconnectez-le sur le serveur.")
+                Text(status["source"].string == "env_var" ? L("Configuré depuis une clé API : supprimez-la dans les clés ci-dessous.") : L("Géré par sa propre CLI : déconnectez-le sur le serveur."))
                     .font(.caption).foregroundStyle(.secondary)
             }
         }.padding(.vertical, 4)
     }
 
     private func oauthStatus(_ status: JSONValue) -> String {
-        guard status["logged_in"].bool else { return status["error"].string.isEmpty ? "Non connecté" : "Erreur : \(status["error"].string)" }
-        var parts = ["Connecté"]
+        guard status["logged_in"].bool else { return status["error"].string.isEmpty ? L("Non connecté") : L("Erreur : %@", status["error"].string) }
+        var parts = [L("Connecté")]
         if !status["source_label"].string.isEmpty { parts.append(status["source_label"].string) }
         if !status["token_preview"].string.isEmpty { parts.append("…" + status["token_preview"].string.suffix(4)) }
         return parts.joined(separator: " · ")
@@ -143,7 +143,7 @@ struct ProvidersSettingsView: View {
     @ViewBuilder private var keysSection: some View {
         Section {
             if !store.loaded && store.loading { SkeletonRows(count: 4) }
-            else if groups.isEmpty { Text(search.isEmpty ? "Aucune clé API de fournisseur disponible." : "Aucun fournisseur ne correspond à votre recherche.").font(.subheadline).foregroundStyle(.secondary) }
+            else if groups.isEmpty { Text(search.isEmpty ? L("Aucune clé API de fournisseur disponible.") : L("Aucun fournisseur ne correspond à votre recherche.")).font(.subheadline).foregroundStyle(.secondary) }
             ForEach(groups, id: \.name) { group in
                 if group.keys.count == 1, let only = group.keys.first {
                     NavigationLink { AccountsCredentialEditor(store: store, key: only.key, profileTitle: profileTitle, providerSetup: true) } label: { groupLabel(group.name, group.keys) }
@@ -165,10 +165,10 @@ struct ProvidersSettingsView: View {
                 }
             }
         } header: {
-            Text("Vous avez une clé API ?")
+            Text(L("Vous avez une clé API ?"))
         } footer: {
             let total = groups.count, configured = groups.filter { $0.keys.contains(where: \.isSet) }.count
-            if search.isEmpty && total > 0 { Text("\(configured) sur \(total) fournisseurs configurés.") }
+            if search.isEmpty && total > 0 { Text(L("%lld sur %lld fournisseurs configurés.", configured, total)) }
         }
     }
 
@@ -176,7 +176,7 @@ struct ProvidersSettingsView: View {
         let set = keys.filter(\.isSet)
         return VStack(alignment: .leading, spacing: 4) {
             Text(name).font(.subheadline.weight(.medium))
-            AccountsStatusLabel(set: !set.isEmpty, text: set.isEmpty ? "Non défini" : (set.first?.status ?? "Configurée"))
+            AccountsStatusLabel(set: !set.isEmpty, text: set.isEmpty ? "Non défini" : (set.first?.status ?? L("Configurée")))
         }.padding(.vertical, 3)
     }
 
@@ -186,8 +186,8 @@ struct ProvidersSettingsView: View {
         Section {
             if endpoints.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Aucun point de terminaison personnalisé").font(.subheadline.weight(.medium))
-                    Text("Pointez Hermes vers n’importe quel point de terminaison compatible OpenAI (vLLM, llama.cpp, Ollama…).").font(.caption).foregroundStyle(.secondary)
+                    Text(L("Aucun point de terminaison personnalisé")).font(.subheadline.weight(.medium))
+                    Text(L("Pointez Hermes vers n’importe quel point de terminaison compatible OpenAI (vLLM, llama.cpp, Ollama…).")).font(.caption).foregroundStyle(.secondary)
                 }.padding(.vertical, 3)
             }
             ForEach(endpoints, id: \.["id"].string) { endpoint in
@@ -197,12 +197,12 @@ struct ProvidersSettingsView: View {
                             HStack(spacing: 6) {
                                 Text(endpoint["name"].string).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
                                 if endpoint["is_current"].bool {
-                                    Text("Actif").font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent)
+                                    Text(L("Actif")).font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent)
                                         .padding(.horizontal, 6).padding(.vertical, 2).background(AppTheme.accent.opacity(0.1), in: Capsule())
                                 }
                             }
                             Text(endpoint["base_url"].string).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1)
-                            Text([endpoint["model"].string, endpoint["has_api_key"].bool ? "Clé API définie" : ""].filter { !$0.isEmpty }.joined(separator: " · "))
+                            Text([endpoint["model"].string, endpoint["has_api_key"].bool ? L("Clé API définie") : ""].filter { !$0.isEmpty }.joined(separator: " · "))
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: 0)
@@ -210,14 +210,14 @@ struct ProvidersSettingsView: View {
                     }.padding(.vertical, 3).contentShape(Rectangle())
                 }.buttonStyle(.plain)
                     .swipeActions {
-                        Button("Supprimer", role: .destructive) { deleting = endpoint }
-                        if !endpoint["is_current"].bool { Button("Utiliser") { activate(endpoint) }.tint(AppTheme.accent) }
+                        Button(L("Supprimer"), role: .destructive) { deleting = endpoint }
+                        if !endpoint["is_current"].bool { Button(L("Utiliser")) { activate(endpoint) }.tint(AppTheme.accent) }
                     }
             }
-            Button { creating = true } label: { Label("Nouveau point de terminaison", systemImage: "plus") }.disabled(app.demo)
-        } header: { Text("Points de terminaison personnalisés") } footer: {
+            Button { creating = true } label: { Label(L("Nouveau point de terminaison"), systemImage: "plus") }.disabled(app.demo)
+        } header: { Text(L("Points de terminaison personnalisés")) } footer: {
             if !current["provider"].string.isEmpty {
-                Text("Modèle actuel de cet agent : \(current["model"].string) · \(current["provider"].string)")
+                Text(L("Modèle actuel de cet agent : %@ · %@", current["model"].string, current["provider"].string))
             }
         }
     }
@@ -225,7 +225,7 @@ struct ProvidersSettingsView: View {
     private func activate(_ endpoint: JSONValue) {
         Task { await tools.perform {
             let result = try await tools.request("/api/providers/custom-endpoints/" + Accounts.segment(endpoint["id"].string) + "/activate", method: "POST")
-            notice = "\(endpoint["name"].string) est maintenant utilisé (\(result["model"].string))."
+            notice = L("%@ est maintenant utilisé (%@).", endpoint["name"].string, result["model"].string)
             await loadEndpoints()
         } }
     }
@@ -248,9 +248,9 @@ struct ProvidersSettingsView: View {
 
     private func loadOAuth() async {
         if app.demo {
-            oauth = [["id": "nous", "name": "Nous Portal", "flow": "device_code", "status": ["logged_in": true, "source_label": "Abonnement"], "disconnectable": true],
-                     ["id": "openai-codex", "name": "ChatGPT or Codex Subscription", "flow": "device_code", "status": ["logged_in": false]],
-                     ["id": "anthropic", "name": "Anthropic Account", "flow": "external", "cli_command": "hermes auth add anthropic", "status": ["logged_in": false]]]
+            oauth = [["id": "nous", "name": .string(L("Nous Portal")), "flow": "device_code", "status": ["logged_in": true, "source_label": .string(L("Abonnement"))], "disconnectable": true],
+                     ["id": "openai-codex", "name": .string(L("ChatGPT or Codex Subscription")), "flow": "device_code", "status": ["logged_in": false]],
+                     ["id": "anthropic", "name": .string(L("Anthropic Account")), "flow": "external", "cli_command": "hermes auth add anthropic", "status": ["logged_in": false]]]
             return
         }
         do { oauth = try await tools.request("/api/providers/oauth")["providers"].array; oauthLoaded = true }
@@ -284,10 +284,10 @@ private struct AccountsDeviceLogin: View {
                 Section {
                     Text(provider["name"].string).font(.headline)
                     switch status {
-                    case "starting": HStack { ProgressView(); Text("Lancement du flux de connexion…").foregroundStyle(.secondary) }
-                    case "pending": HStack { ProgressView(); Text("En attente de votre autorisation dans le navigateur…").foregroundStyle(.secondary) }
-                    case "approved": Label("Connecté !", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-                    default: Label(message ?? "Échec de la connexion.", systemImage: "exclamationmark.circle").foregroundStyle(AppTheme.accent)
+                    case "starting": HStack { ProgressView(); Text(L("Lancement du flux de connexion…")).foregroundStyle(.secondary) }
+                    case "pending": HStack { ProgressView(); Text(L("En attente de votre autorisation dans le navigateur…")).foregroundStyle(.secondary) }
+                    case "approved": Label(L("Connecté !"), systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                    default: Label(message ?? L("Échec de la connexion."), systemImage: "exclamationmark.circle").foregroundStyle(AppTheme.accent)
                     }
                 }
                 if !session["user_code"].string.isEmpty && status != "approved" {
@@ -296,23 +296,23 @@ private struct AccountsDeviceLogin: View {
                             Text(session["user_code"].string).font(.system(.title2, design: .monospaced).weight(.semibold)).textSelection(.enabled)
                             Spacer()
                             Button { UIPasteboard.general.string = session["user_code"].string; copied = true } label: {
-                                Label(copied ? "Copié" : "Copier le code", systemImage: copied ? "checkmark" : "doc.on.doc")
+                                Label(copied ? L("Copié") : L("Copier le code"), systemImage: copied ? "checkmark" : "doc.on.doc")
                             }.buttonStyle(.borderless)
                         }
                         if let url = URL(string: session["verification_url"].string) {
-                            Button { openURL(url) } label: { Label("Ouvrir la page de vérification", systemImage: "safari") }
+                            Button { openURL(url) } label: { Label(L("Ouvrir la page de vérification"), systemImage: "safari") }
                         }
-                    } header: { Text("Saisissez ce code si demandé") } footer: {
-                        Text("Connectez-vous dans Safari puis revenez ici : Hermes enregistre le compte sur le serveur dès que vous avez autorisé l’accès.")
+                    } header: { Text(L("Saisissez ce code si demandé")) } footer: {
+                        Text(L("Connectez-vous dans Safari puis revenez ici : Hermes enregistre le compte sur le serveur dès que vous avez autorisé l’accès."))
                     }
                 }
                 if status == "error" || status == "expired" {
-                    Button("Réessayer") { Task { await start() } }
+                    Button(L("Réessayer")) { Task { await start() } }
                 }
-            }.modernList().navigationTitle("Connecter un compte").navigationBarTitleDisplayMode(.inline)
+            }.modernList().navigationTitle(L("Connecter un compte")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     AppToolbarItem(placement: .cancellationAction) {
-                        Button(status == "approved" ? "Terminé" : "Annuler") { Task { await cancel(); dismiss() } }
+                        Button(status == "approved" ? L("Terminé") : L("Annuler")) { Task { await cancel(); dismiss() } }
                     }
                 }
                 .task { await start() }
@@ -331,7 +331,7 @@ private struct AccountsDeviceLogin: View {
         } catch {
             status = "error"
             message = (error as? RPCFailure)?.code == 401
-                ? "Hermes refuse de lancer cette connexion depuis l’app. Connectez ce compte depuis le desktop ou la CLI."
+                ? L("Hermes refuse de lancer cette connexion depuis l’app. Connectez ce compte depuis le desktop ou la CLI.")
                 : error.localizedDescription
         }
     }
@@ -347,7 +347,7 @@ private struct AccountsDeviceLogin: View {
                 let next = result["status"].string
                 if next != "pending" {
                     status = next == "approved" ? "approved" : (next == "expired" ? "expired" : "error")
-                    message = result["error_message"].string.isEmpty ? (next == "expired" ? "Session expirée. Réessayez pour démarrer une nouvelle connexion." : nil) : result["error_message"].string
+                    message = result["error_message"].string.isEmpty ? (next == "expired" ? L("Session expirée. Réessayez pour démarrer une nouvelle connexion.") : nil) : result["error_message"].string
                     if next == "approved" { finished() }
                 }
             } catch is CancellationError { return }
@@ -403,39 +403,39 @@ private struct AccountsEndpointForm: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Nom (ex. Proxy Axet)", text: $name)
-                    TextField("URL du point de terminaison", text: $baseURL).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    TextField(L("Nom (ex. Proxy Axet)"), text: $name)
+                    TextField(L("URL du point de terminaison"), text: $baseURL).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
                     if models.isEmpty {
-                        TextField("Modèle par défaut", text: $model).textInputAutocapitalization(.never).autocorrectionDisabled()
+                        TextField(L("Modèle par défaut"), text: $model).textInputAutocapitalization(.never).autocorrectionDisabled()
                     } else {
-                        AppPicker(title: "Modèle par défaut", selection: $model,
-                                  options: (models.contains(model) ? [] : [(value: model, label: model.isEmpty ? "Choisir" : model)]) + models.map { (value: $0, label: $0) })
+                        AppPicker(title: L("Modèle par défaut"), selection: $model,
+                                  options: (models.contains(model) ? [] : [(value: model, label: model.isEmpty ? L("Choisir") : model)]) + models.map { (value: $0, label: $0) })
                     }
                 }
                 Section {
-                    SecureField(hasKey ? "Laissez vide pour conserver la clé actuelle" : "Clé API (facultatif)", text: $apiKey)
+                    SecureField(hasKey ? L("Laissez vide pour conserver la clé actuelle") : L("Clé API (facultatif)"), text: $apiKey)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
-                    if hasKey { Toggle("Retirer la clé enregistrée", isOn: $clearKey).disabled(!apiKey.isEmpty) }
-                } header: { Text("Clé API") } footer: { Text("La clé est écrite dans le .env de l’agent sur le serveur et référencée par la configuration ; elle n’est jamais renvoyée à l’app.") }
+                    if hasKey { Toggle(L("Retirer la clé enregistrée"), isOn: $clearKey).disabled(!apiKey.isEmpty) }
+                } header: { Text(L("Clé API")) } footer: { Text(L("La clé est écrite dans le .env de l’agent sur le serveur et référencée par la configuration ; elle n’est jamais renvoyée à l’app.")) }
                 Section {
-                    AppPicker(title: "Mode API", selection: $apiMode, options: [
-                        (value: "", label: "Détection automatique"), (value: "chat_completions", label: "Chat Completions"),
-                        (value: "codex_responses", label: "Responses (Codex)"), (value: "anthropic_messages", label: "Messages Anthropic")])
-                    TextField("Contexte (auto)", text: $context).keyboardType(.numberPad)
-                    Toggle("Découvrir les modèles", isOn: $discover)
-                    Toggle("Utiliser pour les nouvelles conversations", isOn: $makeDefault)
+                    AppPicker(title: L("Mode API"), selection: $apiMode, options: [
+                        (value: "", label: L("Détection automatique")), (value: "chat_completions", label: L("Chat Completions")),
+                        (value: "codex_responses", label: L("Responses (Codex)")), (value: "anthropic_messages", label: L("Messages Anthropic"))])
+                    TextField(L("Contexte (auto)"), text: $context).keyboardType(.numberPad)
+                    Toggle(L("Découvrir les modèles"), isOn: $discover)
+                    Toggle(L("Utiliser pour les nouvelles conversations"), isOn: $makeDefault)
                 }
                 Section {
-                    Button { Task { await test() } } label: { Label("Tester", systemImage: "antenna.radiowaves.left.and.right") }
+                    Button { Task { await test() } } label: { Label(L("Tester"), systemImage: "antenna.radiowaves.left.and.right") }
                         .disabled(baseURL.isEmpty || tools.busy)
                     if let probe { Label(probe.text, systemImage: probe.ok ? "checkmark.circle" : "exclamationmark.triangle").font(.subheadline).foregroundStyle(probe.ok ? .green : .orange) }
                 }
                 ToolFeedback(tools: tools)
-            }.modernList().navigationTitle(endpoint == nil ? "Ajouter un point de terminaison" : "Modifier le point de terminaison").navigationBarTitleDisplayMode(.inline)
+            }.modernList().navigationTitle(endpoint == nil ? L("Ajouter un point de terminaison") : L("Modifier le point de terminaison")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    AppToolbarItem(placement: .cancellationAction) { Button("Annuler") { apiKey = ""; dismiss() } }
+                    AppToolbarItem(placement: .cancellationAction) { Button(L("Annuler")) { apiKey = ""; dismiss() } }
                     AppToolbarItem(placement: .confirmationAction) {
-                        Button("Enregistrer") { Task { await save() } }.disabled(!valid || tools.busy || tools.app.demo)
+                        Button(L("Enregistrer")) { Task { await save() } }.disabled(!valid || tools.busy || tools.app.demo)
                     }
                 }
                 .task {
@@ -454,7 +454,7 @@ private struct AccountsEndpointForm: View {
             let result = try await tools.request("/api/providers/custom-endpoints/validate", method: "POST", body: .object(payload))
             let found = result["models"].array.map(\.string).filter { !$0.isEmpty }
             if !found.isEmpty { models = found; details = result["model_details"]; if model.isEmpty { model = found[0] } }
-            probe = (true, found.isEmpty ? "Le point de terminaison est joignable." : "Joignable : \(found.count) modèle\(found.count > 1 ? "s" : "") trouvé\(found.count > 1 ? "s" : "").")
+            probe = (true, found.isEmpty ? L("Le point de terminaison est joignable.") : L("Joignable : %lld modèle(s) trouvé(s).", found.count))
         } catch {
             probe = (false, error.localizedDescription)
         }

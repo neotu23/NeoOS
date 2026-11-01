@@ -10,7 +10,7 @@ extension JSONValue {
     var displayText: String {
         switch self {
         case .string(let value): value
-        case .bool(let value): value ? "Oui" : "Non"
+        case .bool(let value): value ? L("Oui") : L("Non")
         case .number(let value): value == value.rounded() ? String(format: "%.0f", value) : String(value)
         case .null: ""
         default: (try? String(decoding: data(), as: UTF8.self)) ?? ""

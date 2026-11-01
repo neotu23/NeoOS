@@ -2,9 +2,18 @@ import SwiftUI
 
 struct RootView: View {
     @Bindable var model: AppModel
+    /// Cloud mode has its own model and settings: an asynchronous mailbox is not a live socket, and
+    /// the direct channel keeps working untouched when the user switches back.
+    @Bindable var cloud: CloudChatModel
+    @Bindable var cloudSettings: CloudSettings
+    /// Reading `language` here registers the dependency: switching language rebuilds the interface
+    /// (and the screens come back in the new language).
+    private let localizer = Localizer.shared
     var body: some View {
         Group {
-            if model.booting && !model.demo {
+            if cloudSettings.mode == .cloud {
+                CloudChatView(cloud: cloud, settings: cloudSettings)
+            } else if model.booting && !model.demo {
                 OrbView(phase: .idle, animated: false).frame(width: 84, height: 84)
                     .frame(maxWidth: .infinity, maxHeight: .infinity).background(AppTheme.background)
             } else if model.connections.isEmpty && !model.demo {
@@ -13,6 +22,7 @@ struct RootView: View {
                 ChatView(model: model).id(model.navigationRevision)
             }
         }
+        .id(localizer.language)
         .background(AppTheme.background)
         .overlay(alignment: .top) { ToastBanner(model: model) }
         .overlay { NoticeDialog(model: model) }
@@ -31,7 +41,7 @@ struct ToastBanner: View {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(AppTheme.accent)
                 Text(message).font(.subheadline).frame(maxWidth: .infinity, alignment: .leading)
                 Button { model.toast = nil } label: { Image(systemName: "xmark").frame(width: 44, height: 44) }
-                    .accessibilityLabel("Fermer la confirmation")
+                    .accessibilityLabel(L("Fermer la confirmation"))
             }.padding(.leading, 16).padding(.trailing, 4)
                 .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 18))
                 .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(AppTheme.line))
@@ -44,13 +54,13 @@ struct ToastBanner: View {
 struct NoticeDialog: View {
     let model: AppModel
     var body: some View {
-        AppDialogOverlay(title: model.notice == RPCFailure.ownershipMessage ? "Conversation ouverte ailleurs" : "Hermès iOS",
+        AppDialogOverlay(title: model.notice == RPCFailure.ownershipMessage ? L("Conversation ouverte ailleurs") : L("NeoOS"),
                          isPresented: Binding(get: { model.notice != nil }, set: { if !$0 { model.notice = nil } })) {
             if model.canContinueInNewChat {
-                Button("Nouveau fil avec mon brouillon") { Task { await model.continueInNewChat() } }
+                Button(L("Nouveau fil avec mon brouillon")) { Task { await model.continueInNewChat() } }
             }
-            Button("Compris", role: .cancel) { model.notice = nil }
-        } message: { Text(model.notice ?? "") }
+            Button(L("Compris"), role: .cancel) { model.notice = nil }
+        } message: { Text(L(model.notice ?? "")) }
             .animation(.easeOut(duration: 0.15), value: model.notice)
     }
 }

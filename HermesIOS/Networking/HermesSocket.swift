@@ -86,7 +86,7 @@ final class HermesSocket {
     }
 
     func call(_ method: String, _ params: JSONValue = [:], timeout: Double = 40) async throws -> JSONValue {
-        guard socket != nil else { throw RPCFailure("Connexion à Hermes en cours…", code: -1) }
+        guard socket != nil else { throw RPCFailure(L("Connexion à Hermes en cours…"), code: -1) }
         let id = UUID().uuidString
         let frame: JSONValue = ["jsonrpc": "2.0", "id": .string(id), "method": .string(method), "params": params]
         return try await withTaskCancellationHandler {
@@ -94,7 +94,7 @@ final class HermesSocket {
                 pending[id] = continuation
                 deadlines[id] = Task { [weak self] in
                     do { try await Task.sleep(for: .seconds(timeout)) } catch { return }
-                    self?.resolve(id, result: .failure(RPCFailure("Hermes met trop de temps à répondre.", code: -2)))
+                    self?.resolve(id, result: .failure(RPCFailure(L("Hermes met trop de temps à répondre."), code: -2)))
                 }
                 let sent = enqueue(frame)
                 Task { [weak self] in if let error = await sent.value { self?.resolve(id, result: .failure(error)) } }
@@ -108,7 +108,7 @@ final class HermesSocket {
         let socket = self.socket, previous = sendTail
         let task = Task.detached(priority: .userInitiated) { () -> Error? in
             _ = await previous?.value
-            guard let socket else { return RPCFailure("Hermes est déconnecté.") }
+            guard let socket else { return RPCFailure(L("Hermes est déconnecté.")) }
             do { try await socket.send(.string(String(decoding: try frame.data(), as: UTF8.self))); return nil }
             catch { return error }
         }
@@ -146,11 +146,11 @@ final class HermesSocket {
     }
 
     func answerRequest(_ id: String, result: JSONValue) async throws {
-        guard requests.frames.contains(where: { $0["id"].string == id }) else { throw RPCFailure("Cette demande a expiré.") }
+        guard requests.frames.contains(where: { $0["id"].string == id }) else { throw RPCFailure(L("Cette demande a expiré.")) }
         do {
             let response = try await call("request.answer", ["id": .string(id), "result": result])
             guard response["status"].string == "ok" else {
-                requests.retire(id); onRequestsChanged?(); throw RPCFailure("Cette demande a expiré.")
+                requests.retire(id); onRequestsChanged?(); throw RPCFailure(L("Cette demande a expiré."))
             }
         } catch let error as RPCFailure where error.code == -32601 {
             // Early bidirectional gateways only accept a standard JSON-RPC response.
@@ -162,7 +162,7 @@ final class HermesSocket {
     func lockAnswer(_ id: String, question: String, answer: String) async throws {
         let response = try await call("clarify.lock", ["request_id": .string(id), "question_id": .string(question), "answer": .string(answer)])
         guard response["status"].string == "ok" else {
-            requests.retire(id); onRequestsChanged?(); throw RPCFailure("Cette question a expiré.")
+            requests.retire(id); onRequestsChanged?(); throw RPCFailure(L("Cette question a expiré."))
         }
         let remaining = response["remaining"]
         if remaining.isNull || remaining == .array([]) || remaining == .number(0) { requests.retire(id) }
@@ -171,7 +171,7 @@ final class HermesSocket {
     }
 
     private func sendFrame(_ frame: JSONValue) async throws {
-        guard socket != nil else { throw RPCFailure("Hermes est déconnecté.") }
+        guard socket != nil else { throw RPCFailure(L("Hermes est déconnecté.")) }
         if let error = await enqueue(frame).value { throw error }
     }
 
@@ -185,6 +185,6 @@ final class HermesSocket {
         heartbeat?.cancel(); heartbeat = nil
         sendTail = nil
         socket?.cancel(with: .goingAway, reason: nil); socket = nil
-        for id in Array(pending.keys) { resolve(id, result: .failure(RPCFailure("La connexion a été interrompue.", code: -1))) }
+        for id in Array(pending.keys) { resolve(id, result: .failure(RPCFailure(L("La connexion a été interrompue."), code: -1))) }
     }
 }

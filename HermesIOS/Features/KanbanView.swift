@@ -25,13 +25,13 @@ struct KanbanView: View {
                         }
                     } label: {
                         HStack(spacing: 8) {
-                            Text(boards.data["boards"].array.first(where: { $0["slug"].string == slug })?["name"].string ?? "Tableaux")
+                            Text(boards.data["boards"].array.first(where: { $0["slug"].string == slug })?["name"].string ?? L("Tableaux"))
                                 .font(.system(size: 26, design: .serif)).tracking(-0.5)
                             Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold)).foregroundStyle(.secondary)
                         }.frame(minHeight: 44)
-                    }.buttonStyle(.plain).disabled(boards.data.isNull).accessibilityLabel("Choisir un tableau")
+                    }.buttonStyle(.plain).disabled(boards.data.isNull).accessibilityLabel(L("Choisir un tableau"))
                     Spacer()
-                    Text("\(columns.reduce(0) { $0 + $1["tasks"].array.count }) tâches")
+                    Text(L("%lld tâches", columns.reduce(0) { $0 + $1["tasks"].array.count }))
                         .font(.caption).foregroundStyle(.secondary)
                 }.padding(.top, 8)
                 ToolFeedback(tools: boards, placeholders: false)
@@ -64,22 +64,22 @@ struct KanbanView: View {
                     }
                 }
                 if !board.data.isNull && columns.filter({ filter == "all" || $0["name"].string == filter }).allSatisfy({ $0["tasks"].array.isEmpty }) {
-                    ContentUnavailableView("Une idée à organiser ?", systemImage: "rectangle.split.3x1", description: Text("Ajoutez une tâche pour la retrouver dans votre tableau Hermes."))
+                    ContentUnavailableView(L("Une idée à organiser ?"), systemImage: "rectangle.split.3x1", description: Text(L("Ajoutez une tâche pour la retrouver dans votre tableau Hermes.")))
                 }
             }.padding(.horizontal, 22).padding(.bottom, 24).frame(maxWidth: 680).frame(maxWidth: .infinity)
         }.background(AppTheme.background).appNavigationBar()
-            .navigationTitle("Kanban").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L("Kanban")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 AppToolbarItem(placement: .primaryAction) {
                     AppMenu {
-                        AppMenuButton("Tout voir", selected: filter == "all") { filter = "all" }
+                        AppMenuButton(L("Tout voir"), selected: filter == "all") { filter = "all" }
                         ForEach(columns, id: \.["name"].string) { column in
                             AppMenuButton(statusName(column["name"].string), selected: filter == column["name"].string) { filter = column["name"].string }
                         }
-                    } label: { Label("Filtrer les tâches", systemImage: "line.3.horizontal.decrease").labelStyle(.iconOnly).frame(width: 44, height: 44).contentShape(Rectangle()) }
+                    } label: { Label(L("Filtrer les tâches"), systemImage: "line.3.horizontal.decrease").labelStyle(.iconOnly).frame(width: 44, height: 44).contentShape(Rectangle()) }
                 }
                 AppToolbarItem(placement: .primaryAction) {
-                    Button("Nouvelle tâche", systemImage: "plus") { creating = true }.labelStyle(.iconOnly)
+                    Button(L("Nouvelle tâche"), systemImage: "plus") { creating = true }.labelStyle(.iconOnly)
                         .disabled(slug.isEmpty || board.data.isNull || board.app.demo)
                 }
             }
@@ -103,22 +103,22 @@ struct KanbanView: View {
     private var createForm: some View {
         NavigationStack {
             Form {
-                TextField("Titre de la tâche", text: $title).disabled(board.busy)
+                TextField(L("Titre de la tâche"), text: $title).disabled(board.busy)
                     .onChange(of: title) { _, _ in if !board.busy { creationID = UUID().uuidString } }
-                TextField("Quelques détails…", text: $bodyText, axis: .vertical).lineLimit(4...10).disabled(board.busy)
+                TextField(L("Quelques détails…"), text: $bodyText, axis: .vertical).lineLimit(4...10).disabled(board.busy)
                     .onChange(of: bodyText) { _, _ in if !board.busy { creationID = UUID().uuidString } }
-                Text("Ajoutée dans À préciser. L’orchestration de cette idée reste gérée par Hermes.").font(.caption).foregroundStyle(.secondary)
+                Text(L("Ajoutée dans À préciser. L’orchestration de cette idée reste gérée par Hermes.")).font(.caption).foregroundStyle(.secondary)
                 ToolFeedback(tools: board)
-            }.modernList().navigationTitle("Nouvelle tâche").navigationBarTitleDisplayMode(.inline)
+            }.modernList().navigationTitle(L("Nouvelle tâche")).navigationBarTitleDisplayMode(.inline)
                 .safeAreaInset(edge: .bottom) {
                     Button { Task { await board.perform {
                         let result = try await board.request("/api/plugins/kanban/tasks", method: "POST", body: ["title": .string(title), "body": .string(bodyText), "triage": true, "idempotency_key": .string(creationID)], query: query)
-                        guard !result["task"]["id"].string.isEmpty else { throw RPCFailure("Hermes n’a pas confirmé la création. Vérifiez le tableau avant de réessayer.") }
+                        guard !result["task"]["id"].string.isEmpty else { throw RPCFailure(L("Hermes n’a pas confirmé la création. Vérifiez le tableau avant de réessayer.")) }
                         creating = false; title = ""; bodyText = ""; creationID = UUID().uuidString; await refresh()
-                    } } } label: { Text(board.busy ? "Ajout…" : "Ajouter au tableau").frame(maxWidth: .infinity, minHeight: 48) }
+                    } } } label: { Text(board.busy ? L("Ajout…") : L("Ajouter au tableau")).frame(maxWidth: .infinity, minHeight: 48) }
                         .buttonStyle(AppProminentButtonStyle()).disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || board.busy).padding(20)
                 }
-                .toolbar { AppToolbarItem(placement: .cancellationAction) { Button("Annuler") { creating = false } } }
+                .toolbar { AppToolbarItem(placement: .cancellationAction) { Button(L("Annuler")) { creating = false } } }
         }.presentationBackground(AppTheme.background).interactiveDismissDisabled(board.busy)
     }
 }
@@ -139,41 +139,41 @@ private struct KanbanDetailView: View {
     private var current: JSONValue { full["task"].isNull ? task : full["task"] }
     var body: some View {
         Form {
-            Section("La tâche") {
-                TextField("Titre", text: $title)
-                TextField("Description", text: $bodyText, axis: .vertical).lineLimit(4...12)
-                AppPicker(title: "Agent", selection: $assignee,
-                          options: [(value: "", label: "Non assignée")] + Array(Set(assignees + [assignee])).filter { !$0.isEmpty }.sorted().map { (value: $0, label: $0) })
+            Section(L("La tâche")) {
+                TextField(L("Titre"), text: $title)
+                TextField(L("Description"), text: $bodyText, axis: .vertical).lineLimit(4...12)
+                AppPicker(title: L("Agent"), selection: $assignee,
+                          options: [(value: "", label: L("Non assignée"))] + Array(Set(assignees + [assignee])).filter { !$0.isEmpty }.sorted().map { (value: $0, label: $0) })
                 Label(statusName(current["status"].string), systemImage: "circle.dotted").foregroundStyle(AppTheme.accent)
-                Button("Enregistrer") { Task { await tools.perform {
+                Button(L("Enregistrer")) { Task { await tools.perform {
                     _ = try await tools.request(path, method: "PATCH", body: ["title": .string(title), "body": .string(bodyText), "assignee": .string(assignee)], query: query)
                     try await load()
                 } } }.disabled(title.isEmpty || full.isNull || tools.busy || tools.app.demo)
             }
             ToolFeedback(tools: tools)
-            Section("Faire avancer") {
+            Section(L("Faire avancer")) {
                 AppMenu {
                     ForEach(["triage", "todo", "ready", "review", "done", "archived"], id: \.self) { state in
                         AppMenuButton(statusName(state), selected: current["status"].string == state) { confirmAction = state }
                     }
                 } label: {
-                    HStack { Text("Déplacer la tâche"); Spacer(); Image(systemName: "chevron.up.chevron.down").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary) }
+                    HStack { Text(L("Déplacer la tâche")); Spacer(); Image(systemName: "chevron.up.chevron.down").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary) }
                         .foregroundStyle(.primary).contentShape(Rectangle())
                 }.buttonStyle(.plain).disabled(tools.busy || tools.app.demo)
-                if ["failed", "blocked"].contains(current["status"].string) { Button("Remettre en attente") { confirmAction = "ready" }.disabled(tools.busy) }
+                if ["failed", "blocked"].contains(current["status"].string) { Button(L("Remettre en attente")) { confirmAction = "ready" }.disabled(tools.busy) }
             }
-            if !current["result"].string.isEmpty { Section("Résultat") { MarkdownText(text: current["result"].string).textSelection(.enabled) } }
-            Section("Commentaires") {
+            if !current["result"].string.isEmpty { Section(L("Résultat")) { MarkdownText(text: current["result"].string).textSelection(.enabled) } }
+            Section(L("Commentaires")) {
                 ForEach(Array(full["comments"].array.enumerated()), id: \.offset) { _, row in
                     VStack(alignment: .leading, spacing: 6) { Text(row["author"].string).font(.caption.weight(.semibold)); Text(row["body"].string) }
                 }
-                TextField("Ajouter un commentaire", text: $comment, axis: .vertical)
-                Button("Publier") { Task { await tools.perform {
-                    _ = try await tools.request(path + "/comments", method: "POST", body: ["body": .string(comment), "author": "Hermès iOS"], query: query)
+                TextField(L("Ajouter un commentaire"), text: $comment, axis: .vertical)
+                Button(L("Publier")) { Task { await tools.perform {
+                    _ = try await tools.request(path + "/comments", method: "POST", body: ["body": .string(comment), "author": "NeoOS"], query: query)
                     comment = ""; try await load()
                 } } }.disabled(comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || tools.busy || tools.app.demo)
             }
-        }.modernList().navigationTitle("La tâche").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("La tâche")).navigationBarTitleDisplayMode(.inline)
             .task {
                 title = task["title"].string; bodyText = task["body"].string; assignee = task["assignee"].string
                 guard !tools.app.demo else { return }
@@ -182,15 +182,15 @@ private struct KanbanDetailView: View {
                     assignees = try await tools.request("/api/plugins/kanban/assignees", query: query)["assignees"].array.map(\.string)
                 }
             }
-            .appConfirm("Déplacer vers \(statusName(confirmAction ?? "")) ?", isPresented: Binding(get: { confirmAction != nil }, set: { if !$0 { confirmAction = nil } })) {
-                Button("Déplacer") {
+            .appConfirm(L("Déplacer vers %@ ?", statusName(confirmAction ?? "")), isPresented: Binding(get: { confirmAction != nil }, set: { if !$0 { confirmAction = nil } })) {
+                Button(L("Déplacer")) {
                     guard let state = confirmAction else { return }; confirmAction = nil
                     Task { await tools.perform {
                         _ = try await tools.request(path, method: "PATCH", body: ["status": .string(state)], query: query)
                         try await load()
                     } }
                 }
-            } message: { Text("Hermes applique ses règles de dépendance et peut lancer un agent lorsqu’une tâche devient prête.") }
+            } message: { Text(L("Hermes applique ses règles de dépendance et peut lancer un agent lorsqu’une tâche devient prête.")) }
     }
     private func load() async throws {
         full = try await tools.request(path, query: query)
@@ -199,5 +199,5 @@ private struct KanbanDetailView: View {
 }
 
 private func statusName(_ status: String) -> String {
-    ["triage": "À préciser", "todo": "À faire", "ready": "Prêt", "running": "En cours", "blocked": "Bloqué", "review": "À valider", "done": "Terminé", "failed": "En échec", "archived": "Archivé"][status] ?? status.capitalized
+    L(["triage": L("À préciser"), "todo": L("À faire"), "ready": L("Prêt"), "running": L("En cours"), "blocked": L("Bloqué"), "review": L("À valider"), "done": L("Terminé"), "failed": L("En échec"), "archived": L("Archivé")][status] ?? status.capitalized)
 }

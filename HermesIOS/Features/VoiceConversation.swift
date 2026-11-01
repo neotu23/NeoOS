@@ -61,11 +61,11 @@ final class VoiceConversation {
 
     /// Connection|profile pairs whose GPT-Live failed during this app session.
     private static var liveUnavailable = Set<String>()
-    private static let waitingNotice = "Hermes attend votre réponse dans le chat. La conversation vocale reprendra ensuite."
-    private static let busyNotice = "Hermes termine la réponse précédente…"
-    private static let localVoiceNotice = "La voix du serveur est indisponible (quota). L’iPhone lit la réponse."
+    private static let waitingNotice = L("Hermes attend votre réponse dans le chat. La conversation vocale reprendra ensuite.")
+    private static let busyNotice = L("Hermes termine la réponse précédente…")
+    private static let localVoiceNotice = L("La voix du serveur est indisponible (quota). L’iPhone lit la réponse.")
     /// Spoken once when the agent has been working in silence: after a tool starts, or after a slow start.
-    private static let holdingLine = "Je regarde ça. "
+    private static let holdingLine = L("Je regarde ça. ")
     private static let holdingToolDelay: TimeInterval = 0.5
     private static let holdingSlowDelay: TimeInterval = 1.5
 
@@ -86,18 +86,18 @@ final class VoiceConversation {
         case .waiting: "waiting"
         case .paused: "paused"
         }
-        LiveActivities.shared.updateCall(title: tools.app.agent?.title ?? "Hermès", phase: name, muted: inputMuted)
+        LiveActivities.shared.updateCall(title: tools.app.agent?.title ?? L("Hermès"), phase: name, muted: inputMuted)
     }
     var title: String {
-        if inputMuted, [.listening, .transcribing, .thinking].contains(phase) { return "Microphone coupé." }
+        if inputMuted, [.listening, .transcribing, .thinking].contains(phase) { return L("Microphone coupé.") }
         return switch phase {
-        case .ready: "La voix se prépare."
-        case .listening: "Je vous écoute."
-        case .transcribing: "Je vous ai entendu."
-        case .thinking: "Hermes réfléchit."
-        case .speaking: "Hermes vous répond."
-        case .waiting: "Hermes attend votre réponse."
-        case .paused: "On reprend ?"
+        case .ready: L("La voix se prépare.")
+        case .listening: L("Je vous écoute.")
+        case .transcribing: L("Je vous ai entendu.")
+        case .thinking: L("Hermes réfléchit.")
+        case .speaking: L("Hermes vous répond.")
+        case .waiting: L("Hermes attend votre réponse.")
+        case .paused: L("On reprend ?")
         }
     }
     func start(standardMode: Bool = false, useLive: Bool = false) {
@@ -133,13 +133,13 @@ final class VoiceConversation {
                         live?.close(); live = nil; liveTranscript = VoiceLiveTranscript(); tools.app.speechSink = nil
                         await VoiceAudioEngine.settleAudioWork()
                         try validate(attempt)
-                        notice = "GPT-Live indisponible : \(unavailable.message) Voix standard utilisée pour cet appel."
+                        notice = L("GPT-Live indisponible : %@ Voix standard utilisée pour cet appel.", unavailable.message)
                     }
                 }
                 try await runStandard(preferences, attempt: attempt)
             } catch is CancellationError {
                 if generation == attempt, !Task.isCancelled {
-                    error = "La connexion a changé. La conversation reste disponible dans le chat."
+                    error = L("La connexion a changé. La conversation reste disponible dans le chat.")
                 }
             } catch {
                 if generation == attempt { self.error = error.localizedDescription }
@@ -300,7 +300,7 @@ final class VoiceConversation {
                 continue
             }
             if now >= deadline {
-                notice = "Hermes n’a pas encore terminé sa réponse précédente. Votre phrase n’a pas été envoyée ; elle reste affichée ici."
+                notice = L("Hermes n’a pas encore terminé sa réponse précédente. Votre phrase n’a pas été envoyée ; elle reste affichée ici.")
                 return false
             }
             if now - started > 1, notice == nil { notice = Self.busyNotice }
@@ -350,7 +350,7 @@ final class VoiceConversation {
             if transcript.approval != nil || transcript.clarification != nil || transcript.credential != nil {
                 if !awaitingUser {
                     awaitingUser = true; phase = .waiting; notice = Self.waitingNotice
-                    if !announced { announced = true; speechStream.send("\n\nJ’attends votre réponse dans le chat de l’application.\n\n") }
+                    if !announced { announced = true; speechStream.send(L("\n\nJ’attends votre réponse dans le chat de l’application.\n\n")) }
                 }
             } else if awaitingUser {
                 awaitingUser = false; phase = .thinking
@@ -365,22 +365,22 @@ final class VoiceConversation {
                 speechStream.finish(); answer = reply.display
                 break
             } else if idleSince == nil { idleSince = now }
-            guard now < deadline else { throw VoiceTurnIssue("Hermes travaille encore. Retrouvez sa réponse dans le chat.") }
+            guard now < deadline else { throw VoiceTurnIssue(L("Hermes travaille encore. Retrouvez sa réponse dans le chat.")) }
             try await Task.sleep(for: .milliseconds(100))
         }
         awaitingUser = false
         if notice == Self.waitingNotice { notice = nil }
         if replyStatus == "error" {
-            throw VoiceTurnIssue(tools.app.transcript.failure ?? "Hermes n’a pas pu terminer cette réponse. Elle reste dans le chat.")
+            throw VoiceTurnIssue(tools.app.transcript.failure ?? L("Hermes n’a pas pu terminer cette réponse. Elle reste dans le chat."))
         }
         let text = reply.display
         answer = text
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw VoiceTurnIssue("Hermes n’a pas renvoyé de réponse à lire.") }
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw VoiceTurnIssue(L("Hermes n’a pas renvoyé de réponse à lire.")) }
         while !speechStream.needsFallback && !speechStream.drained {
             try await Task.sleep(for: .milliseconds(50)); try validate(attempt)
             if speechStream.hasAudio { phase = .speaking }
             if let failure = audio.failure { throw RPCFailure(failure) }
-            guard ProcessInfo.processInfo.systemUptime < deadline else { throw VoiceTurnIssue("La lecture vocale prend trop de temps. La réponse reste dans le chat.") }
+            guard ProcessInfo.processInfo.systemUptime < deadline else { throw VoiceTurnIssue(L("La lecture vocale prend trop de temps. La réponse reste dans le chat.")) }
         }
         if !speechStream.needsFallback && speechStream.hasAudio {
             if let failure = speechStream.failure { throw VoiceTurnIssue(failure) }
@@ -420,7 +420,7 @@ final class VoiceConversation {
     private func speakLocally(_ text: String, attempt: UUID) async throws {
         notice = Self.localVoiceNotice
         guard let rendered = await localSpeech.render(text) else {
-            throw VoiceTurnIssue("La voix du serveur est indisponible. La réponse reste dans le chat.")
+            throw VoiceTurnIssue(L("La voix du serveur est indisponible. La réponse reste dans le chat."))
         }
         try validate(attempt)
         let engine = audio.engine, id = UUID()
@@ -503,7 +503,7 @@ final class VoiceConversation {
             VoiceDiag.log("levels stream ended; generationOK=\(self?.generation == attempt) failure=\(self?.audio.failure ?? "none")")
             // The meter stream only ends when the engine is gone: never leave the call silently stuck.
             guard let self, self.generation == attempt, !Task.isCancelled else { return }
-            self.systemInterrupted(self.audio.failure ?? "Le micro s’est arrêté de façon inattendue. Réactivez-le pour reprendre.")
+            self.systemInterrupted(self.audio.failure ?? L("Le micro s’est arrêté de façon inattendue. Réactivez-le pour reprendre."))
         }
     }
 
@@ -519,7 +519,7 @@ final class VoiceConversation {
             diagFrames = 0; diagMax = 0; diagSince = frame.time
         }
         if tools.app.state != .connected {
-            systemInterrupted("La connexion à Hermès a été interrompue. La réponse reste dans le chat.")
+            systemInterrupted(L("La connexion à Hermès a été interrompue. La réponse reste dans le chat."))
             return
         }
         let playing = audio.playing
@@ -631,7 +631,7 @@ final class VoiceConversation {
         let status: JSONValue
         do { status = try await tools.request("/api/audio/voice-live/status") }
         catch let failure as RPCFailure where [404, 405].contains(failure.code) {
-            throw VoiceLiveUnavailable("Ce serveur Hermes doit être mis à jour pour proposer GPT-Live. Vous pouvez utiliser la voix standard.")
+            throw VoiceLiveUnavailable(L("Ce serveur Hermes doit être mis à jour pour proposer GPT-Live. Vous pouvez utiliser la voix standard."))
         }
         try validate(attempt)
         guard status["ok"].bool, status["available"].bool else {
@@ -693,7 +693,7 @@ final class VoiceConversation {
         tools.app.speechSink = { [weak self] event in self?.receiveSpeech(event, attempt: attempt) }
         try transport.setMuted(inputMuted)
         try transport.send(VoiceLiveProtocol.append("instructions", delegation: nil,
-            content: "Parle en français, naturellement et avec chaleur. Délègue à Hermes les demandes nécessitant ses connaissances, sa mémoire ou ses outils. Ne prétends jamais avoir exécuté ses actions avant son résultat."))
+            content: L("Parle en français, naturellement et avec chaleur. Délègue à Hermes les demandes nécessitant ses connaissances, sa mémoire ou ses outils. Ne prétends jamais avoir exécuté ses actions avant son résultat.")))
         phase = .listening
         if tools.app.transcript.running, let message = tools.app.transcript.messages.last(where: { $0.role == "user" }) {
             openLiveReply(delegation: nil, seed: assistantText(after: message.id))
@@ -703,8 +703,8 @@ final class VoiceConversation {
             try validate(attempt); try transport.check()
             for id in liveTranscript.takeDropped() {
                 try transport.send(VoiceLiveProtocol.append("commentary", delegation: id,
-                    content: "Hermes n’a pas reçu la transcription de cette demande. Demande à l’utilisateur de la répéter."))
-                notice = "Une demande vocale n’a pas été transcrite. Répétez-la si besoin."
+                    content: L("Hermes n’a pas reçu la transcription de cette demande. Demande à l’utilisateur de la répéter.")))
+                notice = L("Une demande vocale n’a pas été transcrite. Répétez-la si besoin.")
             }
             if let next = try liveTranscript.nextRequest(now: ProcessInfo.processInfo.systemUptime) {
                 if VoiceActivity.isStop(next.prompt, phrases: preferences.stopPhrases) { return }
@@ -712,10 +712,10 @@ final class VoiceConversation {
                 // must not cancel backend actions or discard their final result.
                 phase = .thinking
                 transport.mark("hermes_submit")
-                try transport.send(VoiceLiveProtocol.append("thinking", delegation: next.id, content: "Hermes examine la demande. Le travail n’est pas encore terminé."))
+                try transport.send(VoiceLiveProtocol.append("thinking", delegation: next.id, content: L("Hermes examine la demande. Le travail n’est pas encore terminé.")))
                 guard try await waitForHermes(attempt, transport: transport) else {
                     try transport.send(VoiceLiveProtocol.append("commentary", delegation: next.id,
-                        content: "Hermes est encore occupé par une autre tâche ; cette demande n’a pas été transmise."))
+                        content: L("Hermes est encore occupé par une autre tâche ; cette demande n’a pas été transmise.")))
                     phase = .listening; continue
                 }
                 openLiveReply(delegation: next.id)
@@ -725,7 +725,7 @@ final class VoiceConversation {
                 catch {
                     try validate(attempt)
                     replyOpen = false; notice = error.localizedDescription; phase = .listening
-                    try transport.send(VoiceLiveProtocol.append("commentary", delegation: next.id, content: "La demande n’a pas pu être transmise à Hermes."))
+                    try transport.send(VoiceLiveProtocol.append("commentary", delegation: next.id, content: L("La demande n’a pas pu être transmise à Hermes.")))
                     continue
                 }
                 transport.mark("hermes_admitted")
@@ -796,7 +796,7 @@ final class VoiceConversation {
                     if !announced {
                         announced = true
                         try live.send(VoiceLiveProtocol.append("commentary", delegation: delegation,
-                            content: "Hermes attend que l’utilisateur réponde à sa demande dans le chat de l’application avant de continuer."))
+                            content: L("Hermes attend que l’utilisateur réponde à sa demande dans le chat de l’application avant de continuer.")))
                     }
                 }
                 try await Task.sleep(for: .milliseconds(200)); continue
@@ -821,15 +821,15 @@ final class VoiceConversation {
                 try live.send(VoiceLiveProtocol.append("thinking", delegation: delegation, content: String(activity.prefix(200))))
             }
             guard now < deadline else {
-                notice = "Hermes travaille encore. Retrouvez sa réponse dans le chat."
+                notice = L("Hermes travaille encore. Retrouvez sa réponse dans le chat.")
                 phase = .listening; return
             }
             try await Task.sleep(for: .milliseconds(150))
         }
         guard let live else { throw CancellationError() }
         if replyStatus == "error" {
-            notice = tools.app.transcript.failure ?? "Hermes n’a pas pu terminer cette demande."
-            try live.send(VoiceLiveProtocol.append("commentary", delegation: delegation, content: "Hermes n’a pas pu terminer cette demande."))
+            notice = tools.app.transcript.failure ?? L("Hermes n’a pas pu terminer cette demande.")
+            try live.send(VoiceLiveProtocol.append("commentary", delegation: delegation, content: L("Hermes n’a pas pu terminer cette demande.")))
         }
         live.mark("hermes_complete")
         try await live.drain()
@@ -841,7 +841,7 @@ final class VoiceConversation {
                 try validate(attempt); try live.check()
                 guard ProcessInfo.processInfo.systemUptime < speechDeadline else {
                     live.mark("speech_missing")
-                    notice = "Hermès a répondu, mais GPT-Live ne l’a pas lu à voix haute. La réponse reste disponible dans le chat."
+                    notice = L("Hermès a répondu, mais GPT-Live ne l’a pas lu à voix haute. La réponse reste disponible dans le chat.")
                     break
                 }
                 try await Task.sleep(for: .milliseconds(100))
@@ -860,7 +860,7 @@ final class VoiceConversation {
         try Task.checkCancellation()
         guard attempt == generation, tools.connectionID == tools.app.activeConnection?.id,
               tools.profile == tools.app.profile, sessionID == tools.app.selected?.storedID else { throw CancellationError() }
-        guard tools.app.state == .connected else { throw RPCFailure("La connexion à Hermès a été interrompue. Retrouvez la réponse dans le chat, puis reprenez la voix.") }
+        guard tools.app.state == .connected else { throw RPCFailure(L("La connexion à Hermès a été interrompue. Retrouvez la réponse dans le chat, puis reprenez la voix.")) }
     }
     private func acquireLeases(_ attempt: UUID) async {
         for path in ["/api/audio/tts-lease", "/api/audio/stt-lease"] {

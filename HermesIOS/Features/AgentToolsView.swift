@@ -24,8 +24,8 @@ struct SkillsView: View {
         tools.data.array.filter { search.isEmpty || "\($0["name"].string) \($0["description"].string)".localizedCaseInsensitiveContains(search) }
     }
     var body: some View {
-        List { AppSearchSection(text: $search, prompt: "Rechercher un skill"); Group {
-            AppIntro("Les compétences de \(tools.profile). Activez celles dont votre agent a besoin.")
+        List { AppSearchSection(text: $search, prompt: L("Rechercher un skill")); Group {
+            AppIntro(L("Les compétences de %@. Activez celles dont votre agent a besoin.", tools.profile))
             ToolFeedback(tools: tools)
             ForEach(skills, id: \.["name"].string) { skill in
                 NavigationLink {
@@ -39,16 +39,16 @@ struct SkillsView: View {
                         }
                         Spacer(minLength: 4)
                         Circle().fill(skill["enabled"] == false ? Color.secondary.opacity(0.3) : AppTheme.accent).frame(width: 7, height: 7)
-                            .accessibilityLabel(skill["enabled"] == false ? "Désactivé" : "Activé")
+                            .accessibilityLabel(skill["enabled"] == false ? L("Désactivé") : L("Activé"))
                     }.padding(.vertical, 9)
                 }
             }
-            if !tools.data.isNull && skills.isEmpty { ContentUnavailableView("Aucun skill", systemImage: "sparkles", description: Text("Vos compétences installées apparaîtront ici.")) }
+            if !tools.data.isNull && skills.isEmpty { ContentUnavailableView(L("Aucun skill"), systemImage: "sparkles", description: Text(L("Vos compétences installées apparaîtront ici."))) }
         }
 }
             .modernList()
-            .navigationTitle("Compétences").navigationBarTitleDisplayMode(.inline)
-            .toolbar { AppToolbarItem(placement: .primaryAction) { Button("Ajouter", systemImage: "plus") { adding = true }.disabled(tools.app.demo) } }
+            .navigationTitle(L("Compétences")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { AppToolbarItem(placement: .primaryAction) { Button(L("Ajouter"), systemImage: "plus") { adding = true }.disabled(tools.app.demo) } }
             .sheet(isPresented: $adding) { SkillEditorView(tools: tools, refreshed: load) }
             .refreshable { await load() }.task { await load() }
     }
@@ -69,27 +69,27 @@ private struct SkillDetailView: View {
         List { Group {
             Section {
                 Text(skill["description"].string).foregroundStyle(.secondary)
-                Toggle("Disponible pour l’agent", isOn: Binding(get: { enabled }, set: { value in
+                Toggle(L("Disponible pour l’agent"), isOn: Binding(get: { enabled }, set: { value in
                     Task { await tools.perform {
                         let result = try await tools.request("/api/skills/toggle", method: "PUT", body: ["name": skill["name"], "enabled": .bool(value)])
-                        guard result["ok"].bool else { throw RPCFailure("Le skill n’a pas été modifié.") }
+                        guard result["ok"].bool else { throw RPCFailure(L("Le skill n’a pas été modifié.")) }
                         enabled = result["enabled"].bool
                         await tools.load("/api/skills")
                     } }
                 })).disabled(tools.busy || tools.app.demo)
             }
             ToolFeedback(tools: tools)
-            Section("Gérer") {
-                Button("Modifier les instructions") { editing = true }.disabled(reading || tools.app.demo)
+            Section(L("Gérer")) {
+                Button(L("Modifier les instructions")) { editing = true }.disabled(reading || tools.app.demo)
                 if skill["provenance"].string == "hub" {
-                    Button("Mettre à jour depuis sa source") { operation = "update" }.disabled(tools.app.demo)
-                    Button("Désinstaller", role: .destructive) { operation = "uninstall" }.disabled(tools.app.demo)
-                } else { Text("Pour retirer cette compétence de l’agent, désactivez-la ci-dessus.").font(.caption).foregroundStyle(.secondary) }
+                    Button(L("Mettre à jour depuis sa source")) { operation = "update" }.disabled(tools.app.demo)
+                    Button(L("Désinstaller"), role: .destructive) { operation = "uninstall" }.disabled(tools.app.demo)
+                } else { Text(L("Pour retirer cette compétence de l’agent, désactivez-la ci-dessus.")).font(.caption).foregroundStyle(.secondary) }
             }.disabled(tools.busy)
             if let output { Text(output).font(.caption).textSelection(.enabled) }
-            Section("Instructions") {
+            Section(L("Instructions")) {
                 if reading { ProgressView() }
-                else { Text(content.isEmpty ? "Aucune instruction disponible." : content).font(.system(.subheadline, design: .monospaced)).textSelection(.enabled) }
+                else { Text(content.isEmpty ? L("Aucune instruction disponible.") : content).font(.system(.subheadline, design: .monospaced)).textSelection(.enabled) }
             }
         }
 }.modernList()
@@ -98,8 +98,8 @@ private struct SkillDetailView: View {
                 content = (try? await tools.request("/api/skills/content", query: [URLQueryItem(name: "name", value: skill["name"].string)]))?["content"].string ?? content
                 await tools.load("/api/skills")
             } }
-            .appConfirm(operation == "uninstall" ? "Désinstaller ce skill ?" : "Mettre à jour ce skill ?", isPresented: Binding(get: { operation != nil }, set: { if !$0 { operation = nil } })) {
-                Button(operation == "uninstall" ? "Désinstaller" : "Mettre à jour", role: operation == "uninstall" ? .destructive : nil) {
+            .appConfirm(operation == "uninstall" ? L("Désinstaller ce skill ?") : L("Mettre à jour ce skill ?"), isPresented: Binding(get: { operation != nil }, set: { if !$0 { operation = nil } })) {
+                Button(operation == "uninstall" ? L("Désinstaller") : L("Mettre à jour"), role: operation == "uninstall" ? .destructive : nil) {
                     guard let action = operation else { return }; operation = nil
                     Task { await tools.perform {
                         var args: [JSONValue] = ["--profile", .string(tools.profile), "skills", .string(action), skill["name"]]
@@ -108,7 +108,7 @@ private struct SkillDetailView: View {
                         guard !result["blocked"].bool, result["code"].int == 0 else { throw RPCFailure(result["hint"].string + " " + result["output"].string) }
                         output = result["output"].string; await tools.load("/api/skills")
                         if action == "uninstall" {
-                            guard !tools.data.array.contains(where: { $0["name"] == skill["name"] }) else { throw RPCFailure("Hermes n’a pas retiré ce skill. " + result["output"].string) }
+                            guard !tools.data.array.contains(where: { $0["name"] == skill["name"] }) else { throw RPCFailure(L("Hermes n’a pas retiré ce skill. ") + result["output"].string) }
                             dismiss()
                         }
                     } }
@@ -132,16 +132,16 @@ struct WorkspaceView: View {
     @State private var creating = false
     init(app: AppModel) { _tools = State(initialValue: NativeToolSession(app)) }
     var body: some View {
-        List { AppSearchSection(text: $search, prompt: "Retrouver un projet"); Group {
-            AppIntro("Les projets et dossiers de \(tools.profile), sur votre serveur Hermes.")
+        List { AppSearchSection(text: $search, prompt: L("Retrouver un projet")); Group {
+            AppIntro(L("Les projets et dossiers de %@, sur votre serveur Hermes.", tools.profile))
             ToolFeedback(tools: tools)
             ForEach(tools.data["projects"].array.filter { !$0["archived"].bool && $0["archived"].int == 0 && (search.isEmpty || $0["name"].string.localizedCaseInsensitiveContains(search)) }, id: \.["id"].string) { project in
                 NavigationLink {
                     List { Group {
                         if !project["description"].string.isEmpty { Text(project["description"].string) }
-                        Section("Fichiers") { NavigationLink("Parcourir le dossier") { RemoteFilesView(tools: tools, path: project["primary_path"].string) } }
-                        Section("Dossier principal") { Text(project["primary_path"].string).font(.system(.subheadline, design: .monospaced)).textSelection(.enabled) }
-                        Section("Dossiers du projet") {
+                        Section(L("Fichiers")) { NavigationLink(L("Parcourir le dossier")) { RemoteFilesView(tools: tools, path: project["primary_path"].string) } }
+                        Section(L("Dossier principal")) { Text(project["primary_path"].string).font(.system(.subheadline, design: .monospaced)).textSelection(.enabled) }
+                        Section(L("Dossiers du projet")) {
                             ForEach(project["folders"].array, id: \.["path"].string) { folder in
                                 VStack(alignment: .leading, spacing: 6) {
                                     if !folder["label"].string.isEmpty { Label(folder["label"].string, systemImage: "folder") }
@@ -149,11 +149,11 @@ struct WorkspaceView: View {
                                 }
                             }
                         }
-                        Section("Gérer") {
-                            NavigationLink("Modifier le projet") { ProjectEditor(tools: tools, project: project, saved: load) }
-                            Button("Utiliser dans la conversation") { Task { await tools.perform { try await tools.app.useWorkspace(project["primary_path"].string); _ = try await tools.request("projects.set_active", body: ["id": project["id"]], rpc: true) } } }.disabled(tools.app.transcript.running)
+                        Section(L("Gérer")) {
+                            NavigationLink(L("Modifier le projet")) { ProjectEditor(tools: tools, project: project, saved: load) }
+                            Button(L("Utiliser dans la conversation")) { Task { await tools.perform { try await tools.app.useWorkspace(project["primary_path"].string); _ = try await tools.request("projects.set_active", body: ["id": project["id"]], rpc: true) } } }.disabled(tools.app.transcript.running)
                         }
-                        if !project["board_slug"].string.isEmpty { Section("Tableau associé") { Text(project["board_slug"].string) } }
+                        if !project["board_slug"].string.isEmpty { Section(L("Tableau associé")) { Text(project["board_slug"].string) } }
                     }
 }.navigationTitle(project["name"].string).navigationBarTitleDisplayMode(.inline)
                         .modernList()
@@ -167,12 +167,12 @@ struct WorkspaceView: View {
                     }.padding(.vertical, 10)
                 }
             }
-            if !tools.data.isNull && tools.data["projects"].array.isEmpty { ContentUnavailableView("Votre prochain projet", systemImage: "folder", description: Text("Les workspaces créés dans Hermes apparaîtront ici.")) }
+            if !tools.data.isNull && tools.data["projects"].array.isEmpty { ContentUnavailableView(L("Votre prochain projet"), systemImage: "folder", description: Text(L("Les workspaces créés dans Hermes apparaîtront ici."))) }
         }
 }
             .modernList()
-            .navigationTitle("Espace de travail").navigationBarTitleDisplayMode(.inline)
-            .toolbar { AppToolbarItem(placement: .primaryAction) { Button("Créer", systemImage: "plus") { creating = true }.disabled(tools.app.demo) } }
+            .navigationTitle(L("Espace de travail")).navigationBarTitleDisplayMode(.inline)
+            .toolbar { AppToolbarItem(placement: .primaryAction) { Button(L("Créer"), systemImage: "plus") { creating = true }.disabled(tools.app.demo) } }
             .sheet(isPresented: $creating) { ProjectEditor(tools: tools, saved: load) }
             .task { await load() }.refreshable { await load() }
     }

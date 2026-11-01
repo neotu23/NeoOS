@@ -75,7 +75,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
             try self.state.validate(generation)
             if self.engine != nil { return }
             if let previous = Self.sessionOwner, previous !== self {
-                previous.state.fail("Une autre conversation utilise l’audio.")
+                previous.state.fail(L("Une autre conversation utilise l’audio."))
                 previous.shutdownOnQueue(deactivate: false)
             }
             do {
@@ -84,7 +84,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
                 try session.setCategory(.playback, mode: .spokenAudio)
                 try session.setActive(true)
                 let engine = AVAudioEngine(), player = AVAudioPlayerNode()
-                guard let format = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1) else { throw RPCFailure("Format audio indisponible.") }
+                guard let format = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1) else { throw RPCFailure(L("Format audio indisponible.")) }
                 engine.attach(player); engine.connect(player, to: engine.mainMixerNode, format: format)
                 let state = self.state
                 engine.mainMixerNode.installTap(onBus: 0, bufferSize: 1024, format: nil) { buffer, _ in state.acceptOutput(buffer, generation: generation) }
@@ -149,7 +149,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
                   let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1),
                   let output = self.outputFormat,
                   let converter = AVAudioConverter(from: format, to: output) else {
-                throw RPCFailure("Format vocal Hermes non pris en charge.")
+                throw RPCFailure(L("Format vocal Hermes non pris en charge."))
             }
             self.converter = converter
             self.state.setOutputPending(false, id: id)
@@ -159,7 +159,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
     /// Split a bounded websocket frame before decoding: even a large frame cannot queue
     /// minutes of PCM. Backpressure also keeps stop/barge-in responsive between 200ms blocks.
     func enqueuePCM(_ data: Data, sampleRate: Double, id: UUID) async throws -> Bool {
-        guard data.count <= 2 * 1024 * 1024 else { throw RPCFailure("Bloc vocal Hermes trop volumineux.") }
+        guard data.count <= 2 * 1024 * 1024 else { throw RPCFailure(L("Bloc vocal Hermes trop volumineux.")) }
         let blockBytes = max(2, Int(sampleRate * 0.2) * 2)
         var offset = 0
         var scheduled = false
@@ -185,7 +185,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
     func finishPCM(id: UUID) async throws {
         try await onQueue {
             try self.validateOutput(id)
-            guard self.pcmCarry == nil else { throw RPCFailure("Le flux audio Hermes est incomplet.") }
+            guard self.pcmCarry == nil else { throw RPCFailure(L("Le flux audio Hermes est incomplet.")) }
             _ = try self.convertOnQueue(nil, end: true, id: id)
         }
     }
@@ -198,7 +198,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
             guard dataURL.utf8.count <= 32 * 1024 * 1024,
                   let comma = dataURL.firstIndex(of: ","),
                   let data = Data(base64Encoded: String(dataURL[dataURL.index(after: comma)...])),
-                  !data.isEmpty else { throw RPCFailure("Hermes n’a pas renvoyé d’audio lisible.") }
+                  !data.isEmpty else { throw RPCFailure(L("Hermes n’a pas renvoyé d’audio lisible.")) }
             let url = FileManager.default.temporaryDirectory.appendingPathComponent("hermes-speech-\(UUID().uuidString)")
             do {
                 try data.write(to: url, options: .atomic)
@@ -208,7 +208,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
                       Double(file.length) / format.sampleRate <= 600,
                       let output = self.outputFormat,
                       let converter = AVAudioConverter(from: format, to: output) else {
-                    throw RPCFailure("Cet audio ne peut pas être lu en mode vocal.")
+                    throw RPCFailure(L("Cet audio ne peut pas être lu en mode vocal."))
                 }
                 try self.validateOutput(id)
                 self.audioFile = file; self.audioFileURL = url; self.converter = converter
@@ -245,7 +245,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
             teardownGraphOnQueue()
         }
         if let previous = Self.sessionOwner, previous !== self {
-            previous.state.fail("Une autre conversation utilise l’audio.")
+            previous.state.fail(L("Une autre conversation utilise l’audio."))
             previous.shutdownOnQueue(deactivate: false)
         }
         let session = AVAudioSession.sharedInstance()
@@ -265,7 +265,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
             guard (8000...96000).contains(inputFormat.sampleRate), inputFormat.channelCount > 0,
                   inputFormat.commonFormat == .pcmFormatFloat32,
                   let output = AVAudioFormat(standardFormatWithSampleRate: 48000, channels: 1) else {
-                throw RPCFailure("Aucune entrée audio compatible n’est disponible.")
+                throw RPCFailure(L("Aucune entrée audio compatible n’est disponible."))
             }
             state.configure(sampleRate: inputFormat.sampleRate, generation: generation)
             let route = session.currentRoute
@@ -309,10 +309,10 @@ final class VoiceAudioEngine: @unchecked Sendable {
         observers.append(center.addObserver(forName: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance(), queue: nil) { [weak self] note in
             guard let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
                   raw == AVAudioSession.InterruptionType.began.rawValue else { return }
-            Self.queue.async { [weak self] in self?.failOnQueue("L’audio a été interrompu. Vous pouvez reprendre la conversation.") }
+            Self.queue.async { [weak self] in self?.failOnQueue(L("L’audio a été interrompu. Vous pouvez reprendre la conversation.")) }
         })
         observers.append(center.addObserver(forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: nil) { [weak self] _ in
-            Self.queue.async { [weak self] in self?.failOnQueue("L’audio de l’iPhone a redémarré. Relancez la conversation vocale.") }
+            Self.queue.async { [weak self] in self?.failOnQueue(L("L’audio de l’iPhone a redémarré. Relancez la conversation vocale.")) }
         })
     }
 
@@ -320,7 +320,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
         let now = ProcessInfo.processInfo.systemUptime
         recoveries = recoveries.filter { now - $0 < 10 } + [now]
         guard recoveries.count <= 4 else {
-            failOnQueue("La sortie audio change trop souvent. Relancez la conversation vocale."); return
+            failOnQueue(L("La sortie audio change trop souvent. Relancez la conversation vocale.")); return
         }
         let generation = state.generation
         let resumePlayback = playbackID != nil
@@ -405,12 +405,12 @@ final class VoiceAudioEngine: @unchecked Sendable {
 
     private func validateOutput(_ id: UUID) throws {
         guard state.isOutput(id), playbackID == id else { throw CancellationError() }
-        guard engine?.isRunning == true else { throw RPCFailure("La lecture audio a été interrompue.") }
+        guard engine?.isRunning == true else { throw RPCFailure(L("La lecture audio a été interrompue.")) }
         if let failure = state.snapshot().failure { throw RPCFailure(failure) }
     }
 
     private func decodePCMOnQueue(_ data: Data, id: UUID) throws -> Bool {
-        guard let converter else { throw RPCFailure("Le flux vocal n’est pas prêt.") }
+        guard let converter else { throw RPCFailure(L("Le flux vocal n’est pas prêt.")) }
         var bytes = Data()
         if let carry = pcmCarry { bytes.append(carry) }
         bytes.append(data)
@@ -429,12 +429,12 @@ final class VoiceAudioEngine: @unchecked Sendable {
     }
 
     @discardableResult private func convertOnQueue(_ input: AVAudioPCMBuffer?, end: Bool, id: UUID) throws -> Bool {
-        guard let converter, let outputFormat else { throw RPCFailure("Le flux vocal n’est pas prêt.") }
+        guard let converter, let outputFormat else { throw RPCFailure(L("Le flux vocal n’est pas prêt.")) }
         var supplied = false, scheduled = false
         // Input blocks are <=200ms. This bound is ample even for 8kHz → 48kHz,
         // and prevents a faulty converter from spinning indefinitely on the audio queue.
         for _ in 0..<16 {
-            guard let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: 4096) else { throw RPCFailure("Mémoire audio insuffisante.") }
+            guard let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: 4096) else { throw RPCFailure(L("Mémoire audio insuffisante.")) }
             var error: NSError?
             let status = converter.convert(to: output, error: &error) { _, inputStatus in
                 if !supplied, let input {
@@ -444,7 +444,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
                 return nil
             }
             if let error { throw error }
-            if status == .error { throw RPCFailure("La conversion de l’audio a échoué.") }
+            if status == .error { throw RPCFailure(L("La conversion de l’audio a échoué.")) }
             if output.frameLength > 0 {
                 try validateOutput(id)
                 let duration = Double(output.frameLength) / outputFormat.sampleRate
@@ -458,7 +458,7 @@ final class VoiceAudioEngine: @unchecked Sendable {
             }
             if status == .inputRanDry || status == .endOfStream { return scheduled }
         }
-        throw RPCFailure("La conversion audio n’a pas pu se terminer.")
+        throw RPCFailure(L("La conversion audio n’a pas pu se terminer."))
     }
 
     private func fillFileOnQueue(id: UUID) throws {
@@ -475,9 +475,9 @@ final class VoiceAudioEngine: @unchecked Sendable {
                 return
             }
             let count = AVAudioFrameCount(min(remaining, AVAudioFramePosition(file.processingFormat.sampleRate * 0.2)))
-            guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: count) else { throw RPCFailure("Mémoire audio insuffisante.") }
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: count) else { throw RPCFailure(L("Mémoire audio insuffisante.")) }
             try file.read(into: buffer, frameCount: count)
-            guard buffer.frameLength > 0 else { throw RPCFailure("Cet audio est incomplet.") }
+            guard buffer.frameLength > 0 else { throw RPCFailure(L("Cet audio est incomplet.")) }
             _ = try convertOnQueue(buffer, end: false, id: id)
         }
         Self.queue.asyncAfter(deadline: .now() + 0.05) { [weak self] in
@@ -585,7 +585,7 @@ private final class VoiceAudioState: @unchecked Sendable {
         // Bounded by the capture cap: at most one 100 ms chunk per stored 100 ms.
         let (stream, continuation) = AsyncStream<Data>.makeStream(bufferingPolicy: .unbounded)
         let (previous, first): (AsyncStream<Data>.Continuation?, Data?) = try lock.withLock {
-            guard status.monitoring, !muted else { throw RPCFailure("Le microphone est en pause.") }
+            guard status.monitoring, !muted else { throw RPCFailure(L("Le microphone est en pause.")) }
             swap(&samples, &fresh)
             maximum = capacity
             if includePreRoll, ringCount > 0 {
@@ -604,7 +604,7 @@ private final class VoiceAudioState: @unchecked Sendable {
 
     func finishCapture() throws -> [Int16] {
         let (result, tail, stream): ([Int16], Data?, AsyncStream<Data>.Continuation?) = try lock.withLock {
-            guard status.capturing else { throw RPCFailure("Aucun enregistrement disponible.") }
+            guard status.capturing else { throw RPCFailure(L("Aucun enregistrement disponible.")) }
             status.capturing = false
             let result = samples, tail = pending.isEmpty ? nil : VoiceWAV.pcm(pending)
             samples = []; pending = []
@@ -701,7 +701,7 @@ private final class VoiceAudioState: @unchecked Sendable {
 
     func beginOutput(_ id: UUID) throws {
         try lock.withLock {
-            guard status.monitoring else { throw RPCFailure("Démarrez le microphone avant la conversation vocale.") }
+            guard status.monitoring else { throw RPCFailure(L("Démarrez le microphone avant la conversation vocale.")) }
             if let failure = status.failure { throw RPCFailure(failure) }
             status.outputID = id; status.queuedSeconds = 0; status.outputLevel = 0; status.outputPending = true
         }

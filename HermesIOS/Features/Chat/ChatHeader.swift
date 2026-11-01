@@ -14,10 +14,10 @@ struct ChatHeaderContainer: View {
     var body: some View {
         ChatHeader(
             model: model,
-            title: model.selected?.title ?? "Nouvelle conversation",
+            title: model.selected?.title ?? L("Nouvelle conversation"),
             showsConnection: model.state != .connected && !model.demo,
-            agentTitle: model.agent?.title ?? "Hermes",
-            connectionName: model.activeConnection?.name ?? (model.demo ? "Aperçu interactif" : ""),
+            agentTitle: model.agent?.title ?? L("Hermes"),
+            connectionName: model.activeConnection?.name ?? (model.demo ? L("Aperçu interactif") : ""),
             demo: model.demo,
             hasConversation: model.selected != nil,
             actionsDisabled: model.transcript.running || model.sending || model.voiceActive || model.state != .connected,
@@ -60,20 +60,20 @@ struct ChatHeader: View, Equatable {
         // Menu on the left, the agent in the middle, the conversation actions on the right: one thing per place.
         // The conversation list lives in the menu (Conversations); its unread dot rides on the menu button.
         HStack(spacing: 8) {
-            HeaderCircle(symbol: "line.3.horizontal", label: "Menu", id: "app-navigation", badge: hasUnread, action: menu)
+            HeaderCircle(symbol: "line.3.horizontal", label: L("Menu"), id: "app-navigation", badge: hasUnread, action: menu)
             agentCapsule.frame(maxWidth: .infinity)
             if hasConversation {
                 AppMenu {
-                    AppMenuButton("Conversations", systemImage: "bubble.left.and.bubble.right") { history() }
-                    AppMenuButton("Créer une branche", systemImage: "arrow.triangle.branch") { Task { await model.branchConversation() } }
-                    AppMenuButton("Résumer le contexte", systemImage: "arrow.down.right.and.arrow.up.left") { compress() }
+                    AppMenuButton(L("Conversations"), systemImage: "bubble.left.and.bubble.right") { history() }
+                    AppMenuButton(L("Créer une branche"), systemImage: "arrow.triangle.branch") { Task { await model.branchConversation() } }
+                    AppMenuButton(L("Résumer le contexte"), systemImage: "arrow.down.right.and.arrow.up.left") { compress() }
                 } label: { HeaderCircleLabel(symbol: "ellipsis", badge: false) }
                     .disabled(actionsDisabled)
-                    .accessibilityLabel("Actions de la conversation")
+                    .accessibilityLabel(L("Actions de la conversation"))
             } else {
-                HeaderCircle(symbol: "bubble.left.and.bubble.right", label: "Conversations du profil actif", id: "quick-history", action: history)
+                HeaderCircle(symbol: "bubble.left.and.bubble.right", label: L("Conversations du profil actif"), id: "quick-history", action: history)
             }
-            HeaderCircle(symbol: "square.and.pencil", label: "Nouvelle conversation", id: "new-chat", tint: AppTheme.accent) { Haptics.select(); newChat() }
+            HeaderCircle(symbol: "square.and.pencil", label: L("Nouvelle conversation"), id: "new-chat", tint: AppTheme.accent) { Haptics.select(); newChat() }
         }.padding(.horizontal, 14).padding(.top, 6).padding(.bottom, 10)
     }
 
@@ -87,11 +87,11 @@ struct ChatHeader: View, Equatable {
                     if showsConnection {
                         ConnectionIndicator(model: model).font(.caption2).lineLimit(1)
                     } else if running {
-                        Text(activity ?? "Réfléchit…").font(.caption2).foregroundStyle(AppTheme.accent).lineLimit(1)
+                        Text(activity ?? L("Réfléchit…")).font(.caption2).foregroundStyle(AppTheme.accent).lineLimit(1)
                             .contentTransition(.opacity).animation(.easeInOut(duration: 0.2), value: activity)
                     } else {
                         Text(hasConversation ? title : connectionName).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                            .accessibilityLabel(demo ? "Aperçu interactif" : "Connecté à Hermes")
+                            .accessibilityLabel(demo ? L("Aperçu interactif") : L("Connecté à Hermes"))
                             .accessibilityIdentifier("connection-status")
                     }
                 }.frame(alignment: .leading)

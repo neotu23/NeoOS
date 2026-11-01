@@ -125,17 +125,17 @@ struct SpeakStreamReader {
 
     mutating func text(_ frame: String) throws -> Action? {
         guard !done else { return nil }
-        guard let event = try? JSONValue.decode(Data(frame.utf8)) else { throw RPCFailure("Flux vocal Hermes invalide.") }
+        guard let event = try? JSONValue.decode(Data(frame.utf8)) else { throw RPCFailure(L("Flux vocal Hermes invalide.")) }
         if event["type"].string == "error" || !event["error"].string.isEmpty {
             let message = [event["message"].string, event["error"].string].first { !$0.isEmpty }
-            throw RPCFailure(message ?? "Hermes n’a pas pu terminer la lecture vocale.")
+            throw RPCFailure(message ?? L("Hermes n’a pas pu terminer la lecture vocale."))
         }
         switch event["type"].string {
         case "start":
             let rate = event["sample_rate"].double
-            guard (8000...96000).contains(rate), event["channels"].int == 1 else { throw RPCFailure("Format vocal Hermes non pris en charge.") }
+            guard (8000...96000).contains(rate), event["channels"].int == 1 else { throw RPCFailure(L("Format vocal Hermes non pris en charge.")) }
             if let sampleRate {
-                guard sampleRate == rate else { throw RPCFailure("Format vocal Hermes non pris en charge.") }
+                guard sampleRate == rate else { throw RPCFailure(L("Format vocal Hermes non pris en charge.")) }
                 return nil
             }
             sampleRate = rate
@@ -148,7 +148,7 @@ struct SpeakStreamReader {
 
     /// PCM is only valid between `start` and `end`.
     func binary() throws -> Double {
-        guard !done, let sampleRate else { throw RPCFailure("Flux vocal Hermes invalide.") }
+        guard !done, let sampleRate else { throw RPCFailure(L("Flux vocal Hermes invalide.")) }
         return sampleRate
     }
 }

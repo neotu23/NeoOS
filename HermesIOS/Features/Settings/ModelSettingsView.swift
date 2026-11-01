@@ -15,9 +15,9 @@ extension AgentConfigStore {
     func routeSummary(provider: String, model: String, effort: String? = nil, inherits: String? = nil) -> String {
         var text: String
         if provider.isEmpty || provider == "auto" {
-            text = inherits.map { "hérite de \($0)" } ?? "auto · utiliser le modèle principal"
+            text = inherits.map { "hérite de \($0)" } ?? L("auto · utiliser le modèle principal")
         } else {
-            text = "\(providerName(provider)) · \(model.isEmpty ? "(par défaut du fournisseur)" : model)"
+            text = L("%@ · %@", providerName(provider), model.isEmpty ? L("(par défaut du fournisseur)") : model)
         }
         if let effort, !effort.isEmpty { text += " · Raisonnement \(SettingsCatalog.optionLabel(effort, key: "auxiliary.reasoning_effort").lowercased())" }
         return text
@@ -56,7 +56,7 @@ struct ModelPickerView: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher un modèle")
+            AppSearchSection(text: $search, prompt: L("Rechercher un modèle"))
             Section {
                 Text(footnote).font(.subheadline).foregroundStyle(.secondary)
             }
@@ -65,11 +65,11 @@ struct ModelPickerView: View {
                 SkeletonRows(count: 5, avatar: false)
             }
             if !search.isEmpty {
-                Section("Résultats") {
+                Section(L("Résultats")) {
                     ForEach(Array(results.prefix(150).enumerated()), id: \.offset) { _, result in
                         modelButton(result.provider, result.model, caption: result.provider["name"].string)
                     }
-                    if results.isEmpty { Text("Aucun modèle ne correspond.").foregroundStyle(.secondary) }
+                    if results.isEmpty { Text(L("Aucun modèle ne correspond.")).foregroundStyle(.secondary) }
                 }
             } else {
                 ForEach(store.providers, id: \.["slug"].string) { provider in
@@ -78,35 +78,35 @@ struct ModelPickerView: View {
                         DisclosureGroup(isExpanded: Binding(get: { expanded.contains(slug) }, set: { if $0 { expanded.insert(slug) } else { expanded.remove(slug) } })) {
                             let models = provider["models"].array.map(\.displayText)
                             if models.isEmpty {
-                                Text("Aucun modèle listé. Configurez ce fournisseur ou saisissez un modèle ci-dessous.").font(.caption).foregroundStyle(.secondary)
+                                Text(L("Aucun modèle listé. Configurez ce fournisseur ou saisissez un modèle ci-dessous.")).font(.caption).foregroundStyle(.secondary)
                             }
                             ForEach(models, id: \.self) { modelButton(provider, $0) }
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(provider["name"].string.isEmpty ? slug : provider["name"].string).font(.subheadline.weight(.medium))
-                                    Text("\(provider["models"].array.count) modèle\(provider["models"].array.count == 1 ? "" : "s")").font(.caption).foregroundStyle(.secondary)
+                                    Text(L("%lld modèles", provider["models"].array.count)).font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if slug == currentProvider { Image(systemName: "checkmark.circle.fill").foregroundStyle(AppTheme.accent).accessibilityLabel("Fournisseur actuel") }
+                                if slug == currentProvider { Image(systemName: "checkmark.circle.fill").foregroundStyle(AppTheme.accent).accessibilityLabel(L("Fournisseur actuel")) }
                             }
                         }
                     }
                 }
                 if !store.modelOptions.isNull && store.providers.isEmpty {
-                    ContentUnavailableView("Aucun fournisseur configuré", systemImage: "cpu",
-                                           description: Text("Ajoutez un fournisseur dans « Fournisseurs » pour retrouver ses modèles ici."))
+                    ContentUnavailableView(L("Aucun fournisseur configuré"), systemImage: "cpu",
+                                           description: Text(L("Ajoutez un fournisseur dans « Fournisseurs » pour retrouver ses modèles ici.")))
                 }
                 if !store.providers.isEmpty {
                     Section {
-                        AppPicker(title: "Fournisseur", selection: $customProvider,
+                        AppPicker(title: L("Fournisseur"), selection: $customProvider,
                                   options: store.providers.map { (value: $0["slug"].string, label: $0["name"].string.isEmpty ? $0["slug"].string : $0["name"].string) })
-                        TextField("ID du modèle", text: $customModel).textInputAutocapitalization(.never).autocorrectionDisabled()
-                        Button("Utiliser ce modèle") {
+                        TextField(L("ID du modèle"), text: $customModel).textInputAutocapitalization(.never).autocorrectionDisabled()
+                        Button(L("Utiliser ce modèle")) {
                             guard let provider = store.providers.first(where: { $0["slug"].string == customProvider }) else { return }
                             pick(provider, customModel.trimmingCharacters(in: .whitespacesAndNewlines))
                         }.disabled(customModel.trimmingCharacters(in: .whitespaces).isEmpty || customProvider.isEmpty || working)
-                    } header: { Text("Modèle personnalisé") } footer: { Text("Pour un modèle que le fournisseur ne liste pas encore.") }
+                    } header: { Text(L("Modèle personnalisé")) } footer: { Text(L("Pour un modèle que le fournisseur ne liste pas encore.")) }
                 }
             }
         }.modernList().navigationTitle(title).navigationBarTitleDisplayMode(.inline)
@@ -116,21 +116,21 @@ struct ModelPickerView: View {
                 customProvider = currentProvider.isEmpty || currentProvider == "auto" ? store.providers.first?["slug"].string ?? "" : currentProvider
             }
             .refreshable { await store.loadModelOptions(refresh: true) }
-            .appAlert("Confirmation de Hermes", isPresented: Binding(get: { confirmation != nil }, set: { if !$0 { confirmation = nil } })) {
-                Button("Confirmer") {
+            .appAlert(L("Confirmation de Hermes"), isPresented: Binding(get: { confirmation != nil }, set: { if !$0 { confirmation = nil } })) {
+                Button(L("Confirmer")) {
                     guard var body = confirmation?.body.object else { return }
                     body["confirm_expensive_model"] = true; confirmation = nil
                     Task { await assign(.object(body)) }
                 }
-                Button("Annuler", role: .cancel) { confirmation = nil }
+                Button(L("Annuler"), role: .cancel) { confirmation = nil }
             } message: { Text(confirmation?.message ?? "") }
     }
 
     private var footnote: String {
         switch target {
         case .main: "S’applique aux nouvelles sessions de \(store.title). Une conversation en cours garde son modèle."
-        case .auxiliary: "Cette tâche utilisera ce modèle à la place du modèle principal."
-        case .choose: "Choisissez un fournisseur puis un modèle."
+        case .auxiliary: L("Cette tâche utilisera ce modèle à la place du modèle principal.")
+        case .choose: L("Choisissez un fournisseur puis un modèle.")
         }
     }
 
@@ -189,35 +189,35 @@ struct MainModelSettingsView: View {
                 HStack(spacing: 14) {
                     Image(systemName: "shippingbox").font(.title2).foregroundStyle(AppTheme.accent).accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(model.isEmpty ? "Aucun modèle choisi" : model).font(.headline).fixedSize(horizontal: false, vertical: true)
+                        Text(model.isEmpty ? L("Aucun modèle choisi") : model).font(.headline).fixedSize(horizontal: false, vertical: true)
                         if !provider.isEmpty { Text(store.providerName(provider)).font(.caption).foregroundStyle(.secondary) }
                         if store.modelInfo["effective_context_length"].int > 0 {
-                            Text("Contexte : \(store.modelInfo["effective_context_length"].int.formatted()) jetons").font(.caption).foregroundStyle(.secondary)
+                            Text(L("Contexte : %@ jetons", store.modelInfo["effective_context_length"].int.formatted())).font(.caption).foregroundStyle(.secondary)
                         }
                     }
                 }.padding(.vertical, 6).accessibilityElement(children: .combine)
                 NavigationLink {
-                    ModelPickerView(store: store, title: "Modèle principal", target: .main, currentProvider: provider, currentModel: model)
-                } label: { Label("Changer de modèle", systemImage: "arrow.left.arrow.right") }
+                    ModelPickerView(store: store, title: L("Modèle principal"), target: .main, currentProvider: provider, currentModel: model)
+                } label: { Label(L("Changer de modèle"), systemImage: "arrow.left.arrow.right") }
                     .accessibilityIdentifier("settings-change-model")
-            } footer: { Text("S’applique aux nouvelles sessions de cet agent. Une conversation en cours garde son modèle.") }
+            } footer: { Text(L("S’applique aux nouvelles sessions de cet agent. Une conversation en cours garde son modèle.")) }
             SettingsFeedback(store: store)
-            Section("Par défaut") {
+            Section(L("Par défaut")) {
                 if capabilities["reasoning"] != false { ConfigFieldRow(store: store, key: "agent.reasoning_effort") }
                 if store.fields["agent.service_tier"] != nil { ConfigFieldRow(store: store, key: "agent.service_tier") }
             }
             if store.fields["model_context_length"] != nil {
                 Section {
                     ConfigFieldRow(store: store, key: "model_context_length")
-                } header: { Text("Contexte") } footer: {
+                } header: { Text(L("Contexte")) } footer: {
                     if store.modelInfo["auto_context_length"].int > 0 {
-                        Text("Détecté automatiquement : \(store.modelInfo["auto_context_length"].int.formatted()) jetons.")
+                        Text(L("Détecté automatiquement : %@ jetons.", store.modelInfo["auto_context_length"].int.formatted()))
                     }
                 }
             }
             let others = store.keys(on: "model.main").filter { !Self.custom.contains($0) }
-            if !others.isEmpty { Section("Autres réglages") { ConfigFieldRows(store: store, keys: others) } }
-        }.modernList().navigationTitle("Modèle principal").navigationBarTitleDisplayMode(.inline)
+            if !others.isEmpty { Section(L("Autres réglages")) { ConfigFieldRows(store: store, keys: others) } }
+        }.modernList().navigationTitle(L("Modèle principal")).navigationBarTitleDisplayMode(.inline)
             .task { await store.loadModelOptions(); await store.loadModelInfo() }
             .refreshable { await store.refreshModels() }
     }
@@ -231,17 +231,17 @@ struct FallbackModelsView: View {
 
     var body: some View {
         List {
-            Section { Text("Fournisseurs et modèles essayés dans l’ordre si le modèle par défaut échoue.").font(.subheadline).foregroundStyle(.secondary) }
+            Section { Text(L("Fournisseurs et modèles essayés dans l’ordre si le modèle par défaut échoue.")).font(.subheadline).foregroundStyle(.secondary) }
             SettingsFeedback(store: store)
-            Section("Ordre d’essai") {
+            Section(L("Ordre d’essai")) {
                 if routes.isEmpty {
-                    Text("Aucun modèle de secours — le modèle par défaut est utilisé sauf en cas d’échec.").font(.subheadline).foregroundStyle(.secondary)
+                    Text(L("Aucun modèle de secours — le modèle par défaut est utilisé sauf en cas d’échec.")).font(.subheadline).foregroundStyle(.secondary)
                 }
                 ForEach(Array(routes.enumerated()), id: \.offset) { index, route in
                     HStack(spacing: 12) {
                         Text("\(index + 1)").font(.caption.monospaced()).foregroundStyle(.secondary).frame(minWidth: 18)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(route.model.isEmpty ? "Modèle à choisir" : route.model).font(.subheadline.weight(.medium))
+                            Text(route.model.isEmpty ? L("Modèle à choisir") : route.model).font(.subheadline.weight(.medium))
                             Text(store.providerName(route.provider)).font(.caption).foregroundStyle(.secondary)
                         }
                     }.accessibilityElement(children: .combine).accessibilityLabel("Secours \(index + 1) : \(route.model), \(store.providerName(route.provider))")
@@ -251,15 +251,15 @@ struct FallbackModelsView: View {
                     var next = routes; next.move(fromOffsets: source, toOffset: destination); write(next)
                 }
                 NavigationLink {
-                    ModelPickerView(store: store, title: "Ajouter un secours", target: .choose { provider, model in
+                    ModelPickerView(store: store, title: L("Ajouter un secours"), target: .choose { provider, model in
                         guard !routes.contains(where: { $0.provider == provider && $0.model == model }) else { return }
                         write(routes + [FallbackRoute(provider: provider, model: model)])
                     })
-                } label: { Label("Ajouter un secours", systemImage: "plus") }
+                } label: { Label(L("Ajouter un secours"), systemImage: "plus") }
             }
             let others = store.keys(on: "model.fallbacks").filter { $0 != "fallback_providers" }
-            if !others.isEmpty { Section("Autres réglages") { ConfigFieldRows(store: store, keys: others) } }
-        }.modernList().navigationTitle("Modèles de secours").navigationBarTitleDisplayMode(.inline)
+            if !others.isEmpty { Section(L("Autres réglages")) { ConfigFieldRows(store: store, keys: others) } }
+        }.modernList().navigationTitle(L("Modèles de secours")).navigationBarTitleDisplayMode(.inline)
             .toolbar { if !routes.isEmpty { AppToolbarItem(placement: .primaryAction) { EditButton() } } }
             .task { if store.modelOptions.isNull { await store.loadModelOptions() } }
     }
@@ -275,24 +275,24 @@ enum AuxiliaryTasks {
                           "triage_specifier", "kanban_decomposer", "profile_describer", "curator"]
 
     static let copy: [String: (label: String, hint: String)] = [
-        "vision": ("Vision", "Analyse d’image"), "compression": ("Compression", "Compaction de contexte"),
-        "skills_hub": ("Hub de compétences", "Recherche de compétences"), "approval": ("Approbation", "Auto-approbation intelligente"),
-        "mcp": ("MCP", "Routage d’outils MCP"), "title_generation": ("Génération de titre", "Titres de session"),
-        "review": ("Révision", "Sous-agent de révision /review"), "voice_chat": ("Chat vocal", "Réponses parlées du mode vocal"),
-        "triage_specifier": ("Précision du triage", "Détail des spécifications Kanban"), "kanban_decomposer": ("Décomposition Kanban", "Décomposition des tâches"),
-        "profile_describer": ("Description de profil", "Descriptions automatiques des profils"), "curator": ("Curateur", "Revue d’utilisation des compétences"),
-        "background_review": ("Revue en arrière-plan", "Relecture après les tours"), "goal_judge": ("Juge des objectifs", "Suivi des /goal"),
-        "memory_query_rewrite": ("Recherche en mémoire", "Reformulation des requêtes mémoire"), "moa_aggregator": ("Agrégateur MoA", "Mixture of Agents"),
-        "moa_reference": ("Références MoA", "Avis des modèles de référence"), "monitor": ("Surveillance", "Suivi des exécutions"),
-        "tts_audio_tags": ("Balises audio", "Expressivité de la synthèse vocale")
+        "vision": (L("Vision"), L("Analyse d’image")), "compression": (L("Compression"), L("Compaction de contexte")),
+        "skills_hub": (L("Hub de compétences"), L("Recherche de compétences")), "approval": (L("Approbation"), L("Auto-approbation intelligente")),
+        "mcp": ("MCP", L("Routage d’outils MCP")), "title_generation": (L("Génération de titre"), L("Titres de session")),
+        "review": (L("Révision"), L("Sous-agent de révision /review")), "voice_chat": (L("Chat vocal"), L("Réponses parlées du mode vocal")),
+        "triage_specifier": (L("Précision du triage"), L("Détail des spécifications Kanban")), "kanban_decomposer": (L("Décomposition Kanban"), L("Décomposition des tâches")),
+        "profile_describer": (L("Description de profil"), L("Descriptions automatiques des profils")), "curator": (L("Curateur"), L("Revue d’utilisation des compétences")),
+        "background_review": (L("Revue en arrière-plan"), L("Relecture après les tours")), "goal_judge": (L("Juge des objectifs"), L("Suivi des /goal")),
+        "memory_query_rewrite": (L("Recherche en mémoire"), L("Reformulation des requêtes mémoire")), "moa_aggregator": (L("Agrégateur MoA"), L("Mixture of Agents")),
+        "moa_reference": (L("Références MoA"), L("Avis des modèles de référence")), "monitor": (L("Surveillance"), L("Suivi des exécutions")),
+        "tts_audio_tags": (L("Balises audio"), L("Expressivité de la synthèse vocale"))
     ]
 
-    static let voiceChatExplanation = "Quand vous parlez à l’agent (conversation vocale, note vocale), chaque tour parlé peut être confié à un modèle plus rapide que le modèle principal, pour des réponses orales plus réactives. En « auto », le modèle principal répond. Si la conversation est trop longue pour ce modèle, Hermes revient au modèle principal pour ce tour."
+    static var voiceChatExplanation: String { L("Quand vous parlez à l’agent (conversation vocale, note vocale), chaque tour parlé peut être confié à un modèle plus rapide que le modèle principal, pour des réponses orales plus réactives. En « auto », le modèle principal répond. Si la conversation est trop longue pour ce modèle, Hermes revient au modèle principal pour ce tour.") }
 
     static func label(_ task: String, server: JSONValue = .null) -> String {
-        copy[task]?.label ?? (server["label"].string.isEmpty ? task.replacingOccurrences(of: "_", with: " ").capitalized : server["label"].string)
+        L(copy[task]?.label ?? (server["label"].string.isEmpty ? task.replacingOccurrences(of: "_", with: " ").capitalized : server["label"].string))
     }
-    static func hint(_ task: String, server: JSONValue = .null) -> String { copy[task]?.hint ?? server["hint"].string }
+    static func hint(_ task: String, server: JSONValue = .null) -> String { L(copy[task]?.hint ?? server["hint"].string) }
 }
 
 struct AuxiliaryModelsView: View {
@@ -311,7 +311,7 @@ struct AuxiliaryModelsView: View {
 
     var body: some View {
         List {
-            Section { Text("Les tâches d’assistance s’exécutent sur le modèle principal par défaut. Attribuez un modèle dédié à toute tâche pour le remplacer.").font(.subheadline).foregroundStyle(.secondary) }
+            Section { Text(L("Les tâches d’assistance s’exécutent sur le modèle principal par défaut. Attribuez un modèle dédié à toute tâche pour le remplacer.")).font(.subheadline).foregroundStyle(.secondary) }
             SettingsFeedback(store: store)
             Section {
                 ForEach(tasks, id: \.self) { task in
@@ -327,16 +327,16 @@ struct AuxiliaryModelsView: View {
                 }
             }
             if !slots.isEmpty {
-                Section { Button("Tout réinitialiser au principal", role: .destructive) { confirmReset = true } }
+                Section { Button(L("Tout réinitialiser au principal"), role: .destructive) { confirmReset = true } }
             }
-        }.modernList().navigationTitle("Modèles auxiliaires").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Modèles auxiliaires")).navigationBarTitleDisplayMode(.inline)
             .task {
                 await store.loadAuxiliary()
                 if store.modelOptions.isNull { await store.loadModelOptions() }
             }
             .refreshable { await store.refreshModels() }
-            .appConfirm("Remettre toutes les tâches sur le modèle principal ?", isPresented: $confirmReset) {
-                Button("Tout réinitialiser", role: .destructive) {
+            .appConfirm(L("Remettre toutes les tâches sur le modèle principal ?"), isPresented: $confirmReset) {
+                Button(L("Tout réinitialiser"), role: .destructive) {
                     Task {
                         do {
                             _ = try await store.assignModel(["scope": "auxiliary", "task": "__reset__", "provider": "auto", "model": ""])
@@ -360,7 +360,7 @@ struct AuxiliaryModelsView: View {
     var summary: String {
         let inherits = server["inherit_from"].string
         if !pinned, !inherits.isEmpty, server["effective"]["provider"].string != "auto", !server["effective"]["provider"].string.isEmpty {
-            return "hérite de \(AuxiliaryTasks.label(inherits)) · " + store.routeSummary(provider: server["effective"]["provider"].string, model: server["effective"]["model"].string)
+            return L("hérite de %@ · ", AuxiliaryTasks.label(inherits)) + store.routeSummary(provider: server["effective"]["provider"].string, model: server["effective"]["model"].string)
         }
         return store.routeSummary(provider: provider, model: model, effort: effort, inherits: inherits.isEmpty ? nil : AuxiliaryTasks.label(inherits))
     }
@@ -385,19 +385,19 @@ struct AuxTaskDetailView: View {
                 }
             }
             SettingsFeedback(store: store)
-            Section("Modèle utilisé") {
+            Section(L("Modèle utilisé")) {
                 Text(route.summary).font(.subheadline.monospaced()).foregroundStyle(route.pinned ? AppTheme.accent : .secondary)
                 NavigationLink {
                     ModelPickerView(store: store, title: AuxiliaryTasks.label(task), target: isSlot ? .auxiliary(task) : .choose { provider, model in
                         Task { await store.apply(["auxiliary": [task: ["provider": .string(provider), "model": .string(model)]]],
                                                  keys: ["auxiliary.\(task).provider", "auxiliary.\(task).model"]) }
                     }, currentProvider: route.provider, currentModel: route.model)
-                } label: { Label("Choisir un modèle", systemImage: "cpu") }
+                } label: { Label(L("Choisir un modèle"), systemImage: "cpu") }
                 if route.pinned {
-                    Button { Task { await followMain() } } label: { Label("Utiliser le modèle principal (auto)", systemImage: "arrow.uturn.backward") }
+                    Button { Task { await followMain() } } label: { Label(L("Utiliser le modèle principal (auto)"), systemImage: "arrow.uturn.backward") }
                 }
             }
-            if !fieldKeys.isEmpty { Section("Réglages de la tâche") { ConfigFieldRows(store: store, keys: fieldKeys) } }
+            if !fieldKeys.isEmpty { Section(L("Réglages de la tâche")) { ConfigFieldRows(store: store, keys: fieldKeys) } }
         }.modernList().navigationTitle(AuxiliaryTasks.label(task, server: route.server)).navigationBarTitleDisplayMode(.inline)
     }
 
@@ -430,47 +430,47 @@ struct MoASettingsView: View {
 
     var body: some View {
         List {
-            Section { Text("Des préréglages nommés qui apparaissent comme modèles chez le fournisseur Mixture of Agents. L’agrégateur est le modèle actif : il exécute chaque étape et son fournisseur facture presque tout le coût. Les modèles de référence donnent un avis une fois par tour.").font(.subheadline).foregroundStyle(.secondary) }
+            Section { Text(L("Des préréglages nommés qui apparaissent comme modèles chez le fournisseur Mixture of Agents. L’agrégateur est le modèle actif : il exécute chaque étape et son fournisseur facture presque tout le coût. Les modèles de référence donnent un avis une fois par tour.")).font(.subheadline).foregroundStyle(.secondary) }
             SettingsFeedback(store: store)
             if moa.isNull && store.error == nil { SkeletonRows(count: 3, avatar: false) }
             ForEach(presetNames, id: \.self) { name in presetSection(name) }
             if !moa.isNull {
-                Section { Button { naming = true } label: { Label("Ajouter un préréglage", systemImage: "plus") }.disabled(working) }
+                Section { Button { naming = true } label: { Label(L("Ajouter un préréglage"), systemImage: "plus") }.disabled(working) }
             }
             let options = store.keys(on: "model.moa").filter { !$0.hasPrefix("moa.presets.") && !Self.managed.contains($0) }
-            if !options.isEmpty { Section("Options") { ConfigFieldRows(store: store, keys: options) } }
-        }.modernList().navigationTitle("Mixture of Agents").navigationBarTitleDisplayMode(.inline)
+            if !options.isEmpty { Section(L("Options")) { ConfigFieldRows(store: store, keys: options) } }
+        }.modernList().navigationTitle(L("Mixture of Agents")).navigationBarTitleDisplayMode(.inline)
             .task { await load() }.refreshable { await load() }
             .disabled(working)
-            .appAlert("Nouveau préréglage", isPresented: $naming) {
-                TextField("Nom", text: $newName).textInputAutocapitalization(.never)
-                Button("Ajouter") {
+            .appAlert(L("Nouveau préréglage"), isPresented: $naming) {
+                TextField(L("Nom"), text: $newName).textInputAutocapitalization(.never)
+                Button(L("Ajouter")) {
                     let name = newName.trimmingCharacters(in: .whitespacesAndNewlines); newName = ""
                     guard !name.isEmpty, moa["presets"][name].isNull else { return }
                     var presets = moa["presets"].object
                     presets[name] = moa["presets"][defaultPreset].isNull ? ["enabled": true, "reference_models": [], "aggregator": ["provider": "", "model": ""]] : moa["presets"][defaultPreset]
                     save(presets: presets)
                 }
-                Button("Annuler", role: .cancel) { newName = "" }
-            } message: { Text("Il reprend les modèles du préréglage par défaut, que vous pourrez ensuite modifier.") }
+                Button(L("Annuler"), role: .cancel) { newName = "" }
+            } message: { Text(L("Il reprend les modèles du préréglage par défaut, que vous pourrez ensuite modifier.")) }
     }
 
     @ViewBuilder private func presetSection(_ name: String) -> some View {
         let preset = moa["presets"][name]
         let references = preset["reference_models"].array
         Section {
-            Toggle("Activé", isOn: Binding(get: { preset["enabled"] != false }, set: { update(name, ["enabled": .bool($0)]) })).tint(AppTheme.accent)
+            Toggle(L("Activé"), isOn: Binding(get: { preset["enabled"] != false }, set: { update(name, ["enabled": .bool($0)]) })).tint(AppTheme.accent)
             NavigationLink {
-                ModelPickerView(store: store, title: "Agrégateur", target: .choose { provider, model in
+                ModelPickerView(store: store, title: L("Agrégateur"), target: .choose { provider, model in
                     var aggregator = preset["aggregator"].object
                     aggregator["provider"] = .string(provider); aggregator["model"] = .string(model)
                     update(name, ["aggregator": .object(aggregator)])
                 }, currentProvider: preset["aggregator"]["provider"].string, currentModel: preset["aggregator"]["model"].string)
             } label: {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Agrégateur").font(.subheadline.weight(.medium))
+                    Text(L("Agrégateur")).font(.subheadline.weight(.medium))
                     Text(store.routeSummary(provider: preset["aggregator"]["provider"].string, model: preset["aggregator"]["model"].string)).font(.caption.monospaced()).foregroundStyle(AppTheme.accent)
-                    Text("modèle actif · facturé pour l’exécution").font(.caption).foregroundStyle(.secondary)
+                    Text(L("modèle actif · facturé pour l’exécution")).font(.caption).foregroundStyle(.secondary)
                 }
             }
             ForEach(Array(references.enumerated()), id: \.offset) { index, reference in
@@ -480,7 +480,7 @@ struct MoASettingsView: View {
                     update(name, ["reference_models": .array(next)])
                 })) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Référence \(index + 1)").font(.subheadline.weight(.medium))
+                        Text(L("Référence %lld", index + 1)).font(.subheadline.weight(.medium))
                         Text(store.routeSummary(provider: reference["provider"].string, model: reference["model"].string)).font(.caption.monospaced()).foregroundStyle(.secondary)
                     }
                 }.tint(AppTheme.accent)
@@ -488,18 +488,18 @@ struct MoASettingsView: View {
                 update(name, ["reference_models": .array(references.enumerated().filter { !offsets.contains($0.offset) }.map(\.element))])
             }
             NavigationLink {
-                ModelPickerView(store: store, title: "Modèle de référence", target: .choose { provider, model in
+                ModelPickerView(store: store, title: L("Modèle de référence"), target: .choose { provider, model in
                     update(name, ["reference_models": .array(references + [["provider": .string(provider), "model": .string(model), "enabled": true]])])
                 })
-            } label: { Label("Ajouter un modèle de référence", systemImage: "plus") }
+            } label: { Label(L("Ajouter un modèle de référence"), systemImage: "plus") }
             if name != defaultPreset {
-                Button("Définir par défaut") { save(presets: moa["presets"].object, defaultName: name) }
-                Button("Supprimer ce préréglage", role: .destructive) {
+                Button(L("Définir par défaut")) { save(presets: moa["presets"].object, defaultName: name) }
+                Button(L("Supprimer ce préréglage"), role: .destructive) {
                     var presets = moa["presets"].object; presets[name] = nil; save(presets: presets)
                 }
             }
         } header: {
-            Text(name == defaultPreset ? "\(name) · par défaut" : name)
+            Text(name == defaultPreset ? L("%@ · par défaut", name) : name)
         }
     }
 

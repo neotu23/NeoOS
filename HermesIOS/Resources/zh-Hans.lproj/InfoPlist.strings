@@ -1,0 +1,4 @@
+"CFBundleDisplayName" = "NeoOS";
+"NSMicrophoneUsageDescription" = "在 iPhone 上与你的 agent 对话。你的 Hermes 服务器会转写你的语音并准备语音回答。";
+"NSLocalNetworkUsageDescription" = "NeoOS 通过你的私有网络或 Tailscale 连接你的 Hermes agent。";
+"NSCameraUsageDescription" = "拍摄一张照片，在对话中发送给你的 Hermes agent。";

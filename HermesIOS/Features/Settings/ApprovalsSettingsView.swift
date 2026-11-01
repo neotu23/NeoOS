@@ -19,11 +19,11 @@ struct ApprovalsSettingsView: View {
                     }
                 }.padding(.vertical, 5).accessibilityElement(children: .combine)
             } footer: {
-                Text("Politique enregistrée pour cet agent. Les exceptions de session et les protections du serveur restent gérées par Hermes.")
+                Text(L("Politique enregistrée pour cet agent. Les exceptions de session et les protections du serveur restent gérées par Hermes."))
             }
             SettingsFeedback(store: store)
             if store.loaded {
-                Section("Votre accord") {
+                Section(L("Votre accord")) {
                     if store.fields["approvals.mode"] != nil {
                         NavigationLink { ApprovalModeView(store: store) } label: {
                             VStack(alignment: .leading, spacing: 5) {
@@ -42,20 +42,20 @@ struct ApprovalsSettingsView: View {
                     Section {
                         NavigationLink {
                             List {
-                                Section { Text("Les mêmes réglages Hermes, pour ajuster les règles et les cas particuliers de \(store.title).").font(.subheadline).foregroundStyle(.secondary) }
+                                Section { Text(L("Les mêmes réglages Hermes, pour ajuster les règles et les cas particuliers de %@.", store.title)).font(.subheadline).foregroundStyle(.secondary) }
                                 SettingsFeedback(store: store)
                                 Section { ConfigFieldRows(store: store, keys: advanced) }
-                            }.modernList().navigationTitle("Réglages avancés").navigationBarTitleDisplayMode(.inline)
+                            }.modernList().navigationTitle(L("Réglages avancés")).navigationBarTitleDisplayMode(.inline)
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
-                                Label("Réglages avancés", systemImage: "slider.horizontal.3").font(.subheadline.weight(.medium))
-                                Text("Règles permanentes et autres automatisations").font(.caption).foregroundStyle(.secondary)
+                                Label(L("Réglages avancés"), systemImage: "slider.horizontal.3").font(.subheadline.weight(.medium))
+                                Text(L("Règles permanentes et autres automatisations")).font(.caption).foregroundStyle(.secondary)
                             }.padding(.vertical, 4)
                         }.accessibilityIdentifier("configuration-advanced")
                     }
                 }
             }
-        }.modernList().navigationTitle("Permissions").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Permissions")).navigationBarTitleDisplayMode(.inline)
             .refreshable { await store.load() }
     }
 }
@@ -63,9 +63,9 @@ struct ApprovalsSettingsView: View {
 // These describe the native approval modes, not a client-side permission system.
 func approvalEffect(_ value: String) -> String? {
     switch value {
-    case "manual": "Hermes vous demande avant les actions qui nécessitent une autorisation."
-    case "smart": "Hermes évalue les actions sensibles et vous demande quand un accord est nécessaire."
-    case "off": "Hermes exécute les actions sans demande d’accord. Les règles d’interdiction du serveur restent applicables."
+    case "manual": L("Hermes vous demande avant les actions qui nécessitent une autorisation.")
+    case "smart": L("Hermes évalue les actions sensibles et vous demande quand un accord est nécessaire.")
+    case "off": L("Hermes exécute les actions sans demande d’accord. Les règles d’interdiction du serveur restent applicables.")
     default: nil
     }
 }
@@ -97,16 +97,16 @@ private struct ApprovalModeView: View {
                     }.buttonStyle(.plain).accessibilityAddTraits(selection == option ? .isSelected : [])
                         .accessibilityIdentifier("approval-mode-" + option)
                 }
-                if !selection.isEmpty && !options.contains(selection) { Text("Valeur actuelle : \(selection)").font(.caption).foregroundStyle(.secondary) }
+                if !selection.isEmpty && !options.contains(selection) { Text(L("Valeur actuelle : %@", selection)).font(.caption).foregroundStyle(.secondary) }
             }
             SettingsFeedback(store: store)
-            Button("Enregistrer") { confirm = true }
+            Button(L("Enregistrer")) { confirm = true }
                 .disabled(store.saving.contains("approvals.mode") || selection == store.value("approvals.mode").string)
         }.modernList()
             .navigationTitle(SettingsCatalog.label("approvals.mode")).navigationBarTitleDisplayMode(.inline)
             .task { selection = store.value("approvals.mode").string }
             .appConfirm(store.confirmationTitle, isPresented: $confirm) {
-                Button("Appliquer") { Task { if await store.save("approvals.mode", .string(selection)) { dismiss() } } }
+                Button(L("Appliquer")) { Task { if await store.save("approvals.mode", .string(selection)) { dismiss() } } }
             } message: { Text(store.confirmationMessage("approvals.mode")) }
     }
 }

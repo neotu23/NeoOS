@@ -42,7 +42,7 @@ final class PhoneAudio {
         #endif
         if !engine.snapshot.monitoring {
             guard await AVAudioApplication.requestRecordPermission() else {
-                throw RPCFailure("Autorisez le microphone dans les réglages iOS pour parler avec Hermes.")
+                throw RPCFailure(L("Autorisez le microphone dans les réglages iOS pour parler avec Hermes."))
             }
             try validate(attempt)
             try await engine.prepare()
@@ -84,7 +84,7 @@ final class PhoneAudio {
         let attempt = generation
         try await prepare()
         try validate(attempt)
-        guard !inputMuted else { throw RPCFailure("Le microphone est en pause.") }
+        guard !inputMuted else { throw RPCFailure(L("Le microphone est en pause.")) }
         #if DEBUG
         if fixture {
             fixtureRecording = true
@@ -101,7 +101,7 @@ final class PhoneAudio {
         #if DEBUG
         if fixture {
             try validate(attempt)
-            guard fixtureRecording else { throw RPCFailure("Aucun enregistrement disponible.") }
+            guard fixtureRecording else { throw RPCFailure(L("Aucun enregistrement disponible.")) }
             fixtureRecording = false
             return Data(base64Encoded: "UklGRuQSAABXQVZFZm10IBAAAAABAAEAwF0AAIC7AAACABAAZGF0YcASAAA=")! + Data(repeating: 0, count: 4800)
         }

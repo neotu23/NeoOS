@@ -57,7 +57,7 @@ struct FinanceWidgetView: View {
     private var empty: some View {
         VStack(spacing: 6) {
             Image(systemName: "chart.bar.xaxis").font(.title2).foregroundStyle(WidgetPalette.accent)
-            Text("Ouvrez Hermès pour charger vos chiffres").font(.caption).multilineTextAlignment(.center).foregroundStyle(.secondary)
+            Text("Ouvrez NeoOS pour charger vos chiffres").font(.caption).multilineTextAlignment(.center).foregroundStyle(.secondary)
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

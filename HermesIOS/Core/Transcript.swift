@@ -9,12 +9,12 @@ public struct Transcript: Sendable {
         public var state: State
         public var title: String {
             switch name {
-            case "terminal": "Commande"
-            case "web_search": "Recherche web"
-            case "web_extract", "browse": "Consultation web"
-            case "read_file": "Lecture de fichier"
-            case "write_file", "patch": "Modification de fichier"
-            case "clarify": "Question"
+            case "terminal": L("Commande")
+            case "web_search": L("Recherche web")
+            case "web_extract", "browse": L("Consultation web")
+            case "read_file": L("Lecture de fichier")
+            case "write_file", "patch": L("Modification de fichier")
+            case "clarify": L("Question")
             default: name.replacingOccurrences(of: "_", with: " ")
             }
         }
@@ -32,7 +32,7 @@ public struct Transcript: Sendable {
 
     public func isWaitingForResponse(at date: Date) -> Bool {
         running && approval == nil && clarification == nil && credential == nil
-            && ["Réfléchit…", "En cours…"].contains(activity ?? "")
+            && ["Réfléchit…", "En cours…"].map(L).contains(activity ?? "")
             && date.timeIntervalSince(lastActivityAt) >= 15
     }
 
@@ -63,7 +63,7 @@ public struct Transcript: Sendable {
         switch event["type"].string {
         case "message.start":
             toolSteps = []
-            running = true; failure = nil; activity = "Réfléchit…"
+            running = true; failure = nil; activity = L("Réfléchit…")
         case "message.delta":
             guard !p["text"].string.isEmpty else { return }
             running = true; activity = nil
@@ -88,14 +88,14 @@ public struct Transcript: Sendable {
             finishOpenTools()
             if p["status"].string == "error" { failure = p["error"].string }
         case "thinking.delta", "reasoning.delta":
-            running = true; activity = "Réfléchit…"
+            running = true; activity = L("Réfléchit…")
         case "tool.start", "tool.generating":
             running = true
-            activity = p["name"].string.isEmpty ? "Utilise un outil…" : p["name"].string
+            activity = p["name"].string.isEmpty ? L("Utilise un outil…") : p["name"].string
             if event["type"].string == "tool.start" { updateTool(p, completed: false) }
         case "tool.complete":
             updateTool(p, completed: true)
-            activity = running ? (toolSteps.last(where: { $0.state == .running })?.name ?? "Réfléchit…") : nil
+            activity = running ? (toolSteps.last(where: { $0.state == .running })?.name ?? L("Réfléchit…")) : nil
         case "status.update":
             if !p["text"].string.isEmpty { activity = p["text"].string }
         // Interactive prompts arrive as server→client requests (see ServerRequests); only the
@@ -202,7 +202,7 @@ public struct Transcript: Sendable {
         guard carriesState else { return }
         // Live prompts come from server requests (rpc_id); a snapshot only refreshes the queue copy.
         if approval?["rpc_id"].isNull != false { approval = payload["pending_approval"].isNull ? nil : payload["pending_approval"] }
-        activity = running ? "En cours…" : nil
+        activity = running ? L("En cours…") : nil
         if !inflight["error"].string.isEmpty { failure = inflight["error"].string }
     }
 

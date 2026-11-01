@@ -6,30 +6,30 @@ enum AppDestination: String, Identifiable, CaseIterable, Hashable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .history: "Conversations"
-        case .routines: "Routines"
-        case .kanban: "Kanban"
-        case .workspace: "Espace de travail"
-        case .groups: "Groupes"
-        case .skills: "Compétences"
-        case .agents: "Gérer et créer"
-        case .connections: "Connexions"
-        case .notifications: "Notifications"
-        case .about: "À propos"
+        case .history: L("Conversations")
+        case .routines: L("Routines")
+        case .kanban: L("Kanban")
+        case .workspace: L("Espace de travail")
+        case .groups: L("Groupes")
+        case .skills: L("Compétences")
+        case .agents: L("Gérer et créer")
+        case .connections: L("Connexions")
+        case .notifications: L("Notifications")
+        case .about: L("À propos")
         }
     }
     var detail: String {
         switch self {
-        case .history: "Retrouver le fil"
-        case .routines: "Automatiser · cron jobs"
-        case .kanban: "Suivre les tâches"
-        case .workspace: "Projets et dossiers · workspace"
-        case .groups: "Vos agents, ensemble"
-        case .skills: "Skills de l’agent actif"
-        case .agents: "Profils, identité, nouvel agent"
-        case .connections: "Vos serveurs Hermes"
-        case .notifications: "Réponses et routines"
-        case .about: "Version, guide, code source"
+        case .history: L("Retrouver le fil")
+        case .routines: L("Automatiser · cron jobs")
+        case .kanban: L("Suivre les tâches")
+        case .workspace: L("Projets et dossiers · workspace")
+        case .groups: L("Vos agents, ensemble")
+        case .skills: L("Skills de l’agent actif")
+        case .agents: L("Profils, identité, nouvel agent")
+        case .connections: L("Vos serveurs Hermes")
+        case .notifications: L("Réponses et routines")
+        case .about: L("Version, guide, code source")
         }
     }
     var symbol: String {
@@ -55,6 +55,7 @@ enum MenuRoute: Hashable {
     case agent(String)
     case agentPage(String, AgentSettingsPage)
     case favorites
+    case language
 }
 
 /// The single menu over the chat: one navigation stack, native lists and pushes.
@@ -82,13 +83,13 @@ struct MenuView: View {
     var body: some View {
         NavigationStack(path: $path) {
             List {
-                AppSearchSection(text: $search, prompt: "Outils, agents, réglages")
+                AppSearchSection(text: $search, prompt: L("Outils, agents, réglages"))
                 if query.isEmpty { home } else { results }
             }.modernList()
-                .navigationTitle("Menu").navigationBarTitleDisplayMode(.large)
+                .navigationTitle(L("Menu")).navigationBarTitleDisplayMode(.large)
                 .toolbar {
                     AppToolbarItem(placement: .topBarTrailing) {
-                        AppCloseButton(label: "Revenir au chat") { close() }
+                        AppCloseButton(label: L("Revenir au chat")) { close() }
                             .accessibilityIdentifier("return-to-chat")
                     }
                 }
@@ -100,12 +101,12 @@ struct MenuView: View {
                     store = loaded
                     await loaded.load()
                 }
-                .appConfirm("Basculer vers \(switching?.name ?? "") ?", isPresented: Binding(get: { switching != nil }, set: { if !$0 { switching = nil } })) {
-                    Button("Basculer") {
+                .appConfirm(L("Basculer vers %@ ?", switching?.name ?? ""), isPresented: Binding(get: { switching != nil }, set: { if !$0 { switching = nil } })) {
+                    Button(L("Basculer")) {
                         guard let connection = switching else { return }; switching = nil
                         Task { await model.activate(connection) }
                     }
-                } message: { Text("Hermès iOS se connecte à ce serveur et affiche ses agents. La conversation en cours reste sur l’autre serveur.") }
+                } message: { Text(L("NeoOS se connecte à ce serveur et affiche ses agents. La conversation en cours reste sur l’autre serveur.")) }
         }.presentationBackground(AppTheme.background)
     }
 
@@ -118,7 +119,7 @@ struct MenuView: View {
         }.listSectionSeparator(.hidden, edges: .top)
         Section {
             if favorites.isEmpty {
-                Text("Épinglez jusqu’à trois raccourcis.").font(.caption).foregroundStyle(.secondary)
+                Text(L("Épinglez jusqu’à trois raccourcis.")).font(.caption).foregroundStyle(.secondary)
             } else {
                 let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 8)) : AnyLayout(HStackLayout(spacing: 8))
                 layout {
@@ -138,35 +139,38 @@ struct MenuView: View {
             }
         } header: {
             HStack {
-                Text("Accès rapides")
+                Text(L("Accès rapides"))
                 Spacer()
-                Button(favorites.isEmpty ? "Ajouter" : "Modifier") { path.append(.favorites) }
+                Button(favorites.isEmpty ? L("Ajouter") : L("Modifier")) { path.append(.favorites) }
                     .font(.caption.weight(.medium)).foregroundStyle(AppTheme.accent).frame(minWidth: 44, minHeight: 44)
-                    .accessibilityLabel("Modifier les accès rapides").accessibilityIdentifier("edit-tool-favorites")
+                    .accessibilityLabel(L("Modifier les accès rapides")).accessibilityIdentifier("edit-tool-favorites")
             }
         }
-        Section("Travail") {
+        Section(L("Travail")) {
             ForEach(AppDestination.work) { destinationRow($0) }
         }
         Section {
             ForEach(agents) { agentRow($0) }
             if agents.isEmpty && !model.demo && model.state != .offline { SkeletonRows(count: 3) }
             if hasHiddenAgents || showHidden {
-                Toggle("Afficher les agents masqués", isOn: $showHidden).font(.subheadline)
+                Toggle(L("Afficher les agents masqués"), isOn: $showHidden).font(.subheadline)
                     .accessibilityIdentifier("menu-show-hidden")
             }
             destinationRow(.agents)
             ForEach(otherServers) { connection in
                 Button { switching = connection } label: {
-                    MenuLabel(title: connection.name, detail: connection.endpoint.baseURL.host ?? "Autre serveur", symbol: "arrow.left.arrow.right")
+                    MenuLabel(title: connection.name, detail: connection.endpoint.baseURL.host ?? L("Autre serveur"), symbol: "arrow.left.arrow.right")
                 }.buttonStyle(.plain).disabled(model.sending || model.voiceActive)
-                    .accessibilityHint("Basculer vers ce serveur")
+                    .accessibilityHint(L("Basculer vers ce serveur"))
             }
-        } header: { Text("Mes agents") } footer: {
-            Text("Touchez un agent pour discuter avec lui, ou \(Image(systemName: "slider.horizontal.3")) pour ses réglages.").font(.footnote)
+        } header: { Text(L("Mes agents")) } footer: {
+            (Text(L("Touchez un agent pour discuter avec lui, ou ")) + Text(Image(systemName: "slider.horizontal.3")) + Text(L(" pour ses réglages."))).font(.footnote)
         }
-        Section("App") {
+        Section(L("App")) {
             ForEach(AppDestination.settings) { destinationRow($0) }
+            NavigationLink(value: MenuRoute.language) {
+                MenuLabel(title: L("Langue"), detail: L("Français, English, 简体中文"), symbol: "character.bubble")
+            }.accessibilityIdentifier("space-language")
         }
     }
 
@@ -174,13 +178,13 @@ struct MenuView: View {
         HStack(spacing: 14) {
             AgentAvatar(name: model.profile, size: 52)
             VStack(alignment: .leading, spacing: 4) {
-                Text(model.agent?.title ?? "Hermes").font(.system(.title3, design: .serif)).foregroundStyle(.primary)
+                Text(model.agent?.title ?? L("Hermes")).font(.system(.title3, design: .serif)).foregroundStyle(.primary)
                 let detail = [model.agent?.model ?? "", model.activeConnection?.name ?? ""].filter { !$0.isEmpty }.joined(separator: " · ")
                 if !detail.isEmpty { Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(typeSize.isAccessibilitySize ? nil : 1) }
                 ConnectionIndicator(model: model)
             }
         }.padding(.vertical, 8).accessibilityElement(children: .combine)
-            .accessibilityHint("Ouvre les réglages de l’agent")
+            .accessibilityHint(L("Ouvre les réglages de l’agent"))
     }
 
     private func destinationRow(_ entry: AppDestination) -> some View {
@@ -192,7 +196,7 @@ struct MenuView: View {
     private func agentRow(_ agent: AgentProfile) -> some View {
         let current = agent.name == model.profile
         let unread = model.hasUnread(profile: agent.name)
-        let detail = agent.name == "default" ? "Agent principal du serveur" : agent.detail.isEmpty ? "@\(agent.name)" : agent.detail
+        let detail = agent.name == "default" ? L("Agent principal du serveur") : agent.detail.isEmpty ? "@\(agent.name)" : agent.detail
         return HStack(spacing: 4) {
             Button { open(agent) } label: {
                 HStack(spacing: 13) {
@@ -200,7 +204,7 @@ struct MenuView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
                             Text(agent.title).font(.subheadline.weight(unread ? .semibold : .medium)).foregroundStyle(.primary)
-                            if agent.hidden == true { Image(systemName: "eye.slash").font(.caption2).foregroundStyle(.secondary).accessibilityLabel("Masqué") }
+                            if agent.hidden == true { Image(systemName: "eye.slash").font(.caption2).foregroundStyle(.secondary).accessibilityLabel(L("Masqué")) }
                         }
                         Text(detail.replacingOccurrences(of: "\n", with: " ")).font(.caption).foregroundStyle(.secondary)
                             .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
@@ -210,13 +214,13 @@ struct MenuView: View {
                 }.padding(.vertical, 4).contentShape(Rectangle())
             }.buttonStyle(.plain).disabled(!canSwitch && !current)
                 .accessibilityIdentifier("menu-agent-\(agent.name)")
-                .accessibilityValue(unread ? "Conversation non lue" : current ? "Agent sélectionné" : "")
+                .accessibilityValue(unread ? L("Conversation non lue") : current ? L("Agent sélectionné") : "")
             Button { path.append(.agent(agent.name)) } label: {
                 Image(systemName: "slider.horizontal.3").font(.system(size: 16)).foregroundStyle(.secondary).frame(width: 44, height: 44)
             }.buttonStyle(.borderless).accessibilityLabel("Réglages de \(agent.title)")
                 .accessibilityIdentifier("menu-agent-settings-\(agent.name)")
         }.swipeActions(edge: .trailing) {
-            Button("Réglages", systemImage: "slider.horizontal.3") { path.append(.agent(agent.name)) }.tint(AppTheme.accent)
+            Button(L("Réglages"), systemImage: "slider.horizontal.3") { path.append(.agent(agent.name)) }.tint(AppTheme.accent)
         }
     }
 
@@ -232,16 +236,16 @@ struct MenuView: View {
             else { ContentUnavailableView.search(text: query) }
         }
         if !destinations.isEmpty || !pages.isEmpty {
-            Section("Aller à") {
+            Section(L("Aller à")) {
                 ForEach(destinations) { destinationRow($0) }
                 ForEach(pages) { page in
                     NavigationLink(value: MenuRoute.agentPage(model.profile, page)) {
-                        MenuLabel(title: page.title, detail: "Réglages de \(model.agent?.title ?? "Hermes")", symbol: page.symbol)
+                        MenuLabel(title: page.title, detail: "Réglages de \(model.agent?.title ?? L("Hermes"))", symbol: page.symbol)
                     }.accessibilityIdentifier("space-agent-\(page.rawValue)")
                 }
             }
         }
-        if !found.isEmpty { Section("Agents") { ForEach(found) { agentRow($0) } } }
+        if !found.isEmpty { Section(L("Agents")) { ForEach(found) { agentRow($0) } } }
         if let store, !fields.isEmpty { SettingsSearchResults(store: store, query: query) }
     }
 
@@ -264,8 +268,8 @@ struct MenuView: View {
             case .groups:
                 if let connection = model.activeConnection { GroupsView(app: model, connectionID: connection.id) }
                 else {
-                    ContentUnavailableView("Faire équipe", systemImage: "person.2", description: Text("Connectez votre Hermes pour retrouver vos groupes."))
-                        .background(AppTheme.background).navigationTitle("Groupes").navigationBarTitleDisplayMode(.inline)
+                    ContentUnavailableView(L("Faire équipe"), systemImage: "person.2", description: Text(L("Connectez votre Hermes pour retrouver vos groupes.")))
+                        .background(AppTheme.background).navigationTitle(L("Groupes")).navigationBarTitleDisplayMode(.inline)
                 }
             case .skills: SkillsView(app: model, profile: model.profile)
             case .agents: AgentsHubView(app: model)
@@ -276,6 +280,7 @@ struct MenuView: View {
         case .agent(let name): AgentSettingsView(app: model, profile: name)
         case .agentPage(let name, let page): AgentSettingsPageHost(app: model, profile: name, page: page)
         case .favorites: FavoriteToolsEditor(savedFavorites: $savedFavorites)
+        case .language: LanguageSettingsView()
         }
     }
 
@@ -338,16 +343,16 @@ private struct FavoriteToolsEditor: View {
                                 .foregroundStyle(selected ? AppTheme.accent : .secondary)
                         }.frame(minHeight: 44)
                     }.disabled(!selected && favorites.count == 3)
-                        .accessibilityValue(selected ? "Ajouté" : "")
+                        .accessibilityValue(selected ? L("Ajouté") : "")
                         .accessibilityIdentifier("favorite-option-\(entry.rawValue)")
                 }
-            } header: { Text("\(favorites.count) sur 3") }
-            footer: { Text("Choisissez jusqu’à trois raccourcis. Ils restent en haut du menu, dans l’ordre choisi.").font(.footnote) }
+            } header: { Text(L("%lld sur 3", favorites.count)) }
+            footer: { Text(L("Choisissez jusqu’à trois raccourcis. Ils restent en haut du menu, dans l’ordre choisi.")).font(.footnote) }
         }.modernList()
-            .navigationTitle("Accès rapides").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L("Accès rapides")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 AppToolbarItem(placement: .confirmationAction) {
-                    Button("Terminé") { dismiss() }.accessibilityIdentifier("close-tool-favorites")
+                    Button(L("Terminé")) { dismiss() }.accessibilityIdentifier("close-tool-favorites")
                 }
             }
     }

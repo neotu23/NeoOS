@@ -2,9 +2,9 @@ import Foundation
 
 extension AppModel {
     func useWorkspace(_ path: String) async throws {
-        guard let chat = selected, !transcript.running else { throw RPCFailure("Ouvrez une conversation au repos pour choisir son dossier.") }
+        guard let chat = selected, !transcript.running else { throw RPCFailure(L("Ouvrez une conversation au repos pour choisir son dossier.")) }
         _ = try await toolRequest("session.cwd.set", body: ["session_id": .string(chat.runtimeID), "cwd": .string(path)], connectionID: activeConnection?.id, profile: profile, rpc: true)
-        toast = "Dossier de la conversation mis à jour."
+        toast = L("Dossier de la conversation mis à jour.")
     }
 
     func historyPage(query: String, offset: Int = 0, archived: Bool = false) async throws -> JSONValue {

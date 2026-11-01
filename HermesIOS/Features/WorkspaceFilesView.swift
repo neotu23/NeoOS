@@ -6,16 +6,16 @@ struct MemoryView: View {
     init(app: AppModel) { _tools = State(initialValue: NativeToolSession(app)) }
     var body: some View {
         List {
-            Text("Ce que votre agent retient au fil des échanges.").foregroundStyle(.secondary)
+            Text(L("Ce que votre agent retient au fil des échanges.")).foregroundStyle(.secondary)
             ToolFeedback(tools: tools)
             if !home.isEmpty {
-                NavigationLink("Mémoire de l’agent") { RemoteTextEditor(tools: tools, path: home + "/memories/MEMORY.md", title: "Mémoire") }
-                NavigationLink("Ce qu’il sait de vous") { RemoteTextEditor(tools: tools, path: home + "/memories/USER.md", title: "À propos de vous") }
+                NavigationLink(L("Mémoire de l’agent")) { RemoteTextEditor(tools: tools, path: home + "/memories/MEMORY.md", title: "Mémoire") }
+                NavigationLink(L("Ce qu’il sait de vous")) { RemoteTextEditor(tools: tools, path: home + "/memories/USER.md", title: "À propos de vous") }
             }
-        }.modernList().navigationTitle("Mémoire").task {
+        }.modernList().navigationTitle(L("Mémoire")).task {
             await tools.perform {
                 let profiles = try await tools.request("/api/profiles")["profiles"].array
-                guard let found = profiles.first(where: { $0["name"].string == tools.profile }), !found["path"].string.isEmpty else { throw RPCFailure("Hermes n’a pas indiqué le dossier de ce profil.") }
+                guard let found = profiles.first(where: { $0["name"].string == tools.profile }), !found["path"].string.isEmpty else { throw RPCFailure(L("Hermes n’a pas indiqué le dossier de ce profil.")) }
                 home = found["path"].string
             }
         }
@@ -51,11 +51,11 @@ struct RemoteTextEditor: View {
     var body: some View {
         VStack(spacing: 12) {
             ToolFeedback(tools: tools)
-            if readOnly { ContentUnavailableView("Aperçu limité", systemImage: "doc", description: Text("Ce fichier est binaire ou trop grand pour être modifié ici.")) }
+            if readOnly { ContentUnavailableView(L("Aperçu limité"), systemImage: "doc", description: Text(L("Ce fichier est binaire ou trop grand pour être modifié ici."))) }
             else { TextEditor(text: $text).font(.system(.body, design: .monospaced)).scrollContentBackground(.hidden).disabled(original == nil) }
-            if saved { Label("Enregistré sur Hermes", systemImage: "checkmark.circle").font(.caption).foregroundStyle(AppTheme.accent) }
+            if saved { Label(L("Enregistré sur Hermes"), systemImage: "checkmark.circle").font(.caption).foregroundStyle(AppTheme.accent) }
         }.padding(18).background(AppTheme.background).appNavigationBar().navigationTitle(title).navigationBarTitleDisplayMode(.inline)
-            .toolbar { AppToolbarItem(placement: .primaryAction) { Button("Enregistrer") { Task { await save() } }.disabled(readOnly || original == nil || text == original || tools.busy) } }
+            .toolbar { AppToolbarItem(placement: .primaryAction) { Button(L("Enregistrer")) { Task { await save() } }.disabled(readOnly || original == nil || text == original || tools.busy) } }
             .task { await tools.perform {
                 let result = try await tools.request("/api/fs/read-text", query: [URLQueryItem(name: "path", value: path)])
                 readOnly = result["binary"].bool || result["truncated"].bool
@@ -66,7 +66,7 @@ struct RemoteTextEditor: View {
     private func save() async {
         await tools.perform {
             let current = try await tools.request("/api/fs/read-text", query: [URLQueryItem(name: "path", value: path)])
-            guard current["text"].string == original, !current["truncated"].bool, !current["binary"].bool else { throw RPCFailure("Ce fichier a changé sur Hermes. Revenez à la liste et rouvrez-le avant de modifier sa nouvelle version.") }
+            guard current["text"].string == original, !current["truncated"].bool, !current["binary"].bool else { throw RPCFailure(L("Ce fichier a changé sur Hermes. Revenez à la liste et rouvrez-le avant de modifier sa nouvelle version.")) }
             _ = try await tools.request("/api/fs/write-text", method: "POST", body: ["path": .string(path), "content": .string(text)])
             original = text; saved = true
         }
@@ -84,14 +84,14 @@ struct ProjectEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Nom du projet", text: $name)
-                TextField("Description", text: $description, axis: .vertical)
-                if project == nil { TextField("Dossier sur le serveur", text: $path).textInputAutocapitalization(.never).autocorrectionDisabled() }
+                TextField(L("Nom du projet"), text: $name)
+                TextField(L("Description"), text: $description, axis: .vertical)
+                if project == nil { TextField(L("Dossier sur le serveur"), text: $path).textInputAutocapitalization(.never).autocorrectionDisabled() }
                 ToolFeedback(tools: tools)
-            }.modernList().navigationTitle(project == nil ? "Nouveau projet" : "Modifier le projet")
+            }.modernList().navigationTitle(project == nil ? L("Nouveau projet") : L("Modifier le projet"))
                 .toolbar {
-                    AppToolbarItem(placement: .cancellationAction) { Button("Annuler") { dismiss() } }
-                    AppToolbarItem(placement: .confirmationAction) { Button("Enregistrer") { Task { await tools.perform {
+                    AppToolbarItem(placement: .cancellationAction) { Button(L("Annuler")) { dismiss() } }
+                    AppToolbarItem(placement: .confirmationAction) { Button(L("Enregistrer")) { Task { await tools.perform {
                         var body: [String: JSONValue] = ["name": .string(name), "description": .string(description)]
                         if let project { body["id"] = project["id"] }
                         else { body["primary_path"] = .string(path); body["folders"] = [.string(path)] }

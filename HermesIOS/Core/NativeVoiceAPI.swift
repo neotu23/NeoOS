@@ -80,13 +80,13 @@ struct NativeVoiceAPI {
         try Task.checkCancellation()
         let result = try await audioRequest("/api/audio/transcribe", body: [
             "data_url": .string(dataURL), "mime_type": .string(mimeType)
-        ], unavailable: "Ce serveur Hermes ne propose pas la transcription depuis l’iPhone. Mettez Hermes à jour ou vérifiez que son API audio est accessible à cette adresse.")
+        ], unavailable: L("Ce serveur Hermes ne propose pas la transcription depuis l’iPhone. Mettez Hermes à jour ou vérifiez que son API audio est accessible à cette adresse."))
         return result["transcript"].string.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     func speech(_ text: String) async throws -> String {
         let result = try await audioRequest("/api/audio/speak", body: ["text": .string(text)],
-            unavailable: "Ce serveur Hermes ne propose pas la lecture vocale sur l’iPhone. La réponse reste dans le chat. Mettez Hermes à jour ou vérifiez l’accès à son API audio.")
+            unavailable: L("Ce serveur Hermes ne propose pas la lecture vocale sur l’iPhone. La réponse reste dans le chat. Mettez Hermes à jour ou vérifiez l’accès à son API audio."))
         return result["data_url"].string
     }
 

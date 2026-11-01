@@ -6,30 +6,30 @@ enum AgentSettingsPage: String, CaseIterable, Identifiable, Hashable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .model: "Modèle"
-        case .voice: "Voix"
-        case .permissions: "Permissions"
-        case .personality: "Mémoire et personnalité"
-        case .skills: "Compétences"
-        case .tools: "Outils et MCP"
-        case .credentials: "Clés et identifiants"
-        case .providers: "Fournisseurs"
-        case .messaging: "Messagerie"
-        case .plugins: "Extensions"
+        case .model: L("Modèle")
+        case .voice: L("Voix")
+        case .permissions: L("Permissions")
+        case .personality: L("Mémoire et personnalité")
+        case .skills: L("Compétences")
+        case .tools: L("Outils et MCP")
+        case .credentials: L("Clés et identifiants")
+        case .providers: L("Fournisseurs")
+        case .messaging: L("Messagerie")
+        case .plugins: L("Extensions")
         }
     }
     var detail: String {
         switch self {
-        case .model: "Principal, secours, auxiliaires"
-        case .voice: "Conversation, transcription, synthèse"
-        case .permissions: "Quand demander votre accord"
-        case .personality: "SOUL.md, rôle, ce qu’il retient"
-        case .skills: "Ses compétences installées"
-        case .tools: "Ce qu’il peut utiliser, services MCP"
-        case .credentials: "Clés API, sans jamais les afficher"
-        case .providers: "Comptes, points de terminaison, modèles"
-        case .messaging: "Telegram, Discord, Slack…"
-        case .plugins: "Plugins installés et leurs réglages"
+        case .model: L("Principal, secours, auxiliaires")
+        case .voice: L("Conversation, transcription, synthèse")
+        case .permissions: L("Quand demander votre accord")
+        case .personality: L("SOUL.md, rôle, ce qu’il retient")
+        case .skills: L("Ses compétences installées")
+        case .tools: L("Ce qu’il peut utiliser, services MCP")
+        case .credentials: L("Clés API, sans jamais les afficher")
+        case .providers: L("Comptes, points de terminaison, modèles")
+        case .messaging: L("Telegram, Discord, Slack…")
+        case .plugins: L("Plugins installés et leurs réglages")
         }
     }
     var symbol: String {
@@ -51,8 +51,8 @@ enum AgentSettingsPage: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .model: "model llm fallback auxiliaire moa"
         case .voice: "voice tts stt micro"
-        case .permissions: "approvals approbations accord sécurité"
-        case .personality: "memory soul description rôle identité"
+        case .permissions: L("approvals approbations accord sécurité")
+        case .personality: L("memory soul description rôle identité")
         case .skills: "skills"
         case .tools: "tools toolsets mcp serveurs"
         case .credentials: "keys api env secrets"
@@ -99,14 +99,14 @@ private struct AgentSettingsRoot: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher un réglage")
+            AppSearchSection(text: $search, prompt: L("Rechercher un réglage"))
             if search.isEmpty {
                 Section {
                     HStack(spacing: 14) {
                         AgentAvatar(name: profile, size: 48)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(store.title).font(.system(.title3, design: .serif))
-                            Text(profile == "default" ? "Agent principal · \(store.serverName)" : "@\(profile) · \(store.serverName)")
+                            Text(profile == "default" ? L("Agent principal · %@", store.serverName) : "@\(profile) · \(store.serverName)")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: 0)
@@ -118,38 +118,38 @@ private struct AgentSettingsRoot: View {
                             } label: {
                                 Image(systemName: "arrow.left.arrow.right.circle").font(.title2).foregroundStyle(AppTheme.accent)
                                     .frame(width: 44, height: 44)
-                            }.accessibilityLabel("Changer d’agent").accessibilityIdentifier("settings-switch-agent")
+                            }.accessibilityLabel(L("Changer d’agent")).accessibilityIdentifier("settings-switch-agent")
                         }
                     }.padding(.vertical, 6)
                     if profile != app.profile, let agent {
-                        Button { open(agent) } label: { Label("Discuter avec \(agent.title)", systemImage: "bubble.left.and.bubble.right") }
+                        Button { open(agent) } label: { Label(L("Discuter avec %@", agent.title), systemImage: "bubble.left.and.bubble.right") }
                             .disabled(app.opening || app.sending || app.voiceActive || (!app.demo && app.state != .connected))
                     }
                     if agent != nil {
                         NavigationLink { AgentIdentityView(app: app, name: profile, removed: { dismiss() }) } label: {
-                            Label("Nom, épinglage et visibilité", systemImage: "person.text.rectangle")
+                            Label(L("Nom, épinglage et visibilité"), systemImage: "person.text.rectangle")
                         }.accessibilityIdentifier("settings-identity")
                     }
-                } footer: { Text("Ces réglages appartiennent à cet agent et sont enregistrés sur son serveur Hermes.").font(.footnote) }
+                } footer: { Text(L("Ces réglages appartiennent à cet agent et sont enregistrés sur son serveur Hermes.")).font(.footnote) }
             }
             SettingsFeedback(store: store, placeholders: !search.isEmpty)
             if !search.isEmpty {
                 if store.loaded { SettingsSearchResults(store: store, query: search) }
             } else {
-                Section("Essentiel") {
+                Section(L("Essentiel")) {
                     ForEach(AgentSettingsPage.essential) { pageLink($0) }
                 }
-                Section("Connexions") {
+                Section(L("Connexions")) {
                     ForEach(AgentSettingsPage.connections) { pageLink($0) }
                 }
-                Section("Avancé") {
+                Section(L("Avancé")) {
                     ForEach(advancedSections) { section in
                         NavigationLink { SettingsSectionView(store: store, section: section) } label: {
                             SettingsLinkLabel(title: section.title, detail: section.summary, symbol: section.symbol)
                         }.accessibilityIdentifier("settings-section-" + section.id)
                     }
                     NavigationLink { OtherSettingsView(store: store) } label: {
-                        SettingsLinkLabel(title: "Autres réglages", detail: "Tout ce que Hermes expose d’autre", symbol: "ellipsis.circle")
+                        SettingsLinkLabel(title: L("Autres réglages"), detail: L("Tout ce que Hermes expose d’autre"), symbol: "ellipsis.circle")
                     }.accessibilityIdentifier("settings-other")
                 }
             }
@@ -227,16 +227,16 @@ struct AgentPersonalityView: View {
     var body: some View {
         List {
             Section {
-                TextField("Son rôle, en quelques mots", text: $detail, axis: .vertical).lineLimit(2...4).disabled(!loaded)
-            } header: { Text("Description") } footer: { Text("Sert aussi à Hermes pour répartir le travail entre vos agents.").font(.footnote) }
+                TextField(L("Son rôle, en quelques mots"), text: $detail, axis: .vertical).lineLimit(2...4).disabled(!loaded)
+            } header: { Text(L("Description")) } footer: { Text(L("Sert aussi à Hermes pour répartir le travail entre vos agents.")).font(.footnote) }
             Section {
                 TextEditor(text: $soul).frame(minHeight: 160).disabled(!loaded)
-            } header: { Text("Personnalité · SOUL.md") } footer: { Text("Sa façon de penser, son ton et ses instructions permanentes.").font(.footnote) }
+            } header: { Text(L("Personnalité · SOUL.md")) } footer: { Text(L("Sa façon de penser, son ton et ses instructions permanentes.")).font(.footnote) }
             if let error { Section { Text(error).foregroundStyle(AppTheme.accent) } }
-            if saved { Section { Label("Enregistré", systemImage: "checkmark.circle").foregroundStyle(.green) } }
-            Section("Mémoire") {
+            if saved { Section { Label(L("Enregistré"), systemImage: "checkmark.circle").foregroundStyle(.green) } }
+            Section(L("Mémoire")) {
                 NavigationLink { AgentMemoryFilesView(app: app, profile: name) } label: {
-                    SettingsLinkLabel(title: "Fichiers de mémoire", detail: "Ce qu’il retient et ce qu’il sait de vous", symbol: "doc.text")
+                    SettingsLinkLabel(title: L("Fichiers de mémoire"), detail: L("Ce qu’il retient et ce qu’il sait de vous"), symbol: "doc.text")
                 }
                 ForEach(SettingsCatalog.sections.first { $0.id == "memory" }?.pages ?? []) { page in
                     NavigationLink { SettingsDestination(store: store, pageID: page.id) } label: {
@@ -244,10 +244,10 @@ struct AgentPersonalityView: View {
                     }.accessibilityIdentifier("settings-page-" + page.id)
                 }
             }
-        }.modernList().navigationTitle("Mémoire et personnalité").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Mémoire et personnalité")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 AppToolbarItem(placement: .confirmationAction) {
-                    Button(busy ? "En cours…" : "Enregistrer") { Task { await save() } }.disabled(busy || !loaded || app.demo)
+                    Button(busy ? L("En cours…") : L("Enregistrer")) { Task { await save() } }.disabled(busy || !loaded || app.demo)
                 }
             }
             .task { await load() }
@@ -256,7 +256,7 @@ struct AgentPersonalityView: View {
     private func load() async {
         guard !loaded else { return }
         detail = app.profiles.first { $0.name == name }?.detail ?? ""
-        if app.demo { soul = "Tu es un assistant attentif et précis."; loaded = true; return }
+        if app.demo { soul = L("Tu es un assistant attentif et précis."); loaded = true; return }
         do { soul = try await app.describeBot(name)["soul"].string; loaded = true }
         catch { self.error = error.localizedDescription }
     }
@@ -286,10 +286,10 @@ struct CapabilityView: View {
     private var rows: [JSONValue] { (mcp ? servers.data["servers"].array : toolsets.data.array).filter { search.isEmpty || "\($0["name"].string) \($0["description"].string)".localizedCaseInsensitiveContains(search) } }
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher")
+            AppSearchSection(text: $search, prompt: L("Rechercher"))
             Section {
-                AppSegmented(title: "Afficher", selection: $mcp, options: [(value: false, label: "Outils"), (value: true, label: "Connexions MCP")], identifier: "capabilities-filter")
-                Text("Les changements s’appliquent aux prochaines sessions de cet agent.").font(.caption).foregroundStyle(.secondary)
+                AppSegmented(title: L("Afficher"), selection: $mcp, options: [(value: false, label: L("Outils")), (value: true, label: L("Connexions MCP"))], identifier: "capabilities-filter")
+                Text(L("Les changements s’appliquent aux prochaines sessions de cet agent.")).font(.caption).foregroundStyle(.secondary)
             }
             ToolFeedback(tools: tools)
             ForEach(rows, id: \.["name"].string) { row in
@@ -303,15 +303,15 @@ struct CapabilityView: View {
                         } }
                     })) { Text(row["label"].string.isEmpty ? row["name"].string : row["label"].string) }
                     if !row["description"].string.isEmpty { Text(row["description"].string).font(.caption).foregroundStyle(.secondary) }
-                    if mcp { Button("Retirer", role: .destructive) { deleting = row }.font(.caption) }
+                    if mcp { Button(L("Retirer"), role: .destructive) { deleting = row }.font(.caption) }
                 }.padding(.vertical, 5).disabled(tools.busy || tools.app.demo)
             }
-        }.modernList().navigationTitle("Outils et MCP").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Outils et MCP")).navigationBarTitleDisplayMode(.inline)
             .task(id: mcp) { await tools.load(path) }.refreshable { await tools.load(path) }
-            .toolbar { if mcp { AppToolbarItem(placement: .primaryAction) { Button("Ajouter", systemImage: "plus") { adding = true }.disabled(tools.app.demo) } } }
+            .toolbar { if mcp { AppToolbarItem(placement: .primaryAction) { Button(L("Ajouter"), systemImage: "plus") { adding = true }.disabled(tools.app.demo) } } }
             .sheet(isPresented: $adding) { MCPForm(tools: servers) { Task { await servers.load("/api/mcp/servers") } } }
-            .appConfirm("Retirer cette connexion MCP ?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
-                Button("Retirer", role: .destructive) {
+            .appConfirm(L("Retirer cette connexion MCP ?"), isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
+                Button(L("Retirer"), role: .destructive) {
                     guard let row = deleting else { return }; deleting = nil
                     Task { await servers.perform {
                         _ = try await servers.request("/api/mcp/servers/" + (row["name"].string.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed.subtracting(CharacterSet(charactersIn: "/"))) ?? ""), method: "DELETE")
@@ -331,18 +331,18 @@ private struct MCPForm: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Nom", text: $name).textInputAutocapitalization(.never)
-                TextField("URL du serveur MCP", text: $url).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
+                TextField(L("Nom"), text: $name).textInputAutocapitalization(.never)
+                TextField(L("URL du serveur MCP"), text: $url).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                 ToolFeedback(tools: tools)
-                Text("Ajoutez un serveur MCP HTTP accessible depuis votre agent.").font(.caption).foregroundStyle(.secondary)
-            }.modernList().navigationTitle("Ajouter une connexion").navigationBarTitleDisplayMode(.inline)
+                Text(L("Ajoutez un serveur MCP HTTP accessible depuis votre agent.")).font(.caption).foregroundStyle(.secondary)
+            }.modernList().navigationTitle(L("Ajouter une connexion")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     AppToolbarItem(placement: .cancellationAction) {
                         AppCloseButton { dismiss() }
-                            .accessibilityLabel("Fermer").accessibilityIdentifier("close-mcp-form")
+                            .accessibilityLabel(L("Fermer")).accessibilityIdentifier("close-mcp-form")
                     }
-                    AppToolbarItem(placement: .confirmationAction) { Button("Ajouter") { Task { await tools.perform {
-                        guard let address = URL(string: url), ["https", "http"].contains(address.scheme ?? ""), address.host != nil else { throw RPCFailure("Entrez une URL HTTP ou HTTPS valide.") }
+                    AppToolbarItem(placement: .confirmationAction) { Button(L("Ajouter")) { Task { await tools.perform {
+                        guard let address = URL(string: url), ["https", "http"].contains(address.scheme ?? ""), address.host != nil else { throw RPCFailure(L("Entrez une URL HTTP ou HTTPS valide.")) }
                         _ = try await tools.request("/api/mcp/servers", method: "POST", body: ["name": .string(name), "url": .string(url)])
                         saved(); dismiss()
                     } } }.disabled(name.isEmpty || url.isEmpty || tools.busy) }

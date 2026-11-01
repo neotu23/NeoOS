@@ -23,9 +23,9 @@ struct ApprovalCard: View, Equatable {
     var body: some View {
         VStack(alignment: .leading, spacing: 15) {
             VStack(alignment: .leading, spacing: 4) {
-                Label("Hermes vous demande l’accord", systemImage: "hand.raised").font(.subheadline.weight(.semibold))
+                Label(L("Hermes vous demande l’accord"), systemImage: "hand.raised").font(.subheadline.weight(.semibold))
                 if !payload["tool_name"].string.isEmpty {
-                    Text("Outil : \(payload["tool_name"].string)").font(.caption2).foregroundStyle(.secondary)
+                    Text(L("Outil : %@", payload["tool_name"].string)).font(.caption2).foregroundStyle(.secondary)
                 }
             }
             if !payload["command"].string.isEmpty {
@@ -33,28 +33,28 @@ struct ApprovalCard: View, Equatable {
             }
             if !payload["description"].string.isEmpty { Text(payload["description"].string).font(.caption).foregroundStyle(.secondary) }
             if smartDenied {
-                Label("L’évaluation automatique de Hermes a refusé cette action. Vous pouvez seulement l’autoriser pour cette fois.", systemImage: "exclamationmark.shield")
+                Label(L("L’évaluation automatique de Hermes a refusé cette action. Vous pouvez seulement l’autoriser pour cette fois."), systemImage: "exclamationmark.shield")
                     .font(.caption).foregroundStyle(AppTheme.accent)
             }
             HStack {
-                Button("Refuser") { answer("deny") }.buttonStyle(AppBorderedButtonStyle())
+                Button(L("Refuser")) { answer("deny") }.buttonStyle(AppBorderedButtonStyle())
                 Spacer()
                 if choices.contains(.string("once")) {
-                    Button("Autoriser une fois") { answer("once") }.buttonStyle(AppProminentButtonStyle())
+                    Button(L("Autoriser une fois")) { answer("once") }.buttonStyle(AppProminentButtonStyle())
                 }
             }.font(.caption).disabled(busy)
             if allowsSession || allowsAlways {
                 AppMenu {
-                    if allowsSession { AppMenuButton("Pour cette session") { answer("session") } }
-                    if allowsAlways { AppMenuButton("Toujours pour cette règle") { persistent = true } }
+                    if allowsSession { AppMenuButton(L("Pour cette session")) { answer("session") } }
+                    if allowsAlways { AppMenuButton(L("Toujours pour cette règle")) { persistent = true } }
                 } label: {
-                    HStack(spacing: 4) { Text("Autres autorisations"); Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold)) }
+                    HStack(spacing: 4) { Text(L("Autres autorisations")); Image(systemName: "chevron.down").font(.system(size: 9, weight: .semibold)) }
                         .font(.caption.weight(.medium)).foregroundStyle(AppTheme.accent).frame(minHeight: 44)
                 }.buttonStyle(.plain).disabled(busy)
             }
         }.hermesCard()
-            .appConfirm("Autoriser durablement cette règle pour cet agent ?", isPresented: $persistent) {
-                Button("Toujours autoriser cette règle") { answer("always") }
+            .appConfirm(L("Autoriser durablement cette règle pour cet agent ?"), isPresented: $persistent) {
+                Button(L("Toujours autoriser cette règle")) { answer("always") }
             }
     }
 
@@ -92,40 +92,40 @@ struct CredentialCard: View, Equatable {
         VStack(alignment: .leading, spacing: 14) {
             switch kind {
             case .sudo:
-                Label("Accès administrateur demandé", systemImage: "key").font(.subheadline.weight(.semibold))
+                Label(L("Accès administrateur demandé"), systemImage: "key").font(.subheadline.weight(.semibold))
                 if !payload["command"].string.isEmpty {
                     Text(payload["command"].string).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                 }
                 prompt
             case .secret:
-                Label("Hermes demande un secret", systemImage: "key").font(.subheadline.weight(.semibold))
+                Label(L("Hermes demande un secret"), systemImage: "key").font(.subheadline.weight(.semibold))
                 prompt
                 if !payload["env_var"].string.isEmpty {
                     Text(payload["env_var"].string).font(.system(.caption, design: .monospaced)).foregroundStyle(.secondary)
                         .textSelection(.enabled).accessibilityLabel("Variable \(payload["env_var"].string)")
                 }
             case .verificationCode:
-                Label("Code de vérification", systemImage: "number").font(.subheadline.weight(.semibold))
-                if !payload["site"].string.isEmpty { Text("Pour \(payload["site"].string)").font(.caption).foregroundStyle(.secondary) }
+                Label(L("Code de vérification"), systemImage: "number").font(.subheadline.weight(.semibold))
+                if !payload["site"].string.isEmpty { Text(L("Pour %@", payload["site"].string)).font(.caption).foregroundStyle(.secondary) }
                 if !payload["hint"].string.isEmpty { Text(payload["hint"].string).font(.caption).foregroundStyle(.secondary) }
             case .vaultUnlock:
-                Label("Déverrouiller le coffre", systemImage: "lock.open").font(.subheadline.weight(.semibold))
+                Label(L("Déverrouiller le coffre"), systemImage: "lock.open").font(.subheadline.weight(.semibold))
                 let name = payload["display_name"].string.isEmpty ? payload["backend"].string : payload["display_name"].string
                 if !name.isEmpty { Text(name).font(.caption).foregroundStyle(.secondary) }
             }
             if kind == .verificationCode {
-                TextField("Code reçu", text: $value).textFieldStyle(.roundedBorder)
+                TextField(L("Code reçu"), text: $value).textFieldStyle(.roundedBorder)
                     .textContentType(.oneTimeCode).textInputAutocapitalization(.never).autocorrectionDisabled()
             } else {
-                SecureField(kind == .sudo ? "Mot de passe administrateur" : kind == .vaultUnlock ? "Mot de passe du coffre" : "Valeur envoyée directement à Hermes", text: $value)
+                SecureField(kind == .sudo ? "Mot de passe administrateur" : kind == .vaultUnlock ? L("Mot de passe du coffre") : L("Valeur envoyée directement à Hermes"), text: $value)
                     .textFieldStyle(.roundedBorder)
             }
             HStack {
-                Button("Annuler") { respond("") }.buttonStyle(AppBorderedButtonStyle())
+                Button(L("Annuler")) { respond("") }.buttonStyle(AppBorderedButtonStyle())
                 Spacer()
-                Button("Transmettre") { respond(value) }.buttonStyle(AppProminentButtonStyle()).disabled(value.isEmpty)
+                Button(L("Transmettre")) { respond(value) }.buttonStyle(AppProminentButtonStyle()).disabled(value.isEmpty)
             }.disabled(busy)
-            Text("Cette valeur ne sera pas conservée dans l’historique local.").font(.caption2).foregroundStyle(.secondary)
+            Text(L("Cette valeur ne sera pas conservée dans l’historique local.")).font(.caption2).foregroundStyle(.secondary)
         }.hermesCard()
     }
 
@@ -176,9 +176,9 @@ struct ClarificationCard: View, Equatable {
         // Locally answered questions disappear at once; no empty card while the sync catches up.
         if !visible.isEmpty {
             VStack(alignment: .leading, spacing: 14) {
-                Label("À vous de choisir", systemImage: "bubble.left.and.text.bubble.right").font(.subheadline.weight(.semibold))
+                Label(L("À vous de choisir"), systemImage: "bubble.left.and.text.bubble.right").font(.subheadline.weight(.semibold))
                 ForEach(visible) { question($0) }
-                Button("Ne pas répondre") {
+                Button(L("Ne pas répondre")) {
                     busy = true
                     Task { _ = await model.dismissClarification(request: payload); busy = false }
                 }.font(.caption).disabled(busy)
@@ -200,12 +200,12 @@ struct ClarificationCard: View, Equatable {
             }.buttonStyle(AppBorderedButtonStyle()).disabled(busy)
         }
         HStack {
-            TextField("Votre réponse…", text: Binding(get: { answers[key] ?? "" }, set: { answers[key] = $0 })).textFieldStyle(.roundedBorder)
+            TextField(L("Votre réponse…"), text: Binding(get: { answers[key] ?? "" }, set: { answers[key] = $0 })).textFieldStyle(.roundedBorder)
             Button {
                 let selected = q.choices.filter { selections[key, default: []].contains($0) }
                 respond((selected + [answers[key] ?? ""]).filter { !$0.isEmpty }.joined(separator: ", "), to: q)
             } label: { Image(systemName: "arrow.up.circle.fill").font(.title2) }
-                .accessibilityLabel("Répondre")
+                .accessibilityLabel(L("Répondre"))
                 .disabled(((answers[key] ?? "").isEmpty && selections[key, default: []].isEmpty) || busy)
         }
     }

@@ -34,7 +34,7 @@ struct PluginsSettingsView: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher une extension")
+            AppSearchSection(text: $search, prompt: L("Rechercher une extension"))
             if app.demo { AccountsDemoNotice() }
             AccountsScopeSection(app: app, profile: $scope,
                 note: "Les extensions s’installent et s’activent pour « \(profileTitle) » sur son serveur Hermes. Leurs clés secrètes vont dans le .env de ce profil.")
@@ -43,19 +43,19 @@ struct PluginsSettingsView: View {
             Section {
                 if !loaded && tools.loading { SkeletonRows(count: 4) }
                 else if rows.isEmpty {
-                    Text(search.isEmpty ? "Aucune extension installée pour le moment." : "Aucune extension ne correspond.").font(.subheadline).foregroundStyle(.secondary)
+                    Text(search.isEmpty ? L("Aucune extension installée pour le moment.") : L("Aucune extension ne correspond.")).font(.subheadline).foregroundStyle(.secondary)
                 }
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                     NavigationLink { AccountsPluginDetail(tools: tools, plugins: $plugins, key: row["key"].string, name: row["name"].string, profileTitle: profileTitle) } label: { pluginLabel(row) }
                 }
-            } header: { Text("Installées") }
+            } header: { Text(L("Installées")) }
             Section {
                 NavigationLink { AccountsPluginCatalog(tools: tools, installed: plugins) { Task { await load() } } } label: {
-                    Label("Catalogue d’extensions", systemImage: "square.grid.2x2")
+                    Label(L("Catalogue d’extensions"), systemImage: "square.grid.2x2")
                 }
-                Toggle("Afficher les extensions intégrées", isOn: $showBuiltIn)
-            } footer: { Text("Les extensions intégrées (fournisseurs, plateformes…) sont activées par défaut et se règlent depuis leur propre écran.") }
-        }.modernList().navigationTitle("Extensions").navigationBarTitleDisplayMode(.inline)
+                Toggle(L("Afficher les extensions intégrées"), isOn: $showBuiltIn)
+            } footer: { Text(L("Les extensions intégrées (fournisseurs, plateformes…) sont activées par défaut et se règlent depuis leur propre écran.")) }
+        }.modernList().navigationTitle(L("Extensions")).navigationBarTitleDisplayMode(.inline)
             .task(id: scope) {
                 if tools.profile != scope { tools = NativeToolSession(app, profile: scope); plugins = []; loaded = false; notice = nil }
                 await load()
@@ -68,7 +68,7 @@ struct PluginsSettingsView: View {
             HStack(spacing: 6) {
                 Text(row["name"].string).font(.subheadline.weight(.medium))
                 if !row["version"].string.isEmpty { Text(row["version"].string).font(.caption2).foregroundStyle(.tertiary) }
-                if row["update_available"].bool { Text("Mise à jour").font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent) }
+                if row["update_available"].bool { Text(L("Mise à jour")).font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent) }
             }
             if !row["description"].string.isEmpty { Text(row["description"].string).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
             AccountsStatusLabel(set: row["status"].string == "enabled", text: Self.status(row["status"].string))
@@ -76,13 +76,13 @@ struct PluginsSettingsView: View {
     }
 
     static func status(_ value: String) -> String {
-        ["enabled": "Activée", "disabled": "Désactivée", "not enabled": "Non activée"][value] ?? value
+        ["enabled": L("Activée"), "disabled": L("Désactivée"), "not enabled": L("Non activée")][value] ?? value
     }
 
     private func load() async {
         if app.demo {
-            plugins = [["name": "disk-cleanup", "key": "disk-cleanup", "version": "1.0", "description": "Nettoie les fichiers temporaires de l’agent.", "source": "bundled", "status": "enabled"],
-                       ["name": "kanban", "key": "kanban", "version": "0.4", "description": "Tableaux de projets partagés avec vos agents.", "source": "user", "status": "enabled"]]
+            plugins = [["name": "disk-cleanup", "key": "disk-cleanup", "version": "1.0", "description": .string(L("Nettoie les fichiers temporaires de l’agent.")), "source": "bundled", "status": "enabled"],
+                       ["name": "kanban", "key": "kanban", "version": "0.4", "description": .string(L("Tableaux de projets partagés avec vos agents.")), "source": "user", "status": "enabled"]]
             loaded = true; return
         }
         do {
@@ -119,15 +119,15 @@ private struct AccountsPluginDetail: View {
                     Text([row["version"].string, row["source"].string, row["catalog_tier"].string].filter { !$0.isEmpty }.joined(separator: " · "))
                         .font(.caption2).foregroundStyle(.tertiary)
                 }.padding(.vertical, 4)
-                Toggle("Activée", isOn: Binding(get: { row["status"].string == "enabled" }, set: { value in Task { await toggle(value) } }))
+                Toggle(L("Activée"), isOn: Binding(get: { row["status"].string == "enabled" }, set: { value in Task { await toggle(value) } }))
                     .disabled(key.isEmpty || tools.busy || tools.app.demo)
             } footer: {
-                if key.isEmpty { Text("Ce serveur Hermes est trop ancien pour activer cette extension depuis l’app.") }
+                if key.isEmpty { Text(L("Ce serveur Hermes est trop ancien pour activer cette extension depuis l’app.")) }
             }
             if let notice { Section { Label(notice, systemImage: "info.circle").font(.subheadline) } }
             ToolFeedback(tools: tools)
             if !row["servers"].array.isEmpty {
-                Section("Serveurs") {
+                Section(L("Serveurs")) {
                     ForEach(row["servers"].array, id: \.["name"].string) { server in
                         VStack(alignment: .leading, spacing: 3) {
                             Text(server["name"].string).font(.subheadline)
@@ -139,35 +139,35 @@ private struct AccountsPluginDetail: View {
             if !schema.isEmpty {
                 Section {
                     ForEach(schema, id: \.["key"].string) { field in settingField(field) }
-                } header: { Text("Réglages") } footer: { Text("Les champs secrets sont écrits dans le .env de « \(profileTitle) » et ne sont jamais renvoyés à l’app.") }
+                } header: { Text(L("Réglages")) } footer: { Text(L("Les champs secrets sont écrits dans le .env de « %@ » et ne sont jamais renvoyés à l’app.", profileTitle)) }
                 Section {
-                    Button("Enregistrer") { Task { await saveSettings() } }.disabled(tools.busy || tools.app.demo || (values.isEmpty && secrets.values.allSatisfy(\.isEmpty)))
+                    Button(L("Enregistrer")) { Task { await saveSettings() } }.disabled(tools.busy || tools.app.demo || (values.isEmpty && secrets.values.allSatisfy(\.isEmpty)))
                 }
             }
             if row["update_available"].bool || removable {
                 Section {
                     if row["update_available"].bool {
                         Button { Task { await update(accept: false) } } label: {
-                            Label("Mettre à jour" + (row["catalog_version"].string.isEmpty ? "" : " vers \(row["catalog_version"].string)"), systemImage: "arrow.down.circle")
+                            Label(L("Mettre à jour") + (row["catalog_version"].string.isEmpty ? "" : " vers \(row["catalog_version"].string)"), systemImage: "arrow.down.circle")
                         }.disabled(tools.busy || !row["pinned_sha"].string.isEmpty)
                     }
-                    if removable { Button("Désinstaller", role: .destructive) { removing = true }.disabled(tools.busy || tools.app.demo) }
+                    if removable { Button(L("Désinstaller"), role: .destructive) { removing = true }.disabled(tools.busy || tools.app.demo) }
                 }
             }
         }.modernList().navigationTitle(name).navigationBarTitleDisplayMode(.inline)
             .onDisappear { secrets = [:] }
-            .appConfirm("Désinstaller \(name) ?", isPresented: $removing) {
-                Button("Désinstaller", role: .destructive) {
+            .appConfirm(L("Désinstaller %@ ?", name), isPresented: $removing) {
+                Button(L("Désinstaller"), role: .destructive) {
                     Task {
                         var ok = false
                         await tools.perform { _ = try await tools.request("plugins.manage", body: ["action": "remove", "name": .string(name)], rpc: true); ok = true }
                         if ok { plugins.removeAll { $0["name"].string == name }; dismiss() }
                     }
                 }
-            } message: { Text("Les fichiers de l’extension sont supprimés du serveur.") }
-            .appConfirm("Cette mise à jour élargit les capacités de l’extension.", isPresented: Binding(get: { consent != nil }, set: { if !$0 { consent = nil } })) {
-                Button("Accepter et mettre à jour") { consent = nil; Task { await update(accept: true) } }
-            } message: { Text("Vérifiez ce qu’elle pourra faire avant d’accepter : \(consent?["delta"].displayText ?? "")") }
+            } message: { Text(L("Les fichiers de l’extension sont supprimés du serveur.")) }
+            .appConfirm(L("Cette mise à jour élargit les capacités de l’extension."), isPresented: Binding(get: { consent != nil }, set: { if !$0 { consent = nil } })) {
+                Button(L("Accepter et mettre à jour")) { consent = nil; Task { await update(accept: true) } }
+            } message: { Text(L("Vérifiez ce qu’elle pourra faire avant d’accepter : %@", consent?["delta"].displayText ?? "")) }
     }
 
     @ViewBuilder private func settingField(_ field: JSONValue) -> some View {
@@ -180,16 +180,16 @@ private struct AccountsPluginDetail: View {
                 Toggle(label, isOn: Binding(get: { current.bool }, set: { values[id] = .bool($0) }))
             case "enum":
                 AppPicker(title: label, selection: Binding(get: { current.displayText }, set: { values[id] = .string($0) }),
-                          options: (field["choices"].array.map(\.displayText).contains(current.displayText) ? [] : [(value: current.displayText, label: current.displayText.isEmpty ? "Non défini" : current.displayText)])
+                          options: (field["choices"].array.map(\.displayText).contains(current.displayText) ? [] : [(value: current.displayText, label: current.displayText.isEmpty ? L("Non défini") : current.displayText)])
                               + field["choices"].array.map(\.displayText).map { (value: $0, label: $0) })
             case "secret":
                 Text(label).font(.subheadline.weight(.medium))
-                SecureField(field["has_value"].bool ? "Configurée · laisser vide pour conserver" : "Coller la valeur",
+                SecureField(field["has_value"].bool ? L("Configurée · laisser vide pour conserver") : L("Coller la valeur"),
                             text: Binding(get: { secrets[field["env"].string] ?? "" }, set: { secrets[field["env"].string] = $0 }))
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
             case "number":
                 Text(label).font(.subheadline.weight(.medium))
-                TextField("Nombre", text: Binding(get: { current.displayText }, set: { if let number = Double($0) { values[id] = .number(number) } else if $0.isEmpty { values[id] = .null } }))
+                TextField(L("Nombre"), text: Binding(get: { current.displayText }, set: { if let number = Double($0) { values[id] = .number(number) } else if $0.isEmpty { values[id] = .null } }))
                     .keyboardType(.decimalPad)
             case "json":
                 Text(label).font(.subheadline.weight(.medium))
@@ -214,7 +214,7 @@ private struct AccountsPluginDetail: View {
         await tools.perform {
             let result = try await tools.request("plugins.manage", body: ["action": "toggle", "key": .string(key), "enable": .bool(enable)], rpc: true)
             replace(result)
-            notice = result["restart_required"].bool ? "Ce changement prend effet au prochain redémarrage de Hermes." : nil
+            notice = result["restart_required"].bool ? L("Ce changement prend effet au prochain redémarrage de Hermes.") : nil
         }
     }
 
@@ -229,9 +229,9 @@ private struct AccountsPluginDetail: View {
                 replace(try await tools.request("plugins.manage", body: ["action": "settings", "key": .string(key), "values": .object(values)], rpc: true))
                 values = [:]
             }
-            notice = "Réglages enregistrés."
+            notice = L("Réglages enregistrés.")
         }
-        if notice == "Réglages enregistrés.", let list = try? await tools.request("plugins.manage", body: ["action": "list"], rpc: true)["plugins"].array { plugins = list }
+        if notice == L("Réglages enregistrés."), let list = try? await tools.request("plugins.manage", body: ["action": "list"], rpc: true)["plugins"].array { plugins = list }
     }
 
     private func update(accept: Bool) async {
@@ -240,7 +240,7 @@ private struct AccountsPluginDetail: View {
             if accept { body["accept_capabilities"] = true }
             let result = try await tools.request("plugins.manage", body: .object(body), rpc: true)
             if result["consent_required"].bool { consent = result; return }
-            notice = "Extension mise à jour."
+            notice = L("Extension mise à jour.")
             plugins = try await tools.request("plugins.manage", body: ["action": "list"], rpc: true)["plugins"].array
         }
     }
@@ -267,11 +267,11 @@ private struct AccountsPluginCatalog: View {
 
     var body: some View {
         List {
-            Section { Text("Installez uniquement des sources de confiance. Les entrées du catalogue Hermes sont installées depuis leur commit vérifié.").font(.caption).foregroundStyle(.secondary) }
+            Section { Text(L("Installez uniquement des sources de confiance. Les entrées du catalogue Hermes sont installées depuis leur commit vérifié.")).font(.caption).foregroundStyle(.secondary) }
             ToolFeedback(tools: tools)
             if let result { Section { Label(result, systemImage: "info.circle").font(.subheadline) } }
-            Section("Catalogue Hermes") {
-                if entries.isEmpty && !tools.busy { Text(tools.app.demo ? "Connectez votre Hermes pour parcourir le catalogue." : "Catalogue vide ou indisponible.").font(.subheadline).foregroundStyle(.secondary) }
+            Section(L("Catalogue Hermes")) {
+                if entries.isEmpty && !tools.busy { Text(tools.app.demo ? L("Connectez votre Hermes pour parcourir le catalogue.") : L("Catalogue vide ou indisponible.")).font(.subheadline).foregroundStyle(.secondary) }
                 ForEach(entries, id: \.["name"].string) { entry in
                     HStack(alignment: .top, spacing: 10) {
                         VStack(alignment: .leading, spacing: 4) {
@@ -280,36 +280,36 @@ private struct AccountsPluginCatalog: View {
                             Text([entry["tier"].string, entry["maintainer"].string, entry["version"].string].filter { !$0.isEmpty }.joined(separator: " · "))
                                 .font(.caption2).foregroundStyle(.tertiary)
                             let env = entry["capabilities"]["requires_env"].array.map(\.string)
-                            if !env.isEmpty { Text("Clés requises : \(env.joined(separator: ", "))").font(.caption2).foregroundStyle(.secondary) }
+                            if !env.isEmpty { Text(L("Clés requises : %@", env.joined(separator: ", "))).font(.caption2).foregroundStyle(.secondary) }
                         }
                         Spacer(minLength: 6)
-                        if isInstalled(entry) { Text("Installée").font(.caption).foregroundStyle(.secondary) }
-                        else { Button("Installer") { installing = entry }.font(.caption.weight(.semibold)).buttonStyle(.borderless).disabled(tools.busy) }
+                        if isInstalled(entry) { Text(L("Installée")).font(.caption).foregroundStyle(.secondary) }
+                        else { Button(L("Installer")) { installing = entry }.font(.caption.weight(.semibold)).buttonStyle(.borderless).disabled(tools.busy) }
                     }.padding(.vertical, 3)
                 }
             }
             Section {
                 TextField("https://github.com/proprietaire/depot", text: $repository).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
-                TextField("Épingler à un commit (facultatif)", text: $pin).textInputAutocapitalization(.never).autocorrectionDisabled().font(.callout.monospaced())
-                Button("Installer") { confirmGit = true }.disabled(repository.trimmingCharacters(in: .whitespaces).isEmpty || !validPin || tools.busy || tools.app.demo)
-            } header: { Text("Installer depuis Git") } footer: {
+                TextField(L("Épingler à un commit (facultatif)"), text: $pin).textInputAutocapitalization(.never).autocorrectionDisabled().font(.callout.monospaced())
+                Button(L("Installer")) { confirmGit = true }.disabled(repository.trimmingCharacters(in: .whitespaces).isEmpty || !validPin || tools.busy || tools.app.demo)
+            } header: { Text(L("Installer depuis Git")) } footer: {
                 Text(validPin ? "Laissez le commit vide pour utiliser le dernier. Préférez https:// ; vérifiez le dépôt avant d’installer." : "Le SHA doit contenir exactement 40 caractères.")
             }
-        }.modernList().navigationTitle("Catalogue").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Catalogue")).navigationBarTitleDisplayMode(.inline)
             .task { await load() }
-            .appConfirm("Installer \(installing?["name"].string ?? "") ?", isPresented: Binding(get: { installing != nil }, set: { if !$0 { installing = nil } })) {
-                Button("Installer et activer") {
+            .appConfirm(L("Installer %@ ?", installing?["name"].string ?? ""), isPresented: Binding(get: { installing != nil }, set: { if !$0 { installing = nil } })) {
+                Button(L("Installer et activer")) {
                     guard let entry = installing else { return }; installing = nil
                     Task { await install(["action": "install", "catalog_name": .string(entry["name"].string), "enable": true], label: entry["name"].string) }
                 }
-            } message: { Text("Entrée du catalogue Hermes, installée depuis son commit vérifié \(installing?["sha"].string.prefix(7) ?? "").") }
-            .appConfirm("Installer depuis ce dépôt ?", isPresented: $confirmGit) {
-                Button("Installer et activer") {
+            } message: { Text(L("Entrée du catalogue Hermes, installée depuis son commit vérifié %@.", String(installing?["sha"].string.prefix(7) ?? ""))) }
+            .appConfirm(L("Installer depuis ce dépôt ?"), isPresented: $confirmGit) {
+                Button(L("Installer et activer")) {
                     var body: [String: JSONValue] = ["action": "install", "identifier": .string(repository.trimmingCharacters(in: .whitespaces)), "enable": true]
                     if !pin.isEmpty { body["ref"] = .string(pin.lowercased()) }
                     Task { await install(body, label: repository) }
                 }
-            } message: { Text("Le code de ce dépôt s’exécutera sur votre serveur Hermes. N’installez que des sources de confiance.") }
+            } message: { Text(L("Le code de ce dépôt s’exécutera sur votre serveur Hermes. N’installez que des sources de confiance.")) }
     }
 
     private func load() async {
@@ -324,7 +324,7 @@ private struct AccountsPluginCatalog: View {
             let name = response["plugin_name"].string.isEmpty ? label : response["plugin_name"].string
             done.insert(body["catalog_name"]?.string ?? name)
             let missing = response["missing_env"].array.map(\.string)
-            result = missing.isEmpty ? "\(name) est installée." : "\(name) est installée, mais a besoin d’une clé pour fonctionner : \(missing.joined(separator: ", ")). Ajoutez-la dans Clés et identifiants."
+            result = missing.isEmpty ? L("%@ est installée.", name) : L("%@ est installée, mais a besoin d’une clé pour fonctionner : %@. Ajoutez-la dans Clés et identifiants.", name, missing.joined(separator: ", "))
             repository = ""; pin = ""
             changed()
         }

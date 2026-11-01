@@ -163,7 +163,7 @@ struct VoiceLiveProgress {
                        running: Bool, receivedReply: Bool, tools: [Transcript.ToolStep]) -> String? {
         hasReply = hasReply || receivedReply
         guard running, !hasReply, spoken.count < 3, now - lastSpeechAt >= 2 else { return nil }
-        let acknowledgement = "Je m’en occupe."
+        let acknowledgement = L("Je m’en occupe.")
         if lastUpdateAt == nil, lastOutputAt < startedAt - 2, now - startedAt >= 2 {
             return emit(acknowledgement, at: now)
         }
@@ -176,7 +176,7 @@ struct VoiceLiveProgress {
                 return emit(message, at: now)
             }
         }
-        let waiting = "Je travaille encore sur votre demande."
+        let waiting = L("Je travaille encore sur votre demande.")
         guard !spoken.contains(waiting) else { return nil }
         return emit(waiting, at: now)
     }
@@ -188,11 +188,11 @@ struct VoiceLiveProgress {
 
     private static func description(_ tool: String) -> String? {
         switch tool {
-        case "web_search": "Je recherche les informations sur le web."
-        case "web_extract", "browse": "Je consulte les informations sur le web."
-        case "read_file": "Je consulte les fichiers nécessaires."
-        case "write_file", "patch": "La modification des fichiers est en cours."
-        case "terminal": "Une commande est en cours d’exécution."
+        case "web_search": L("Je recherche les informations sur le web.")
+        case "web_extract", "browse": L("Je consulte les informations sur le web.")
+        case "read_file": L("Je consulte les fichiers nécessaires.")
+        case "write_file", "patch": L("La modification des fichiers est en cours.")
+        case "terminal": L("Une commande est en cours d’exécution.")
         default: nil
         }
     }
@@ -213,7 +213,7 @@ struct VoiceLiveReceipts {
     mutating func receive(_ event: JSONValue) {
         let id = event["client_event_id"].string
         if event["type"].string == "error" {
-            failure = "GPT-Live n’a pas confirmé la transmission. La réponse d’Hermès reste disponible dans le chat."
+            failure = L("GPT-Live n’a pas confirmé la transmission. La réponse d’Hermès reste disponible dans le chat.")
         } else if let item = pending[id], event["type"].string == item.expected {
             pending.removeValue(forKey: id)
         }
@@ -221,7 +221,7 @@ struct VoiceLiveReceipts {
     func check(now: Double) throws {
         if let failure { throw RPCFailure(failure) }
         if pending.values.contains(where: { now - $0.sentAt >= 30 }) {
-            throw RPCFailure("GPT-Live ne confirme plus la réception des réponses. Retrouvez la réponse d’Hermès dans le chat.")
+            throw RPCFailure(L("GPT-Live ne confirme plus la réception des réponses. Retrouvez la réponse d’Hermès dans le chat."))
         }
     }
 }

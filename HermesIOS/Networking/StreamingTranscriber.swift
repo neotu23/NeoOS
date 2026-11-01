@@ -54,7 +54,7 @@ final class StreamingTranscriber {
         let timer = Task { [weak self] in
             try? await Task.sleep(for: .seconds(timeout))
             guard !Task.isCancelled else { return }
-            self?.resolve(.failure(RPCFailure("La transcription en direct ne répond pas.")))
+            self?.resolve(.failure(RPCFailure(L("La transcription en direct ne répond pas."))))
         }
         defer { timer.cancel() }
         await withTaskCancellationHandler {

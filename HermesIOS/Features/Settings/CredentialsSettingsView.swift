@@ -45,14 +45,14 @@ struct CredentialsSettingsView: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher une clé")
+            AppSearchSection(text: $search, prompt: L("Rechercher une clé"))
             if app.demo { AccountsDemoNotice() }
             AccountsScopeSection(app: app, profile: $scope, note: Accounts.scopeNote(profileTitle))
             ToolFeedback(tools: store.tools)
             if !store.loaded && store.loading {
                 SkeletonRows(count: 5, avatar: false)
             } else if !search.isEmpty {
-                Section("Résultats") {
+                Section(L("Résultats")) {
                     if searchResults.isEmpty { ContentUnavailableView.search(text: search) }
                     ForEach(searchResults) { credentialLink($0) }
                 }
@@ -60,31 +60,31 @@ struct CredentialsSettingsView: View {
                 voiceSection
                 Section {
                     NavigationLink { ProvidersSettingsView(app: app, profile: scope) } label: {
-                        row(symbol: "cpu", title: "Fournisseurs de modèles",
+                        row(symbol: "cpu", title: L("Fournisseurs de modèles"),
                             detail: "\(providerRows.filter(\.isSet).count) clé(s) configurée(s) · comptes, clés et points de terminaison")
                     }
-                } header: { Text("Fournisseurs LLM") }
-                credentialSection("Outils et recherche", rows(["tool"]), empty: "Rien configuré dans cette catégorie pour le moment.")
-                credentialSection("Réglages du serveur", rows(["setting", "messaging"]), empty: nil)
+                } header: { Text(L("Fournisseurs LLM")) }
+                credentialSection(L("Outils et recherche"), rows(["tool"]), empty: L("Rien configuré dans cette catégorie pour le moment."))
+                credentialSection(L("Réglages du serveur"), rows(["setting", "messaging"]), empty: nil)
                 Section {
                     NavigationLink { MessagingSettingsView(app: app, profile: scope) } label: {
-                        row(symbol: "bubble.left.and.text.bubble.right", title: "Messagerie",
-                            detail: "Les jetons de Telegram, Discord, Slack… se gèrent avec leur plateforme")
+                        row(symbol: "bubble.left.and.text.bubble.right", title: L("Messagerie"),
+                            detail: L("Les jetons de Telegram, Discord, Slack… se gèrent avec leur plateforme"))
                     }
                 }
                 Section {
                     ForEach(rows(["custom"])) { credentialLink($0) }
-                    Button { adding = true } label: { Label("Ajouter une clé personnalisée", systemImage: "plus") }
+                    Button { adding = true } label: { Label(L("Ajouter une clé personnalisée"), systemImage: "plus") }
                         .disabled(app.demo)
-                } header: { Text("Clés personnalisées") } footer: {
-                    Text("Variables d’environnement arbitraires que Hermes ne reconnaît pas. Utilisez-les pour des skills, des serveurs MCP ou vos propres outils.")
+                } header: { Text(L("Clés personnalisées")) } footer: {
+                    Text(L("Variables d’environnement arbitraires que Hermes ne reconnaît pas. Utilisez-les pour des skills, des serveurs MCP ou vos propres outils."))
                 }
-                if !otherRows.isEmpty { credentialSection("Autres", otherRows, empty: nil) }
+                if !otherRows.isEmpty { credentialSection(L("Autres"), otherRows, empty: nil) }
                 Section {
-                    Toggle("Afficher les options avancées", isOn: $showAdvanced)
-                } footer: { Text("Les modifications sont enregistrées immédiatement. Les sessions actives récupèrent les nouvelles clés automatiquement.") }
+                    Toggle(L("Afficher les options avancées"), isOn: $showAdvanced)
+                } footer: { Text(L("Les modifications sont enregistrées immédiatement. Les sessions actives récupèrent les nouvelles clés automatiquement.")) }
             }
-        }.modernList().navigationTitle("Clés et identifiants").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Clés et identifiants")).navigationBarTitleDisplayMode(.inline)
             .task(id: scope) { await reload() }
             .refreshable { await reload() }
             .sheet(isPresented: $adding) {
@@ -103,28 +103,28 @@ struct CredentialsSettingsView: View {
                         Image(systemName: "waveform").font(.system(size: 20, weight: .medium)).foregroundStyle(AppTheme.accent)
                             .frame(width: 36, height: 36).background(AppTheme.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 11))
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("ElevenLabs").font(.headline)
-                            AccountsStatusLabel(set: eleven?.isSet == true, text: eleven?.status ?? "Non définie")
+                            Text(L("ElevenLabs")).font(.headline)
+                            AccountsStatusLabel(set: eleven?.isSet == true, text: eleven?.status ?? L("Non définie"))
                         }
                     }
-                    Text("Active la voix ElevenLabs en streaming (synthèse) et la transcription en temps réel Scribe. La clé reste sur votre serveur Hermes.")
+                    Text(L("Active la voix ElevenLabs en streaming (synthèse) et la transcription en temps réel Scribe. La clé reste sur votre serveur Hermes."))
                         .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }.padding(.vertical, 6)
             }.accessibilityIdentifier("credential-elevenlabs")
             if eleven?.isSet == true, ttsProvider != "elevenlabs" || sttProvider != "elevenlabs" {
                 Button { voiceNotice = nil; offerVoice = true } label: {
-                    Label("Utiliser ElevenLabs pour la voix", systemImage: "speaker.wave.2")
+                    Label(L("Utiliser ElevenLabs pour la voix"), systemImage: "speaker.wave.2")
                 }.disabled(store.tools.busy || app.demo)
             }
             ForEach(voiceRows) { credentialLink($0) }
-        } header: { Text("Voix et audio") } footer: {
+        } header: { Text(L("Voix et audio")) } footer: {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Synthèse vocale : \(providerName(ttsProvider, fallback: "par défaut")) · Transcription : \(providerName(sttProvider, fallback: "détection automatique"))")
+                Text(L("Synthèse vocale : %@ · Transcription : %@", providerName(ttsProvider, fallback: L("par défaut")), providerName(sttProvider, fallback: L("détection automatique"))))
                 if let voiceNotice { Text(voiceNotice).foregroundStyle(AppTheme.accent) }
-                Text("OpenAI et xAI partagent la clé de leur fournisseur de modèles.")
+                Text(L("OpenAI et xAI partagent la clé de leur fournisseur de modèles."))
             }
         }
-        .appConfirm("Utiliser ElevenLabs pour la voix de « \(profileTitle) » ?", isPresented: $offerVoice) {
+        .appConfirm(L("Utiliser ElevenLabs pour la voix de « %@ » ?", profileTitle), isPresented: $offerVoice) {
             ForEach(Array(elevenFollowUp.actions.enumerated()), id: \.offset) { _, action in
                 Button(action.label) {
                     Task {
@@ -143,14 +143,14 @@ struct CredentialsSettingsView: View {
         let tools = store.tools
         let refresh: @MainActor () async -> Void = { await loadVoiceConfig() }
         return AccountsFollowUp(
-            title: "Faire d’ElevenLabs la voix de « \(profileTitle) » ?",
-            message: "Hermes utilisera ElevenLabs pour lire ses réponses. Vous pouvez aussi lui confier la transcription (Scribe). Ce choix est enregistré dans la configuration de cet agent.",
+            title: L("Faire d’ElevenLabs la voix de « %@ » ?", profileTitle),
+            message: L("Hermes utilisera ElevenLabs pour lire ses réponses. Vous pouvez aussi lui confier la transcription (Scribe). Ce choix est enregistré dans la configuration de cet agent."),
             actions: [
-                .init(label: "Voix (synthèse) seulement", done: "ElevenLabs est maintenant la voix de cet agent.") {
+                .init(label: L("Voix (synthèse) seulement"), done: "ElevenLabs est maintenant la voix de cet agent.") {
                     _ = try await tools.request("/api/config", method: "PUT", body: ["config": ["tts": ["provider": "elevenlabs"]]])
                     await refresh()
                 },
-                .init(label: "Voix et transcription", done: "ElevenLabs gère maintenant la voix et la transcription.") {
+                .init(label: L("Voix et transcription"), done: "ElevenLabs gère maintenant la voix et la transcription.") {
                     _ = try await tools.request("/api/config", method: "PUT",
                         body: ["config": ["tts": ["provider": "elevenlabs"], "stt": ["provider": "elevenlabs"]]])
                     await refresh()
@@ -192,8 +192,8 @@ struct CredentialsSettingsView: View {
     }
 
     private func providerName(_ value: String, fallback: String) -> String {
-        value.isEmpty ? fallback : (["elevenlabs": "ElevenLabs", "openai": "OpenAI", "edge": "Edge (gratuit)", "xai": "xAI", "mistral": "Mistral",
-                                     "groq": "Groq", "local": "Locale", "gemini": "Gemini", "minimax": "MiniMax", "deepinfra": "DeepInfra"][value] ?? value)
+        value.isEmpty ? fallback : (["elevenlabs": L("ElevenLabs"), "openai": L("OpenAI"), "edge": L("Edge (gratuit)"), "xai": "xAI", "mistral": L("Mistral"),
+                                     "groq": L("Groq"), "local": L("Locale"), "gemini": L("Gemini"), "minimax": L("MiniMax"), "deepinfra": L("DeepInfra")][value] ?? value)
     }
 
     private func reload() async {
@@ -225,23 +225,23 @@ private struct AccountsCustomKeySheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("p. ex. MY_SERVICE_API_KEY", text: $name).textInputAutocapitalization(.characters).autocorrectionDisabled()
+                    TextField(L("p. ex. MY_SERVICE_API_KEY"), text: $name).textInputAutocapitalization(.characters).autocorrectionDisabled()
                         .font(.body.monospaced())
-                } header: { Text("Nom de la variable") } footer: {
+                } header: { Text(L("Nom de la variable")) } footer: {
                     if !name.isEmpty && !valid {
-                        Text("Utilisez uniquement des lettres, des chiffres et des traits de soulignement (doit commencer par une lettre ou un trait de soulignement).")
+                        Text(L("Utilisez uniquement des lettres, des chiffres et des traits de soulignement (doit commencer par une lettre ou un trait de soulignement)."))
                             .foregroundStyle(AppTheme.accent)
                     }
                 }
                 Section {
-                    SecureField("Valeur", text: $value).textInputAutocapitalization(.never).autocorrectionDisabled()
-                } footer: { Text("Enregistrée dans le .env de « \(profileTitle) » sur le serveur, jamais sur cet iPhone.") }
+                    SecureField(L("Valeur"), text: $value).textInputAutocapitalization(.never).autocorrectionDisabled()
+                } footer: { Text(L("Enregistrée dans le .env de « %@ » sur le serveur, jamais sur cet iPhone.", profileTitle)) }
                 ToolFeedback(tools: store.tools)
-            }.modernList().navigationTitle("Clé personnalisée").navigationBarTitleDisplayMode(.inline)
+            }.modernList().navigationTitle(L("Clé personnalisée")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    AppToolbarItem(placement: .cancellationAction) { Button("Annuler") { value = ""; dismiss() } }
+                    AppToolbarItem(placement: .cancellationAction) { Button(L("Annuler")) { value = ""; dismiss() } }
                     AppToolbarItem(placement: .confirmationAction) {
-                        Button("Ajouter") {
+                        Button(L("Ajouter")) {
                             Task { if await store.save(name, value: value) { value = ""; dismiss() } }
                         }.disabled(!valid || value.trimmingCharacters(in: .whitespaces).isEmpty || store.tools.busy)
                     }

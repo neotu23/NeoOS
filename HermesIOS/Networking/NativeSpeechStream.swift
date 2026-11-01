@@ -99,7 +99,7 @@ final class NativeSpeechStream {
             guard error != nil else { return }
             Task { @MainActor [weak self] in
                 guard let self, self.generation == attempt, !self.ended else { return }
-                self.streamFailure = "La lecture vocale a été interrompue."; self.ended = true
+                self.streamFailure = L("La lecture vocale a été interrompue."); self.ended = true
             }
         }
     }
@@ -135,7 +135,7 @@ final class NativeSpeechStream {
                     }
                 case .data(let data):
                     let rate = try parser.binary()
-                    guard let playbackID else { throw RPCFailure("Flux vocal Hermes invalide.") }
+                    guard let playbackID else { throw RPCFailure(L("Flux vocal Hermes invalide.")) }
                     VoiceMetrics.shared.mark(.firstPCM)
                     let produced = try await audio.engine.enqueuePCM(data, sampleRate: rate, id: playbackID)
                     VoiceMetrics.shared.mark(.playbackStart)

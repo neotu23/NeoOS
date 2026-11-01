@@ -6,11 +6,11 @@ struct RoutinesView: View {
     @State private var loaded = false
     var body: some View {
         List { Group {
-            AppIntro("Les routines de \(model.agent?.title ?? "Hermes") continuent sur votre serveur, même quand Hermès iOS est fermé.")
+            AppIntro("Les routines de \(model.agent?.title ?? L("Hermes")) continuent sur votre serveur, même quand NeoOS est fermé.")
             if model.routines.isEmpty && !loaded && !model.demo {
                 SkeletonRows(count: 3)
             } else if model.routines.isEmpty {
-                ContentUnavailableView("Un rythme à inventer", systemImage: "sun.max", description: Text("Un briefing du matin, une veille, un bilan. Confiez une habitude à votre agent."))
+                ContentUnavailableView(L("Un rythme à inventer"), systemImage: "sun.max", description: Text(L("Un briefing du matin, une veille, un bilan. Confiez une habitude à votre agent.")))
             }
             ForEach(model.routines) { routine in
                 NavigationLink { RoutineDetailView(app: model, routine: routine) } label: {
@@ -19,32 +19,32 @@ struct RoutinesView: View {
                             Text(routine.name).font(.headline).lineLimit(1)
                             Spacer(minLength: 8)
                             if routine.paused || routine.completed {
-                                Text(routine.completed ? "Terminée" : "En pause").font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                                Text(routine.completed ? L("Terminée") : L("En pause")).font(.caption.weight(.medium)).foregroundStyle(.secondary)
                             }
                         }
                         Text(routine.prompt).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
                         Label(routine.scheduleSummary, systemImage: "clock").font(.caption).foregroundStyle(.secondary)
                         if !routine.paused, let next = routine.nextRunAt {
-                            Text("Prochaine : \(next.formatted(date: .abbreviated, time: .shortened))")
+                            Text(L("Prochaine : %@", next.formatted(date: .abbreviated, time: .shortened)))
                                 .font(.caption).foregroundStyle(AppTheme.accent)
                         }
                     }.padding(.vertical, 8)
                 }.swipeActions(edge: .leading, allowsFullSwipe: false) {
-                    Button(routine.paused ? "Reprendre" : "Pause", systemImage: routine.paused ? "play" : "pause") {
+                    Button(routine.paused ? L("Reprendre") : L("Pause"), systemImage: routine.paused ? "play" : "pause") {
                         Task { await model.toggleRoutine(routine) }
                     }.tint(AppTheme.accent).disabled(model.demo || routine.completed)
                 }
             }
             if model.routines.contains(where: { !$0.paused && $0.nextRunAt != nil }) {
-                Text("Les prochaines exécutions sont affichées à l’heure de cet iPhone.")
+                Text(L("Les prochaines exécutions sont affichées à l’heure de cet iPhone."))
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
 }.modernList()
-            .navigationTitle("Les routines").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L("Les routines")).navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 AppToolbarItem(placement: .primaryAction) {
-                    Button("Nouvelle routine", systemImage: "plus") { creating = true }.disabled(model.demo).accessibilityIdentifier("routine.add")
+                    Button(L("Nouvelle routine"), systemImage: "plus") { creating = true }.disabled(model.demo).accessibilityIdentifier("routine.add")
                 }
             }
             .task { await model.loadRoutines(); loaded = true }.refreshable { await model.loadRoutines() }
@@ -63,21 +63,21 @@ struct RoutineEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Une petite habitude") {
-                    TextField("Nom de la routine", text: $name).accessibilityIdentifier("routine.name")
-                    TextField("Que doit faire votre agent ?", text: $prompt, axis: .vertical).lineLimit(4...8).accessibilityIdentifier("routine.prompt")
+                Section(L("Une petite habitude")) {
+                    TextField(L("Nom de la routine"), text: $name).accessibilityIdentifier("routine.name")
+                    TextField(L("Que doit faire votre agent ?"), text: $prompt, axis: .vertical).lineLimit(4...8).accessibilityIdentifier("routine.prompt")
                 }
                 RoutineScheduleFields(schedule: $schedule)
                 Section {
-                    Label("Le résultat arrive dans le Bot Chat de cet agent.", systemImage: "bubble.left.and.bubble.right")
+                    Label(L("Le résultat arrive dans le Bot Chat de cet agent."), systemImage: "bubble.left.and.bubble.right")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
                 if let error { Text(error).foregroundStyle(AppTheme.accent) }
             }.modernList()
-                .navigationTitle("Nouvelle routine").navigationBarTitleDisplayMode(.inline)
+                .navigationTitle(L("Nouvelle routine")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     AppToolbarItem(placement: .cancellationAction) { AppCloseButton { dismiss() }.disabled(busy) }
-                    AppToolbarItem(placement: .confirmationAction) { Button(busy ? "Création…" : "Créer") { create() }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || schedule.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy).accessibilityIdentifier("routine.create") }
+                    AppToolbarItem(placement: .confirmationAction) { Button(busy ? L("Création…") : L("Créer")) { create() }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || schedule.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || busy).accessibilityIdentifier("routine.create") }
                 }
         }.presentationBackground(AppTheme.background).interactiveDismissDisabled(busy)
     }
@@ -116,28 +116,28 @@ struct RoutineScheduleFields: View {
     }
     var body: some View {
         Section {
-            AppPicker(title: "Rythme", selection: rhythm,
-                      options: RoutineSchedule.Rhythm.allCases.map { (value: $0.rawValue, label: $0.title) } + [(value: "custom", label: "Personnalisé")],
+            AppPicker(title: L("Rythme"), selection: rhythm,
+                      options: RoutineSchedule.Rhythm.allCases.map { (value: $0.rawValue, label: $0.title) } + [(value: "custom", label: L("Personnalisé"))],
                       identifier: "routine.rhythm")
             if !customized, let parsed {
                 if parsed.rhythm == .weekly {
-                    AppPicker(title: "Jour", selection: Binding(get: { parsed.weekday }, set: { value in
+                    AppPicker(title: L("Jour"), selection: Binding(get: { parsed.weekday }, set: { value in
                         var updated = parsed; updated.weekday = value; schedule = updated.expression
                     }), options: [1, 2, 3, 4, 5, 6, 0].map { (value: $0, label: RoutineSchedule.weekdays[$0].capitalized) })
                 }
                 if parsed.rhythm == .hourly {
-                    AppPicker(title: "À la minute", selection: Binding(get: { parsed.minute }, set: { value in
+                    AppPicker(title: L("À la minute"), selection: Binding(get: { parsed.minute }, set: { value in
                         var updated = parsed; updated.minute = value; schedule = updated.expression
                     }), options: (0..<60).map { (value: $0, label: String(format: "%02d", $0)) })
                 } else {
                     HStack(spacing: 8) {
-                        Text("Heure")
+                        Text(L("Heure"))
                         Spacer(minLength: 12)
-                        AppPicker(title: "Heure", selection: Binding(get: { parsed.hour }, set: { value in
+                        AppPicker(title: L("Heure"), selection: Binding(get: { parsed.hour }, set: { value in
                             var updated = parsed; updated.hour = value; schedule = updated.expression
                         }), options: (0..<24).map { (value: $0, label: String(format: "%02d", $0)) }, showsTitle: false, identifier: "routine.hour")
                         Text(":").foregroundStyle(.secondary)
-                        AppPicker(title: "Minute", selection: Binding(get: { parsed.minute }, set: { value in
+                        AppPicker(title: L("Minute"), selection: Binding(get: { parsed.minute }, set: { value in
                             var updated = parsed; updated.minute = value; schedule = updated.expression
                         }), options: (0..<60).map { (value: $0, label: String(format: "%02d", $0)) }, showsTitle: false, identifier: "routine.minute")
                     }.accessibilityElement(children: .contain).accessibilityIdentifier("routine.time")
@@ -148,16 +148,16 @@ struct RoutineScheduleFields: View {
             // overwrite the identifiers of the revealed fields (routine.rawSchedule).
             DisclosureGroup(isExpanded: $advanced) {
                 // One line: a schedule is a single expression, and Return must not insert a newline.
-                TextField("Horaire Hermès", text: Binding(get: { schedule }, set: { value in
+                TextField(L("Horaire Hermès"), text: Binding(get: { schedule }, set: { value in
                     schedule = value; customMode = true
                 }))
                     .font(.system(.body, design: .monospaced)).textInputAutocapitalization(.never).autocorrectionDisabled()
                     .accessibilityIdentifier("routine.rawSchedule")
-                Text("Expression cron, intervalle (every 4h), délai unique (in 30m) ou date ISO. Hermès valide l’horaire à l’enregistrement.")
+                Text(L("Expression cron, intervalle (every 4h), délai unique (in 30m) ou date ISO. Hermès valide l’horaire à l’enregistrement."))
                     .font(.caption).foregroundStyle(.secondary)
-            } label: { Text("Avancé").accessibilityIdentifier("routine.advanced") }
-        } header: { Text("Quand") }
-        footer: { Text("Les horaires suivent le fuseau configuré dans Hermès pour ce profil, pas celui de l’iPhone.") }
+            } label: { Text(L("Avancé")).accessibilityIdentifier("routine.advanced") }
+        } header: { Text(L("Quand")) }
+        footer: { Text(L("Les horaires suivent le fuseau configuré dans Hermès pour ce profil, pas celui de l’iPhone.")) }
         .onAppear { if !schedule.isEmpty, parsed == nil { advanced = true } }
         .onChange(of: schedule) { _, _ in if !schedule.isEmpty, parsed == nil { advanced = true } }
     }

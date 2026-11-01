@@ -10,7 +10,7 @@ struct ComposerState: Equatable {
     var chatError: String?
     var hasUnread = false
     var agentName = "default"
-    var agentTitle = "Hermes"
+    var agentTitle = L("Hermes")
     var voiceDisabled = false
     var attachDisabled = false
     var attachOpen = false
@@ -46,7 +46,7 @@ struct ChatComposerContainer: View {
             chatError: model.chatError,
             hasUnread: model.hasUnread(profile: model.profile),
             agentName: model.agent?.name ?? "default",
-            agentTitle: model.agent?.title ?? "Hermes",
+            agentTitle: model.agent?.title ?? L("Hermes"),
             voiceDisabled: model.sending || model.opening || running || (!model.demo && model.state != .connected),
             attachDisabled: model.sending || model.importingAttachments || attachments.count >= 4,
             attachOpen: attachOpen
@@ -101,18 +101,18 @@ struct ChatComposer: View, Equatable {
                         }
                     }.padding(.horizontal, 4).accessibilityIdentifier("pending-attachments")
                 }
-                if state.importing { ProgressView("Ajout…").font(.caption).padding(8) }
+                if state.importing { ProgressView(L("Ajout…")).font(.caption).padding(8) }
                 if let error = state.chatError {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "exclamationmark.circle").padding(.top, 12)
                         Text(error).font(.caption).padding(.vertical, 12).frame(maxWidth: .infinity, alignment: .leading)
                         Button { model.chatError = nil } label: { Image(systemName: "xmark").frame(width: 44, height: 44) }
-                            .accessibilityLabel("Fermer le message")
+                            .accessibilityLabel(L("Fermer le message"))
                     }.foregroundStyle(AppTheme.accent).padding(.leading, 8).accessibilityIdentifier("chat-error")
                 }
                 HStack(alignment: .bottom, spacing: 2) {
                     messageActions
-                    TextField("Demander à \(state.agentTitle)", text: $model.draft, axis: .vertical)
+                    TextField(L("Demander à %@", state.agentTitle), text: $model.draft, axis: .vertical)
                         .lineLimit(1...6).font(.body).focused(focused)
                         .padding(.vertical, 8).frame(minHeight: 44)
                         .accessibilityIdentifier("chat-composer")
@@ -137,7 +137,7 @@ struct ChatComposer: View, Equatable {
                 .rotationEffect(.degrees(state.attachOpen ? 45 : 0))
                 .frame(width: 44, height: 44).contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(state.attachDisabled && state.attachments.count < 4)
-            .accessibilityLabel(state.attachOpen ? "Fermer les pièces jointes" : "Ajouter une pièce jointe").accessibilityIdentifier("message-actions")
+            .accessibilityLabel(state.attachOpen ? L("Fermer les pièces jointes") : L("Ajouter une pièce jointe")).accessibilityIdentifier("message-actions")
     }
 
     /// Voice while the field is empty; send (or stop) as soon as there is something to send or a reply is running.
@@ -155,7 +155,7 @@ struct ChatComposer: View, Equatable {
             Image(systemName: "waveform").font(.system(size: 18, weight: .semibold)).foregroundStyle(.white)
                 .frame(width: 40, height: 40).background(AppTheme.accent, in: Circle())
                 .frame(width: 44, height: 44).contentShape(Rectangle())
-        }.buttonStyle(.plain).accessibilityLabel("Conversation vocale").accessibilityIdentifier("voice-mode")
+        }.buttonStyle(.plain).accessibilityLabel(L("Conversation vocale")).accessibilityIdentifier("voice-mode")
             .disabled(state.voiceDisabled).opacity(state.voiceDisabled ? 0.45 : 1)
     }
 
@@ -173,7 +173,7 @@ struct ChatComposer: View, Equatable {
                 .background(state.canSend || state.running ? AppTheme.accent : Color.secondary.opacity(0.28), in: Circle())
                 .frame(width: 44, height: 44).contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(!state.canSend && !state.running)
-            .accessibilityLabel(state.running ? "Arrêter la réponse" : "Envoyer")
+            .accessibilityLabel(state.running ? L("Arrêter la réponse") : L("Envoyer"))
             .accessibilityIdentifier("send-message")
     }
 }

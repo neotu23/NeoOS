@@ -15,10 +15,10 @@ struct VoiceConversationSettingsView: View {
     @State private var live: JSONValue = .null
     private static let listening = ["voice.silence_duration", "voice.silence_threshold", "voice.barge_in", "voice.barge_in_grace_seconds",
                                     "voice.barge_in_threshold_multiplier", "voice.stop_phrases", "voice.max_recording_seconds"]
-    private static let modes: [(id: String, title: String, detail: String)] = [
-        ("chained", "Enchaîné", "La reconnaissance vocale transcrit votre voix, Hermes répond, puis la synthèse vocale lit la réponse, avec les fournisseurs choisis dans « Reconnaissance vocale » et « Synthèse vocale »."),
-        ("gpt-live", "GPT-Live", "Un modèle vocal OpenAI full-duplex écoute et parle en temps réel, et confie chaque vraie demande à Hermes avec tous ses outils. Nécessite une clé OpenAI ; la couche vocale est facturée 0,05 $ par minute.")
-    ]
+    private static var modes: [(id: String, title: String, detail: String)] {
+        [("chained", L("Enchaîné"), L("La reconnaissance vocale transcrit votre voix, Hermes répond, puis la synthèse vocale lit la réponse, avec les fournisseurs choisis dans « Reconnaissance vocale » et « Synthèse vocale ».")),
+         ("gpt-live", L("GPT-Live"), L("Un modèle vocal OpenAI full-duplex écoute et parle en temps réel, et confie chaque vraie demande à Hermes avec tous ses outils. Nécessite une clé OpenAI ; la couche vocale est facturée 0,05 $ par minute."))]
+    }
     private var mode: String { store.value("voice.voice_chat_mode").string.isEmpty ? "chained" : store.value("voice.voice_chat_mode").string }
     private var pageKeys: [String] { store.keys(on: "voice.conversation") }
 
@@ -35,23 +35,23 @@ struct VoiceConversationSettingsView: View {
                     }
                     if mode == "gpt-live", !live.isNull {
                         CredentialStatusRow(store: store, configured: live["available"].bool,
-                                            configuredText: "Clé OpenAI disponible sur le serveur",
-                                            missingText: "Aucune clé OpenAI : GPT-Live ne peut pas démarrer.")
+                                            configuredText: L("Clé OpenAI disponible sur le serveur"),
+                                            missingText: L("Aucune clé OpenAI : GPT-Live ne peut pas démarrer."))
                     }
-                } header: { Text("Mode de conversation") }
+                } header: { Text(L("Mode de conversation")) }
             }
             if mode == "gpt-live" {
                 let liveKeys = pageKeys.filter { $0.hasPrefix("voice.gpt_live.") }
-                if !liveKeys.isEmpty { Section("GPT-Live") { ConfigFieldRows(store: store, keys: liveKeys) } }
+                if !liveKeys.isEmpty { Section(L("GPT-Live")) { ConfigFieldRows(store: store, keys: liveKeys) } }
             }
             Section {
                 ConfigFieldRows(store: store, keys: Self.listening)
-            } header: { Text("Écoute et interruption") } footer: {
-                Text("Ces réglages décident quand Hermes considère que vous avez fini de parler, et comment vous pouvez lui couper la parole.")
+            } header: { Text(L("Écoute et interruption")) } footer: {
+                Text(L("Ces réglages décident quand Hermes considère que vous avez fini de parler, et comment vous pouvez lui couper la parole."))
             }
             let others = pageKeys.filter { $0 != "voice.voice_chat_mode" && !$0.hasPrefix("voice.gpt_live.") && !Self.listening.contains($0) }
-            if !others.isEmpty { Section("Autres réglages") { ConfigFieldRows(store: store, keys: others) } }
-        }.modernList().navigationTitle("Conversation vocale").navigationBarTitleDisplayMode(.inline)
+            if !others.isEmpty { Section(L("Autres réglages")) { ConfigFieldRows(store: store, keys: others) } }
+        }.modernList().navigationTitle(L("Conversation vocale")).navigationBarTitleDisplayMode(.inline)
             .task { await loadStatus() }
             .onChange(of: mode) { Task { await loadStatus() } }
     }
@@ -77,29 +77,29 @@ struct TranscriptionSettingsView: View {
             if store.value("stt.enabled") != false {
                 Section {
                     VoiceProviderPicker(store: store, key: "stt.provider", providers: providers) { name in
-                        SettingsCatalog.liveTranscriptionProviders.contains(name) ? "En direct" : nil
+                        SettingsCatalog.liveTranscriptionProviders.contains(name) ? L("En direct") : nil
                     }
-                } header: { Text("Fournisseur") } footer: {
-                    Text("« En direct » : le texte s’affiche pendant que vous parlez. Les fournisseurs sans clé tournent sur le serveur Hermes.")
+                } header: { Text(L("Fournisseur")) } footer: {
+                    Text(L("« En direct » : le texte s’affiche pendant que vous parlez. Les fournisseurs sans clé tournent sur le serveur Hermes."))
                 }
                 if store.fields["stt.streaming"] != nil {
                     Section {
                         ConfigFieldRow(store: store, key: "stt.streaming")
                         if store.value("stt.streaming").bool && !SettingsCatalog.liveTranscriptionProviders.contains(provider) {
-                            Label("\(SettingsCatalog.optionLabel(provider, key: "stt.provider")) ne propose pas de session en direct : Hermes transcrira l’enregistrement complet.", systemImage: "info.circle")
+                            Label(L("%@ ne propose pas de session en direct : Hermes transcrira l’enregistrement complet.", SettingsCatalog.optionLabel(provider, key: "stt.provider")), systemImage: "info.circle")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         if provider == "openai" { ConfigFieldRows(store: store, keys: ["stt.openai.streaming_model"]) }
-                    } header: { Text("Transcription en direct") }
+                    } header: { Text(L("Transcription en direct")) }
                 }
                 let specific = pageKeys.filter { providerSpecific($0) == provider && $0 != "stt.openai.streaming_model" }
                 if !specific.isEmpty {
-                    Section("Réglages \(SettingsCatalog.optionLabel(provider, key: "stt.provider"))") { ConfigFieldRows(store: store, keys: specific) }
+                    Section(L("Réglages %@", SettingsCatalog.optionLabel(provider, key: "stt.provider"))) { ConfigFieldRows(store: store, keys: specific) }
                 }
                 let general = pageKeys.filter { providerSpecific($0) == nil && !["stt.enabled", "stt.provider", "stt.streaming"].contains($0) }
-                if !general.isEmpty { Section("Général") { ConfigFieldRows(store: store, keys: general) } }
+                if !general.isEmpty { Section(L("Général")) { ConfigFieldRows(store: store, keys: general) } }
             }
-        }.modernList().navigationTitle("Reconnaissance vocale").navigationBarTitleDisplayMode(.inline)
+        }.modernList().navigationTitle(L("Reconnaissance vocale")).navigationBarTitleDisplayMode(.inline)
             .task { await store.loadCredentials() }
     }
 }
@@ -122,10 +122,10 @@ struct SpeechSettingsView: View {
             Section { ConfigFieldRows(store: store, keys: ["voice.auto_tts"]) }
             Section {
                 VoiceProviderPicker(store: store, key: "tts.provider", providers: providers) { name in
-                    SettingsCatalog.streamingSpeechProviders.contains(name) ? "Flux continu" : "Par phrase"
+                    SettingsCatalog.streamingSpeechProviders.contains(name) ? L("Flux continu") : L("Par phrase")
                 }
-            } header: { Text("Fournisseur") } footer: {
-                Text("« Flux continu » : l’audio arrive par morceaux dès les premiers mots, pour la latence la plus faible. « Par phrase » : chaque phrase est synthétisée puis lue.")
+            } header: { Text(L("Fournisseur")) } footer: {
+                Text(L("« Flux continu » : l’audio arrive par morceaux dès les premiers mots, pour la latence la plus faible. « Par phrase » : chaque phrase est synthétisée puis lue."))
             }
             let specific = pageKeys.filter { providerSpecific($0) == SettingsCatalog.settingsSection(provider) }
             if !specific.isEmpty {
@@ -136,20 +136,20 @@ struct SpeechSettingsView: View {
                         else if key == "tts.gemini.model" { ConfigFieldRow(store: store, key: key, options: Self.geminiModels) }
                         else { ConfigFieldRow(store: store, key: key) }
                     }
-                } header: { Text("Réglages \(SettingsCatalog.optionLabel(provider, key: "tts.provider"))") } footer: {
+                } header: { Text(L("Réglages %@", SettingsCatalog.optionLabel(provider, key: "tts.provider"))) } footer: {
                     if provider == "gemini-voix" {
-                        Text("Voix : le nom exact de votre voix Voice design dans AI Studio, son identifiant voice_…, ou une voix de base. Modèle conseillé : gemini-3.8-flash-lite-tts. Nécessite le plugin gemini-voix sur le serveur et GEMINI_API_KEY dans les clés de ce profil.")
+                        Text(L("Voix : le nom exact de votre voix Voice design dans AI Studio, son identifiant voice_…, ou une voix de base. Modèle conseillé : gemini-3.8-flash-lite-tts. Nécessite le plugin gemini-voix sur le serveur et GEMINI_API_KEY dans les clés de ce profil."))
                     } else if provider == "elevenlabs", !voices.isNull, !voices["available"].bool {
                         Text(voices["error"].string == "unauthorized"
-                             ? "La clé ElevenLabs a été refusée : les voix de votre compte ne peuvent pas être listées."
-                             : "Ajoutez la clé ElevenLabs dans « Clés et identifiants » pour choisir parmi les voix de votre compte.")
+                             ? L("La clé ElevenLabs a été refusée : les voix de votre compte ne peuvent pas être listées.")
+                             : L("Ajoutez la clé ElevenLabs dans « Clés et identifiants » pour choisir parmi les voix de votre compte."))
                     }
                 }
             }
             VoiceSampleSection(store: store)
             let general = pageKeys.filter { providerSpecific($0) == nil && !["voice.auto_tts", "tts.provider"].contains($0) }
-            if !general.isEmpty { Section("Général") { ConfigFieldRows(store: store, keys: general) } }
-        }.modernList().navigationTitle("Synthèse vocale").navigationBarTitleDisplayMode(.inline)
+            if !general.isEmpty { Section(L("Général")) { ConfigFieldRows(store: store, keys: general) } }
+        }.modernList().navigationTitle(L("Synthèse vocale")).navigationBarTitleDisplayMode(.inline)
             .task { await store.loadCredentials(); await loadVoices() }
             .onChange(of: provider) { Task { await loadVoices() } }
     }
@@ -230,15 +230,15 @@ struct VoiceProviderPicker: View {
         }
         if store.hasCredential(for: selected) == false {
             CredentialStatusRow(store: store, configured: false, configuredText: "",
-                                missingText: "Clé \(SettingsCatalog.voiceKeyNames(selected).last ?? "") manquante sur le serveur.")
+                                missingText: L("Clé %@ manquante sur le serveur.", SettingsCatalog.voiceKeyNames(selected).last ?? ""))
         }
     }
 
     private func status(_ name: String, _ credential: Bool?) -> String? {
-        if SettingsCatalog.keylessVoiceProviders.contains(name) { return "Sur le serveur, sans clé" }
+        if SettingsCatalog.keylessVoiceProviders.contains(name) { return L("Sur le serveur, sans clé") }
         switch credential {
-        case true: return "Clé configurée"
-        case false: return "Clé manquante"
+        case true: return L("Clé configurée")
+        case false: return L("Clé manquante")
         default: return nil
         }
     }
@@ -257,7 +257,7 @@ struct CredentialStatusRow: View {
             VStack(alignment: .leading, spacing: 6) {
                 Label(missingText, systemImage: "key").font(.caption).foregroundStyle(AppTheme.accent)
                 NavigationLink { CredentialsSettingsView(app: store.app, profile: store.profile) } label: {
-                    Text("Ajouter la clé dans « Clés et identifiants »").font(.caption.weight(.medium))
+                    Text(L("Ajouter la clé dans « Clés et identifiants »")).font(.caption.weight(.medium))
                 }
             }
         }
@@ -269,26 +269,26 @@ struct CredentialStatusRow: View {
 /// so a voice can be auditioned from the phone before a call. Billed like any spoken reply.
 private struct VoiceSampleSection: View {
     let store: AgentConfigStore
-    @State private var text = "Bonjour! C’est moi, ton agent. Dis-moi ce que je peux faire pour toi aujourd’hui."
+    @State private var text = L("Bonjour! C’est moi, ton agent. Dis-moi ce que je peux faire pour toi aujourd’hui.")
     @State private var busy = false
     @State private var failure: String?
     @State private var player: AVAudioPlayer?
 
     var body: some View {
         Section {
-            TextField("Phrase à faire lire", text: $text, axis: .vertical).lineLimit(1...4)
+            TextField(L("Phrase à faire lire"), text: $text, axis: .vertical).lineLimit(1...4)
             Button {
                 Task { await play() }
             } label: {
                 HStack {
-                    Label(busy ? "Synthèse…" : "Tester la voix", systemImage: "play.circle")
+                    Label(busy ? L("Synthèse…") : L("Tester la voix"), systemImage: "play.circle")
                     if busy { Spacer(); ProgressView() }
                 }
             }.disabled(busy || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.app.demo)
                 .accessibilityIdentifier("voice-sample")
             if let failure { Text(failure).font(.caption).foregroundStyle(.red) }
-        } header: { Text("Essayer") } footer: {
-            Text("Lit la phrase avec le fournisseur et la voix enregistrés pour cet agent. Enregistrez d’abord un changement de voix pour l’entendre.")
+        } header: { Text(L("Essayer")) } footer: {
+            Text(L("Lit la phrase avec le fournisseur et la voix enregistrés pour cet agent. Enregistrez d’abord un changement de voix pour l’entendre."))
         }
     }
 
@@ -299,7 +299,7 @@ private struct VoiceSampleSection: View {
             let result = try await store.tools.request("/api/audio/speak", method: "POST", body: ["text": .string(text)])
             let url = result["data_url"].string
             guard let comma = url.firstIndex(of: ","), let audio = Data(base64Encoded: String(url[url.index(after: comma)...])) else {
-                throw RPCFailure("Hermes n’a pas renvoyé d’audio.")
+                throw RPCFailure(L("Hermes n’a pas renvoyé d’audio."))
             }
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
             try AVAudioSession.sharedInstance().setActive(true)

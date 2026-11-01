@@ -37,81 +37,81 @@ struct RoutineDetailView: View {
     var body: some View {
         Form {
             Section {
-                Label(jobMissing ? "Routine non enregistrée" : (completed ? "Terminée" : (paused ? "En pause" : "Active sur Hermès")), systemImage: jobMissing ? "tray" : (completed ? "checkmark.circle" : (paused ? "pause.circle" : "clock")))
+                Label(jobMissing ? "Routine non enregistrée" : (completed ? "Terminée" : (paused ? L("En pause") : L("Active sur Hermès"))), systemImage: jobMissing ? "tray" : (completed ? "checkmark.circle" : (paused ? "pause.circle" : "clock")))
                     .foregroundStyle(jobMissing || paused ? Color.secondary : AppTheme.accent)
                 if !jobMissing, !paused, let next = RoutineSchedule.nextRun(from: job) {
-                    LabeledContent("Prochaine exécution") {
+                    LabeledContent(L("Prochaine exécution")) {
                         Text(next, format: .dateTime.day().month().hour().minute()).multilineTextAlignment(.trailing)
                     }
-                    Text("À l’heure de cet iPhone.").font(.caption).foregroundStyle(.secondary)
+                    Text(L("À l’heure de cet iPhone.")).font(.caption).foregroundStyle(.secondary)
                 }
                 if !job["last_error"].string.isEmpty {
                     Label(job["last_error"].string, systemImage: "exclamationmark.circle")
                         .font(.caption).foregroundStyle(AppTheme.accent)
                 }
             }
-            Section("La routine") {
-                TextField("Nom", text: $name)
-                TextField("Instruction", text: $prompt, axis: .vertical).lineLimit(4...10)
+            Section(L("La routine")) {
+                TextField(L("Nom"), text: $name)
+                TextField(L("Instruction"), text: $prompt, axis: .vertical).lineLimit(4...10)
             }.disabled(!canMutate)
             RoutineScheduleFields(schedule: $schedule).disabled(!canMutate)
             ToolFeedback(tools: tools)
             if let status { Text(status).font(.subheadline).foregroundStyle(AppTheme.accent) }
             Section {
-                Button(paused ? "Reprendre la routine" : "Mettre en pause", systemImage: paused ? "play.circle" : "pause.circle") {
+                Button(paused ? L("Reprendre la routine") : L("Mettre en pause"), systemImage: paused ? "play.circle" : "pause.circle") {
                     Task { await tools.perform {
                         guard !jobMissing else { return }
                         job = try await tools.request(path + (paused ? "/resume" : "/pause"), method: "POST", body: [:])
-                        status = paused ? "Routine mise en pause" : "Routine réactivée"
+                        status = paused ? L("Routine mise en pause") : L("Routine réactivée")
                         await tools.app.loadRoutines()
                     } }
                 }.disabled(!canMutate || completed)
                 if verifyingTrigger || jobMissing {
-                    Button("Actualiser le résultat", systemImage: "arrow.clockwise") { Task { await load() } }
+                    Button(L("Actualiser le résultat"), systemImage: "arrow.clockwise") { Task { await load() } }
                         .disabled(tools.busy)
                 } else {
-                    Button("Lancer maintenant", systemImage: "play") { triggering = true }
+                    Button(L("Lancer maintenant"), systemImage: "play") { triggering = true }
                         .disabled(!canMutate).accessibilityIdentifier("routine.trigger")
                 }
             }
-            Section("Dernières exécutions") {
-                if runs.isEmpty { Text("Aucune exécution disponible.").foregroundStyle(.secondary) }
+            Section(L("Dernières exécutions")) {
+                if runs.isEmpty { Text(L("Aucune exécution disponible.")).foregroundStyle(.secondary) }
                 ForEach(Array(runs.enumerated()), id: \.offset) { _, run in runRow(run) }
             }
             Section {
-                Button("Supprimer la routine", role: .destructive) { deleting = true }.disabled(!canMutate)
+                Button(L("Supprimer la routine"), role: .destructive) { deleting = true }.disabled(!canMutate)
             }
         }
         .modernList().navigationTitle(name.isEmpty ? routine.name : name).navigationBarTitleDisplayMode(.inline)
         .toolbar {
             AppToolbarItem(placement: .confirmationAction) {
-                Button("Enregistrer") { Task { await save() } }
+                Button(L("Enregistrer")) { Task { await save() } }
                     .disabled(!canMutate || !valid || !hasChanges)
             }
         }
         .task { await load() }.refreshable { await load() }
-        .appConfirm("Supprimer cette routine sur Hermès ?", isPresented: $deleting) {
-            Button("Supprimer", role: .destructive) { Task { await tools.perform {
+        .appConfirm(L("Supprimer cette routine sur Hermès ?"), isPresented: $deleting) {
+            Button(L("Supprimer"), role: .destructive) { Task { await tools.perform {
                 guard !jobMissing else { return }
                 _ = try await tools.request(path, method: "DELETE"); await tools.app.loadRoutines(); dismiss()
             } } }
         }
-        .appConfirm("Exécuter la version enregistrée de cette routine ?", isPresented: $triggering) {
-            Button("Exécuter") { Task { await trigger() } }
+        .appConfirm(L("Exécuter la version enregistrée de cette routine ?"), isPresented: $triggering) {
+            Button(L("Exécuter")) { Task { await trigger() } }
         } message: {
-            if paused { Text("Hermès réactive aussi la routine mise en pause lors d’un lancement manuel.") }
-            else if hasChanges { Text("Les modifications non enregistrées ne seront pas utilisées.") }
+            if paused { Text(L("Hermès réactive aussi la routine mise en pause lors d’un lancement manuel.")) }
+            else if hasChanges { Text(L("Les modifications non enregistrées ne seront pas utilisées.")) }
         }
     }
 
     @ViewBuilder private func runRow(_ run: JSONValue) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(run["title"].string.isEmpty ? "Exécution" : run["title"].string)
+                Text(run["title"].string.isEmpty ? L("Exécution") : run["title"].string)
                     .font(.subheadline.weight(.medium)).lineLimit(1)
                 Spacer()
                 if run["is_active"].bool {
-                    Text("En cours").font(.caption).foregroundStyle(AppTheme.accent)
+                    Text(L("En cours")).font(.caption).foregroundStyle(AppTheme.accent)
                 }
             }
             if run["started_at"].double > 0 {
@@ -121,7 +121,7 @@ struct RoutineDetailView: View {
             if !run["preview"].string.isEmpty { Text(run["preview"].string).font(.subheadline).foregroundStyle(.secondary).lineLimit(3) }
             if !run["error"].string.isEmpty { Text(run["error"].string).font(.caption).foregroundStyle(AppTheme.accent) }
             if let conversation = RoutineSchedule.runConversation(run, profile: tools.profile) {
-                Button("Voir le résultat", systemImage: "arrow.up.right") {
+                Button(L("Voir le résultat"), systemImage: "arrow.up.right") {
                     Task {
                         guard !openingResult, !tools.app.sending, !tools.app.voiceActive,
                               tools.app.activeConnection?.id == tools.connectionID else { return }
@@ -149,7 +149,7 @@ struct RoutineDetailView: View {
             if schedule != originalSchedule { updates["schedule"] = .string(schedule.trimmingCharacters(in: .whitespacesAndNewlines)) }
             job = try await tools.request(path, method: "PUT", body: ["updates": .object(updates)])
             name = cleanedName; originalName = name; originalPrompt = prompt; originalSchedule = schedule
-            status = "Modifications enregistrées"
+            status = L("Modifications enregistrées")
             await tools.app.loadRoutines()
         }
     }
@@ -157,17 +157,17 @@ struct RoutineDetailView: View {
     private func trigger() async {
         guard !jobMissing else { return }
         await tools.perform {
-            status = "Hermès exécute la routine. Vous pouvez revenir au chat."
+            status = L("Hermès exécute la routine. Vous pouvez revenir au chat.")
             do {
                 job = try await tools.request(path + "/trigger", method: "POST", body: [:])
-                status = "Exécution terminée. Retrouvez son résultat ci-dessous."
+                status = L("Exécution terminée. Retrouvez son résultat ci-dessous.")
                 await loadRuns()
                 await tools.app.loadRoutines()
             } catch let error as URLError where [.timedOut, .networkConnectionLost, .notConnectedToInternet].contains(error.code) {
                 // The native endpoint waits for the whole run. A transport timeout
                 // is not evidence that the server stopped, so never submit it again.
                 verifyingTrigger = true
-                status = "La connexion a été interrompue. La routine peut continuer sur Hermès. Actualisez son résultat avant de la relancer."
+                status = L("La connexion a été interrompue. La routine peut continuer sur Hermès. Actualisez son résultat avant de la relancer.")
                 await load()
             }
         }
@@ -179,7 +179,7 @@ struct RoutineDetailView: View {
             if jobMissing { status = nil }
             jobMissing = false
             if verifyingTrigger, row["last_run_at"] != job["last_run_at"], !row["last_run_at"].isNull {
-                verifyingTrigger = false; status = "Le résultat de l’exécution est disponible."
+                verifyingTrigger = false; status = L("Le résultat de l’exécution est disponible.")
             }
             job = row
             if !loaded {
@@ -197,7 +197,7 @@ struct RoutineDetailView: View {
             // produces the same response. Keep the history without inferring success.
             jobMissing = true
             tools.error = nil
-            status = "Cette routine n’est plus enregistrée. Ses exécutions restent accessibles."
+            status = L("Cette routine n’est plus enregistrée. Ses exécutions restent accessibles.")
             await loadRuns()
         } catch { tools.error = error.localizedDescription }
     }

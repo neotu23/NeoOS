@@ -8,10 +8,10 @@ public struct RoutineSchedule: Equatable, Sendable {
 
         public var title: String {
             switch self {
-            case .daily: "Tous les jours"
-            case .weekdays: "Du lundi au vendredi"
-            case .weekly: "Chaque semaine"
-            case .hourly: "Toutes les heures"
+            case .daily: L("Tous les jours")
+            case .weekdays: L("Du lundi au vendredi")
+            case .weekly: L("Chaque semaine")
+            case .hourly: L("Toutes les heures")
             }
         }
     }
@@ -55,16 +55,19 @@ public struct RoutineSchedule: Equatable, Sendable {
     }
 
     public var summary: String {
-        let time = minute == 0 ? "\(hour) h" : String(format: "%d h %02d", hour, minute)
+        let time = minute == 0 ? L("%lld h", hour) : String(format: "%d h %02d", hour, minute)
         switch rhythm {
-        case .daily: return "Tous les jours à \(time)"
-        case .weekdays: return "Du lundi au vendredi à \(time)"
-        case .weekly: return "Le \(Self.weekdays[weekday]) à \(time)"
-        case .hourly: return minute == 0 ? "Toutes les heures" : "Toutes les heures, à la minute \(minute)"
+        case .daily: return L("Tous les jours à %@", time)
+        case .weekdays: return L("Du lundi au vendredi à %@", time)
+        case .weekly: return L("Le %@ à %@", L(Self.weekdays[weekday]), time)
+        case .hourly: return minute == 0 ? L("Toutes les heures") : L("Toutes les heures, à la minute %lld", minute)
         }
     }
 
-    public static let weekdays = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"]
+    /// Weekday names in the selected interface language, Sunday first as the cron convention wants.
+    public static var weekdays: [String] {
+        ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"].map(L)
+    }
 
     /// Prefer the canonical schedule object over its display string. In particular,
     /// converting a saved one-shot back to “in 30m” would shift its execution.
@@ -77,7 +80,7 @@ public struct RoutineSchedule: Equatable, Sendable {
             let minutes = schedule["minutes"].double
             if minutes > 0 {
                 let value = minutes.rounded() == minutes ? String(format: "%.0f", minutes) : String(minutes)
-                return "every \(value)m"
+                return L("every %@m", value)
             }
         case "once": if !schedule["run_at"].string.isEmpty { return schedule["run_at"].string }
         default: break

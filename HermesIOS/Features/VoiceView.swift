@@ -26,7 +26,7 @@ struct VoiceView: View {
                             .aspectRatio(1, contentMode: .fit)
                             .padding(.bottom, 18)
                         VStack(spacing: 10) {
-                            Text(app.demo ? "Parlons simplement." : conversation.title)
+                            Text(app.demo ? L("Parlons simplement.") : conversation.title)
                                 .font(.system(.title, design: .serif)).tracking(-0.4)
                                 .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                                 .id(conversation.title).transition(.opacity)
@@ -53,11 +53,11 @@ struct VoiceView: View {
             .toolbar {
                 AppToolbarItem(placement: .topBarTrailing) {
                     AppMenu {
-                        AppMenuButton("GPT-Live · Stone · français") { conversation.chooseLive() }
+                        AppMenuButton(L("GPT-Live · Stone · français")) { conversation.chooseLive() }
                             .accessibilityIdentifier("voice-use-live")
-                        AppMenuButton("Voix standard pour cet appel") { conversation.chooseStandard() }
+                        AppMenuButton(L("Voix standard pour cet appel")) { conversation.chooseStandard() }
                     } label: {
-                        Label(conversation.isLive ? "GPT-Live" : "Mode vocal", systemImage: "slider.horizontal.3")
+                        Label(conversation.isLive ? L("GPT-Live") : L("Mode vocal"), systemImage: "slider.horizontal.3")
                     }.disabled(app.demo).accessibilityIdentifier("voice-engine")
                 }
             }
@@ -67,7 +67,7 @@ struct VoiceView: View {
             .onDisappear { UIApplication.shared.isIdleTimerDisabled = false; conversation.pause() }
             .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)) { notification in
                 if (notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt) == AVAudioSession.InterruptionType.began.rawValue {
-                    conversation.systemInterrupted("L’audio a été interrompu. Réactivez le micro quand vous êtes prêt.")
+                    conversation.systemInterrupted(L("L’audio a été interrompu. Réactivez le micro quand vous êtes prêt."))
                 }
             }
             // Route changes (speaker, Bluetooth, headphones) are absorbed by the audio engine,
@@ -75,10 +75,10 @@ struct VoiceView: View {
             .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.routeChangeNotification)) { notification in
                 guard let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
                       AVAudioSession.RouteChangeReason(rawValue: raw) == .noSuitableRouteForCategory else { return }
-                conversation.systemInterrupted("Aucune sortie audio utilisable. Réactivez le micro quand l’iPhone est prêt.")
+                conversation.systemInterrupted(L("Aucune sortie audio utilisable. Réactivez le micro quand l’iPhone est prêt."))
             }
             .onReceive(NotificationCenter.default.publisher(for: AVAudioSession.mediaServicesWereResetNotification)) { _ in
-                conversation.systemInterrupted("L’audio de l’iPhone a redémarré. Réactivez le micro pour reprendre.")
+                conversation.systemInterrupted(L("L’audio de l’iPhone a redémarré. Réactivez le micro pour reprendre."))
             }
         }.presentationBackground(AppTheme.background)
     }
@@ -87,7 +87,7 @@ struct VoiceView: View {
     private var agentContext: some View {
         HStack(spacing: 10) {
             AgentAvatar(name: app.profile, size: 28)
-            Text(app.agent?.title ?? "Hermes").font(.subheadline.weight(.medium))
+            Text(app.agent?.title ?? L("Hermes")).font(.subheadline.weight(.medium))
             if !app.demo {
                 TimelineView(.periodic(from: startedAt, by: 1)) { timeline in
                     let seconds = max(0, Int(timeline.date.timeIntervalSince(startedAt)))
@@ -99,23 +99,23 @@ struct VoiceView: View {
             .background(AppTheme.surface, in: Capsule())
             .overlay(Capsule().strokeBorder(AppTheme.line))
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Conversation vocale avec \(app.agent?.title ?? "Hermes")")
+            .accessibilityLabel("Conversation vocale avec \(app.agent?.title ?? L("Hermes"))")
     }
 
     /// A hint only when the call needs the person to do something; the state title says the rest.
     private var guidance: String? {
-        if app.demo { return "Connectez votre Hermes pour parler avec votre agent." }
-        if conversation.requiresStandardMode { return "Choisissez la voix standard pour cet appel." }
-        if conversation.inputMuted { return "Vous pouvez continuer à écouter." }
+        if app.demo { return L("Connectez votre Hermes pour parler avec votre agent.") }
+        if conversation.requiresStandardMode { return L("Choisissez la voix standard pour cet appel.") }
+        if conversation.inputMuted { return L("Vous pouvez continuer à écouter.") }
         switch conversation.phase {
-        case .waiting: return "Répondez dans le chat. La conversation reprendra ensuite."
-        case .paused: return "Réactivez le micro quand vous êtes prêt."
+        case .waiting: return L("Répondez dans le chat. La conversation reprendra ensuite.")
+        case .paused: return L("Réactivez le micro quand vous êtes prêt.")
         default: return nil
         }
     }
 
     private var microphoneState: some View {
-        Label(conversation.inputMuted ? "Micro coupé" : "En pause",
+        Label(conversation.inputMuted ? L("Micro coupé") : L("En pause"),
               systemImage: conversation.inputMuted ? "mic.slash" : "pause.circle")
             .font(.caption.weight(.medium)).foregroundStyle(conversation.inputMuted ? AppTheme.accent : .secondary)
             .padding(.horizontal, 13).padding(.vertical, 8)
@@ -125,9 +125,9 @@ struct VoiceView: View {
 
     private var standardModePrompt: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("GPT-Live n’est pas disponible pour cet appel. Vous pouvez réessayer depuis le menu vocal ou utiliser la voix standard.")
+            Text(L("GPT-Live n’est pas disponible pour cet appel. Vous pouvez réessayer depuis le menu vocal ou utiliser la voix standard."))
                 .font(.subheadline).foregroundStyle(.secondary)
-            Button("Utiliser la voix standard") { conversation.chooseStandard() }
+            Button(L("Utiliser la voix standard")) { conversation.chooseStandard() }
                 .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
                 .accessibilityIdentifier("voice-standard-mode")
         }.padding(18).background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 20))
@@ -154,7 +154,7 @@ struct VoiceView: View {
     }
 
     private var microphoneLabel: String {
-        conversation.phase == .paused ? "Reprendre" : conversation.inputMuted ? "Activer le micro" : "Couper le micro"
+        conversation.phase == .paused ? "Reprendre" : conversation.inputMuted ? L("Activer le micro") : L("Couper le micro")
     }
 
     private var callControls: some View {
@@ -166,7 +166,7 @@ struct VoiceView: View {
                         .foregroundStyle(conversation.inputMuted ? AppTheme.accent : .primary)
                         .background(conversation.inputMuted ? AppTheme.accent.opacity(0.1) : AppTheme.surface, in: Circle())
                         .overlay(Circle().strokeBorder(AppTheme.line))
-                    Text(typeSize.isAccessibilitySize ? "Micro" : microphoneLabel)
+                    Text(typeSize.isAccessibilitySize ? L("Micro") : microphoneLabel)
                         .font(.caption.weight(.medium)).foregroundStyle(.secondary).multilineTextAlignment(.center)
                 }.frame(maxWidth: .infinity)
             }.accessibilityLabel(microphoneLabel).accessibilityIdentifier("voice-listen")
@@ -175,9 +175,9 @@ struct VoiceView: View {
                 VStack(spacing: 9) {
                     Image(systemName: "xmark").font(.system(size: 20, weight: .medium)).frame(width: 64, height: 64)
                         .foregroundStyle(.white).background(AppTheme.accent, in: Circle())
-                    Text(typeSize.isAccessibilitySize ? "Fin" : "Terminer").font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                    Text(typeSize.isAccessibilitySize ? L("Fin") : L("Terminer")).font(.caption.weight(.medium)).foregroundStyle(.secondary)
                 }.frame(maxWidth: .infinity)
-            }.accessibilityLabel("Terminer et revenir au chat").accessibilityIdentifier("return-to-chat")
+            }.accessibilityLabel(L("Terminer et revenir au chat")).accessibilityIdentifier("return-to-chat")
         }.buttonStyle(.plain).foregroundStyle(.primary)
             .frame(maxWidth: 320).padding(.horizontal, 30).padding(.top, 10).padding(.bottom, 14)
             .frame(maxWidth: .infinity).barBackground()

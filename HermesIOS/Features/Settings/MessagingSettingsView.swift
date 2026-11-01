@@ -27,7 +27,7 @@ struct MessagingSettingsView: View {
 
     var body: some View {
         List {
-            AppSearchSection(text: $search, prompt: "Rechercher dans la messagerie…")
+            AppSearchSection(text: $search, prompt: L("Rechercher dans la messagerie…"))
             if app.demo { AccountsDemoNotice() }
             AccountsScopeSection(app: app, profile: $scope,
                 note: "Jetons, listes d’accès et canaux de « \(profileTitle) ». Ils vivent dans le .env et le config.yaml de ce profil sur le serveur ; deux agents ne peuvent pas partager le même bot.")
@@ -36,17 +36,17 @@ struct MessagingSettingsView: View {
             if !store.loaded && store.loading {
                 SkeletonRows(count: 4)
             }
-            if !active.isEmpty { Section("Vos canaux") { ForEach(active, id: \.["id"].string) { link($0) } } }
-            if !available.isEmpty { Section("Disponibles") { ForEach(available, id: \.["id"].string) { link($0) } } }
-        }.modernList().navigationTitle("Messagerie").navigationBarTitleDisplayMode(.inline)
+            if !active.isEmpty { Section(L("Vos canaux")) { ForEach(active, id: \.["id"].string) { link($0) } } }
+            if !available.isEmpty { Section(L("Disponibles")) { ForEach(available, id: \.["id"].string) { link($0) } } }
+        }.modernList().navigationTitle(L("Messagerie")).navigationBarTitleDisplayMode(.inline)
             .task(id: scope) {
                 if store.tools.profile != scope { store = AccountsMessagingStore(tools: NativeToolSession(app, profile: scope)) }
                 await store.load()
             }
             .refreshable { await store.load() }
-            .appConfirm("Redémarrer le gateway de messagerie ?", isPresented: $restarting) {
-                Button(store.gatewayRunning ? "Redémarrer maintenant" : "Démarrer") { Task { await store.restartGateway() } }
-            } message: { Text("Les canaux de « \(profileTitle) » se reconnectent avec les nouveaux paramètres. Les conversations en cours sur Telegram, Discord… peuvent être brièvement interrompues.") }
+            .appConfirm(L("Redémarrer le gateway de messagerie ?"), isPresented: $restarting) {
+                Button(store.gatewayRunning ? L("Redémarrer maintenant") : L("Démarrer")) { Task { await store.restartGateway() } }
+            } message: { Text(L("Les canaux de « %@ » se reconnectent avec les nouveaux paramètres. Les conversations en cours sur Telegram, Discord… peuvent être brièvement interrompues.", profileTitle)) }
     }
 
     @ViewBuilder private var gatewaySection: some View {
@@ -54,16 +54,16 @@ struct MessagingSettingsView: View {
             HStack(spacing: 12) {
                 Image(systemName: "point.3.connected.trianglepath.dotted").foregroundStyle(AppTheme.accent).frame(width: 26)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Gateway de messagerie").font(.subheadline.weight(.medium))
-                    AccountsStatusLabel(set: store.gatewayRunning, text: store.gatewayRunning ? "En marche" : "Gateway de messagerie arrêté")
+                    Text(L("Gateway de messagerie")).font(.subheadline.weight(.medium))
+                    AccountsStatusLabel(set: store.gatewayRunning, text: store.gatewayRunning ? L("En marche") : L("Gateway de messagerie arrêté"))
                 }
                 Spacer(minLength: 8)
-                Button(store.gatewayRunning ? "Redémarrer" : "Démarrer") { restarting = true }
+                Button(store.gatewayRunning ? L("Redémarrer") : L("Démarrer")) { restarting = true }
                     .font(.caption.weight(.semibold)).buttonStyle(.borderless).disabled(store.tools.busy || app.demo)
             }.padding(.vertical, 4)
             if let notice = store.notice { Text(notice).font(.caption).foregroundStyle(.secondary) }
         } footer: {
-            if store.restartNeeded { Text("Enregistré. Redémarrez le gateway de messagerie pour appliquer les nouveaux paramètres.").foregroundStyle(AppTheme.accent) }
+            if store.restartNeeded { Text(L("Enregistré. Redémarrez le gateway de messagerie pour appliquer les nouveaux paramètres.")).foregroundStyle(AppTheme.accent) }
         }
     }
 
@@ -88,9 +88,9 @@ struct MessagingSettingsView: View {
     }
 
     static func state(_ value: String) -> String {
-        ["connected": "Connecté", "connecting": "Connexion", "disabled": "Désactivé", "fatal": "Erreur",
-         "gateway_stopped": "Gateway de messagerie arrêté", "not_configured": "Nécessite une configuration",
-         "pending_restart": "Redémarrage requis", "retrying": "Nouvelle tentative", "startup_failed": "Échec du démarrage"][value] ?? (value.isEmpty ? "Inconnu" : value)
+        ["connected": L("Connecté"), "connecting": L("Connexion"), "disabled": L("Désactivé"), "fatal": L("Erreur"),
+         "gateway_stopped": L("Gateway de messagerie arrêté"), "not_configured": L("Nécessite une configuration"),
+         "pending_restart": L("Redémarrage requis"), "retrying": L("Nouvelle tentative"), "startup_failed": L("Échec du démarrage")][value] ?? (value.isEmpty ? L("Inconnu") : value)
     }
 
     static func symbol(_ id: String) -> String {
@@ -136,7 +136,7 @@ final class AccountsMessagingStore {
             var body: [String: JSONValue] = ["env": .object(env.mapValues(JSONValue.string)), "clear_env": .array(clear.map(JSONValue.string))]
             if let enabled { body["enabled"] = .bool(enabled) }
             let result = try await tools.request("/api/messaging/platforms/" + Accounts.segment(id), method: "PUT", body: .object(body))
-            if result["hot_served"].bool { notice = "Appliqué au gateway en cours d’exécution." }
+            if result["hot_served"].bool { notice = L("Appliqué au gateway en cours d’exécution.") }
             else if gatewayRunning { restartNeeded = true }
             done = true
         }
@@ -148,7 +148,7 @@ final class AccountsMessagingStore {
         await tools.perform {
             _ = try await tools.request(gatewayRunning ? "/api/gateway/restart" : "/api/gateway/start", method: "POST")
             restartNeeded = false
-            notice = gatewayRunning ? "Redémarrage du gateway en cours…" : "Démarrage du gateway en cours…"
+            notice = gatewayRunning ? L("Redémarrage du gateway en cours…") : L("Démarrage du gateway en cours…")
         }
         try? await Task.sleep(for: .seconds(4))
         await load()
@@ -171,11 +171,11 @@ final class AccountsMessagingStore {
     }
 
     private static let demo: [JSONValue] = [
-        ["id": "telegram", "name": "Telegram", "description": "Discutez avec votre agent depuis Telegram.", "enabled": true, "configured": true,
-         "gateway_running": true, "state": "connected", "env_vars": [["key": "TELEGRAM_BOT_TOKEN", "required": true, "is_set": true, "is_password": true, "prompt": "Jeton du bot", "redacted_value": "«redacted:123…wxyz»"]]],
-        ["id": "discord", "name": "Discord", "description": "Un bot Discord pour vos serveurs.", "enabled": false, "configured": false, "state": "disabled",
-         "env_vars": [["key": "DISCORD_BOT_TOKEN", "required": true, "is_set": false, "is_password": true, "prompt": "Jeton du bot"]]],
-        ["id": "slack", "name": "Slack", "description": "Votre agent dans Slack.", "enabled": false, "configured": false, "state": "disabled", "env_vars": []]
+        ["id": "telegram", "name": .string(L("Telegram")), "description": .string(L("Discutez avec votre agent depuis Telegram.")), "enabled": true, "configured": true,
+         "gateway_running": true, "state": "connected", "env_vars": [["key": "TELEGRAM_BOT_TOKEN", "required": true, "is_set": true, "is_password": true, "prompt": .string(L("Jeton du bot")), "redacted_value": .string(L("«redacted:123…wxyz»"))]]],
+        ["id": "discord", "name": .string(L("Discord")), "description": .string(L("Un bot Discord pour vos serveurs.")), "enabled": false, "configured": false, "state": "disabled",
+         "env_vars": [["key": "DISCORD_BOT_TOKEN", "required": true, "is_set": false, "is_password": true, "prompt": .string(L("Jeton du bot"))]]],
+        ["id": "slack", "name": .string(L("Slack")), "description": .string(L("Votre agent dans Slack.")), "enabled": false, "configured": false, "state": "disabled", "env_vars": []]
     ]
 }
 
@@ -222,27 +222,27 @@ private struct AccountsPlatformView: View {
                     if !platform["error_message"].string.isEmpty { Text(platform["error_message"].string).font(.caption).foregroundStyle(AppTheme.accent) }
                     if let hint { Text(hint).font(.caption).foregroundStyle(.secondary) }
                 }.padding(.vertical, 4)
-                Toggle("Activé", isOn: Binding(get: { platform["enabled"].bool }, set: { value in
+                Toggle(L("Activé"), isOn: Binding(get: { platform["enabled"].bool }, set: { value in
                     Task { await store.update(platformID, enabled: value) }
                 })).disabled(store.tools.busy || store.tools.app.demo)
                 if let docs = URL(string: platform["docs_url"].string), docs.scheme == "https" {
-                    Link(destination: docs) { Label("Ouvrir le guide de configuration", systemImage: "book") }
+                    Link(destination: docs) { Label(L("Ouvrir le guide de configuration"), systemImage: "book") }
                 }
             } footer: {
-                if !platform["ingress_url"].string.isEmpty { Text("Servi sur le listener partagé du gateway à \(platform["ingress_url"].string)") }
+                if !platform["ingress_url"].string.isEmpty { Text(L("Servi sur le listener partagé du gateway à %@", platform["ingress_url"].string)) }
             }
             if platformID == "telegram" {
                 Section {
-                    Button { telegramSetup = true } label: { Label("Créer un bot avec Telegram", systemImage: "paperplane") }
+                    Button { telegramSetup = true } label: { Label(L("Créer un bot avec Telegram"), systemImage: "paperplane") }
                         .disabled(store.tools.app.demo)
-                } footer: { Text("Ouvre Telegram sur cet iPhone pour créer le bot, puis Hermes enregistre son jeton et vous autorise automatiquement.") }
+                } footer: { Text(L("Ouvre Telegram sur cet iPhone pour créer le bot, puis Hermes enregistre son jeton et vous autorise automatiquement.")) }
             }
             ToolFeedback(tools: store.tools)
             let basic = fields.filter { !$0["advanced"].bool }, advanced = fields.filter { $0["advanced"].bool }
             if fields.isEmpty {
-                Section { Text("Cette plateforme ne nécessite pas de jeton ici. Utilisez le guide de configuration ci-dessus, puis activez-la.").font(.subheadline).foregroundStyle(.secondary) }
+                Section { Text(L("Cette plateforme ne nécessite pas de jeton ici. Utilisez le guide de configuration ci-dessus, puis activez-la.")).font(.subheadline).foregroundStyle(.secondary) }
             }
-            if !basic.isEmpty { Section("Identifiants") { ForEach(basic, id: \.["key"].string) { fieldRow($0) } } }
+            if !basic.isEmpty { Section(L("Identifiants")) { ForEach(basic, id: \.["key"].string) { fieldRow($0) } } }
             if !advanced.isEmpty {
                 Section {
                     DisclosureGroup("Avancé (\(advanced.count))", isExpanded: $showAdvanced) { ForEach(advanced, id: \.["key"].string) { fieldRow($0) } }
@@ -250,14 +250,14 @@ private struct AccountsPlatformView: View {
             }
             if !fields.isEmpty {
                 Section {
-                    Button("Enregistrer les modifications") {
+                    Button(L("Enregistrer les modifications")) {
                         let env = changes, clear = clearedLists
                         Task { if await store.update(platformID, env: env, clear: clear) { drafts = [:] } }
                     }.disabled((changes.isEmpty && clearedLists.isEmpty) || store.tools.busy || store.tools.app.demo)
-                } footer: { Text("Les valeurs secrètes sont envoyées au serveur de « \(profileTitle) » puis effacées de ce formulaire.") }
+                } footer: { Text(L("Les valeurs secrètes sont envoyées au serveur de « %@ » puis effacées de ce formulaire.", profileTitle)) }
             }
             Section {
-                Button { Task { await test() } } label: { Label("Tester la connexion", systemImage: "checkmark.seal") }
+                Button { Task { await test() } } label: { Label(L("Tester la connexion"), systemImage: "checkmark.seal") }
                     .disabled(store.tools.busy || store.tools.app.demo)
                 if let testResult { Label(testResult.text, systemImage: testResult.ok ? "checkmark.circle" : "exclamationmark.triangle").font(.subheadline).foregroundStyle(testResult.ok ? .green : .orange) }
             }
@@ -265,8 +265,8 @@ private struct AccountsPlatformView: View {
         }.modernList().navigationTitle(name).navigationBarTitleDisplayMode(.inline)
             .onDisappear { drafts = [:] }
             .sheet(isPresented: $telegramSetup) { AccountsTelegramSetup(store: store) }
-            .appConfirm("Effacer \(clearing ?? "") ?", isPresented: Binding(get: { clearing != nil }, set: { if !$0 { clearing = nil } })) {
-                Button("Effacer", role: .destructive) {
+            .appConfirm(L("Effacer %@ ?", clearing ?? ""), isPresented: Binding(get: { clearing != nil }, set: { if !$0 { clearing = nil } })) {
+                Button(L("Effacer"), role: .destructive) {
                     guard let key = clearing else { return }; clearing = nil
                     Task { await store.update(platformID, clear: [key]) }
                 }
@@ -275,8 +275,8 @@ private struct AccountsPlatformView: View {
 
     private var hint: String? {
         switch platform["state"].string {
-        case "pending_restart": "Redémarrez le gateway (écran précédent) pour appliquer ce changement."
-        case "gateway_stopped": "Démarrez le gateway (écran précédent) pour vous connecter."
+        case "pending_restart": L("Redémarrez le gateway (écran précédent) pour appliquer ce changement.")
+        case "gateway_stopped": L("Démarrez le gateway (écran précédent) pour vous connecter.")
         default: nil
         }
     }
@@ -286,26 +286,26 @@ private struct AccountsPlatformView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Text(field["prompt"].string.isEmpty ? key : field["prompt"].string).font(.subheadline.weight(.medium))
-                if field["required"].bool { Text("Requis").font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent) }
+                if field["required"].bool { Text(L("Requis")).font(.caption2.weight(.semibold)).foregroundStyle(AppTheme.accent) }
             }
             Text(key).font(.caption2.monospaced()).foregroundStyle(.tertiary)
             if field["is_list"].bool {
-                TextField("Identifiants séparés par des virgules", text: Binding(get: { drafts[key] ?? field["value"].string }, set: { drafts[key] = $0 }))
+                TextField(L("Identifiants séparés par des virgules"), text: Binding(get: { drafts[key] ?? field["value"].string }, set: { drafts[key] = $0 }))
                     .textInputAutocapitalization(.never).autocorrectionDisabled().font(.callout.monospaced())
             } else if field["is_password"].bool {
-                SecureField(field["is_set"].bool ? "Remplacer la valeur actuelle" : "Coller la valeur", text: Binding(get: { drafts[key] ?? "" }, set: { drafts[key] = $0 }))
+                SecureField(field["is_set"].bool ? L("Remplacer la valeur actuelle") : L("Coller la valeur"), text: Binding(get: { drafts[key] ?? "" }, set: { drafts[key] = $0 }))
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
             } else {
-                TextField(field["is_set"].bool ? "Remplacer la valeur actuelle" : "Valeur", text: Binding(get: { drafts[key] ?? "" }, set: { drafts[key] = $0 }))
+                TextField(field["is_set"].bool ? L("Remplacer la valeur actuelle") : L("Valeur"), text: Binding(get: { drafts[key] ?? "" }, set: { drafts[key] = $0 }))
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
             }
             HStack {
                 if !field["is_list"].bool {
-                    AccountsStatusLabel(set: field["is_set"].bool, text: field["is_set"].bool ? "Identifiants définis \(Accounts.maskedHint(field["redacted_value"].string))" : "Non défini")
+                    AccountsStatusLabel(set: field["is_set"].bool, text: field["is_set"].bool ? L("Identifiants définis %@", Accounts.maskedHint(field["redacted_value"].string)) : L("Non défini"))
                 }
                 Spacer(minLength: 0)
                 if field["is_set"].bool && !field["is_list"].bool {
-                    Button("Effacer", role: .destructive) { clearing = key }.font(.caption).buttonStyle(.borderless)
+                    Button(L("Effacer"), role: .destructive) { clearing = key }.font(.caption).buttonStyle(.borderless)
                 }
             }
             if !field["help"].string.isEmpty || !field["description"].string.isEmpty {
@@ -317,27 +317,27 @@ private struct AccountsPlatformView: View {
     @ViewBuilder private var pairingSections: some View {
         let pending = store.pending(for: platformID), approved = store.approved(for: platformID)
         if !pending.isEmpty {
-            Section("Demandes en attente (\(pending.count))") {
+            Section(L("Demandes en attente (%lld)", pending.count)) {
                 ForEach(Array(pending.enumerated()), id: \.offset) { _, request in
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(request["user_name"].string.isEmpty ? request["user_id"].string : request["user_name"].string).font(.subheadline)
-                            Text(request["age_minutes"].int < 1 ? "à l’instant" : "il y a \(request["age_minutes"].int) min").font(.caption).foregroundStyle(.secondary)
+                            Text(request["age_minutes"].int < 1 ? L("à l’instant") : L("il y a %lld min", request["age_minutes"].int)).font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
-                        Button("Approuver") { Task { await store.approve(request) } }.buttonStyle(.borderless)
+                        Button(L("Approuver")) { Task { await store.approve(request) } }.buttonStyle(.borderless)
                             .disabled(store.tools.busy || request["request_id"].string.isEmpty)
                     }
                 }
             }
         }
         if !approved.isEmpty {
-            Section("Utilisateurs approuvés (\(approved.count))") {
+            Section(L("Utilisateurs approuvés (%lld)", approved.count)) {
                 ForEach(Array(approved.enumerated()), id: \.offset) { _, user in
                     HStack {
                         Text(user["user_name"].string.isEmpty ? user["user_id"].string : user["user_name"].string).font(.subheadline)
                         Spacer()
-                        Button("Révoquer", role: .destructive) { Task { await store.revoke(user) } }.buttonStyle(.borderless).disabled(store.tools.busy)
+                        Button(L("Révoquer"), role: .destructive) { Task { await store.revoke(user) } }.buttonStyle(.borderless).disabled(store.tools.busy)
                     }
                 }
             }
@@ -348,7 +348,7 @@ private struct AccountsPlatformView: View {
         testResult = nil
         do {
             let result = try await store.tools.request("/api/messaging/platforms/" + Accounts.segment(platformID) + "/test", method: "POST")
-            testResult = (true, result["message"].string.isEmpty ? "Connecté." : result["message"].string)
+            testResult = (true, result["message"].string.isEmpty ? L("Connecté.") : result["message"].string)
         } catch { testResult = (false, error.localizedDescription) }
     }
 }
@@ -358,7 +358,7 @@ private struct AccountsTelegramSetup: View {
     let store: AccountsMessagingStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @State private var botName = "Hermes Agent"
+    @State private var botName = L("Hermes Agent")
     @State private var pairing: JSONValue = .null
     @State private var ready: JSONValue = .null
     @State private var status = "idle"
@@ -369,29 +369,29 @@ private struct AccountsTelegramSetup: View {
             Form {
                 if status == "idle" || status == "error" {
                     Section {
-                        TextField("Nom du bot", text: $botName)
-                    } footer: { Text("Telegram s’ouvre pour créer le bot. Revenez ensuite ici : Hermes récupère son jeton automatiquement.") }
-                    Button("Ouvrir Telegram") { Task { await start() } }.disabled(botName.trimmingCharacters(in: .whitespaces).isEmpty)
+                        TextField(L("Nom du bot"), text: $botName)
+                    } footer: { Text(L("Telegram s’ouvre pour créer le bot. Revenez ensuite ici : Hermes récupère son jeton automatiquement.")) }
+                    Button(L("Ouvrir Telegram")) { Task { await start() } }.disabled(botName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
                 if status == "waiting" {
                     Section {
-                        HStack { ProgressView(); Text("En attente de Telegram…").foregroundStyle(.secondary) }
-                        if let link = URL(string: pairing["deep_link"].string) { Button { openURL(link) } label: { Label("Rouvrir Telegram", systemImage: "paperplane") } }
-                    } footer: { Text("Suivez les étapes dans Telegram pour créer \(pairing["suggested_username"].string.isEmpty ? "le bot" : "@" + pairing["suggested_username"].string).") }
+                        HStack { ProgressView(); Text(L("En attente de Telegram…")).foregroundStyle(.secondary) }
+                        if let link = URL(string: pairing["deep_link"].string) { Button { openURL(link) } label: { Label(L("Rouvrir Telegram"), systemImage: "paperplane") } }
+                    } footer: { Text(L("Suivez les étapes dans Telegram pour créer %@.", pairing["suggested_username"].string.isEmpty ? L("le bot") : "@" + pairing["suggested_username"].string)) }
                 }
                 if status == "ready" {
                     Section {
-                        Label("Bot \(ready["bot_username"].string.isEmpty ? "" : "@" + ready["bot_username"].string) prêt", systemImage: "checkmark.circle").foregroundStyle(.green)
-                        Button("Enregistrer et m’autoriser") { Task { await apply() } }.disabled(store.tools.busy)
-                    } footer: { Text("Seul votre compte Telegram (ID \(ready["owner_user_id"].displayText)) pourra parler à ce bot. Le gateway redémarre ensuite.") }
+                        Label(L("Bot %@ prêt", ready["bot_username"].string.isEmpty ? "" : "@" + ready["bot_username"].string), systemImage: "checkmark.circle").foregroundStyle(.green)
+                        Button(L("Enregistrer et m’autoriser")) { Task { await apply() } }.disabled(store.tools.busy)
+                    } footer: { Text(L("Seul votre compte Telegram (ID %@) pourra parler à ce bot. Le gateway redémarre ensuite.", ready["owner_user_id"].displayText)) }
                 }
-                if status == "done" { Section { Label(message ?? "Telegram est configuré.", systemImage: "checkmark.circle.fill").foregroundStyle(.green) } }
+                if status == "done" { Section { Label(message ?? L("Telegram est configuré."), systemImage: "checkmark.circle.fill").foregroundStyle(.green) } }
                 if let message, status == "error" { Section { Text(message).foregroundStyle(AppTheme.accent) } }
                 ToolFeedback(tools: store.tools)
-            }.modernList().navigationTitle("Configurer Telegram").navigationBarTitleDisplayMode(.inline)
+            }.modernList().navigationTitle(L("Configurer Telegram")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     AppToolbarItem(placement: .cancellationAction) {
-                        Button(status == "done" ? "Terminé" : "Annuler") { Task { await cancel(); dismiss() } }
+                        Button(status == "done" ? L("Terminé") : L("Annuler")) { Task { await cancel(); dismiss() } }
                     }
                 }
                 .task(id: pairing["pairing_id"].string) { await poll() }
@@ -426,7 +426,7 @@ private struct AccountsTelegramSetup: View {
             let result = try await store.tools.request(pairingPath + "/apply", method: "POST",
                 body: ["allowed_user_ids": [.string(ready["owner_user_id"].displayText)]])
             status = "done"
-            message = result["needs_restart"].bool ? "Enregistré. Redémarrez le gateway de messagerie pour connecter le bot." : "Telegram est configuré et le gateway redémarre."
+            message = result["needs_restart"].bool ? L("Enregistré. Redémarrez le gateway de messagerie pour connecter le bot.") : L("Telegram est configuré et le gateway redémarre.")
         }
         await store.load()
     }

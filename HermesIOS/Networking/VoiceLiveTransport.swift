@@ -16,7 +16,7 @@ final class VoiceLiveTransport: NSObject {
     private var microphone: RTCAudioTrack?
     private var closed = false
     private var receipts = VoiceLiveReceipts()
-    private let logger = Logger(subsystem: "org.hermesios.HermesIOS", category: "VoiceLive")
+    private let logger = Logger(subsystem: "org.hermesios.HermesIOS", category: L("VoiceLive"))
     private let clockStart = ProcessInfo.processInfo.systemUptime
 
     func mark(_ stage: String) {
@@ -56,7 +56,7 @@ final class VoiceLiveTransport: NSObject {
     func start(history: JSONValue, exchange: @MainActor (JSONValue) async throws -> JSONValue) async throws {
         let permission = await AVAudioApplication.requestRecordPermission()
         try check()
-        guard permission else { throw RPCFailure("Autorisez le microphone dans les réglages de l’iPhone.") }
+        guard permission else { throw RPCFailure(L("Autorisez le microphone dans les réglages de l’iPhone.")) }
         let audio = RTCAudioSession.sharedInstance()
         audio.lockForConfiguration()
         let settings = RTCAudioSessionConfiguration.webRTC()
@@ -68,7 +68,7 @@ final class VoiceLiveTransport: NSObject {
         let config = RTCConfiguration()
         config.sdpSemantics = .unifiedPlan
         guard let peer = factory.peerConnection(with: config, constraints: RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil), delegate: self) else {
-            throw RPCFailure("Impossible de préparer l’audio en direct.")
+            throw RPCFailure(L("Impossible de préparer l’audio en direct."))
         }
         self.peer = peer
         let track = factory.audioTrack(withTrackId: "hermes-microphone")
@@ -76,12 +76,12 @@ final class VoiceLiveTransport: NSObject {
         microphone = track
         peer.add(track, streamIds: ["hermes-voice"])
         let channel = peer.dataChannel(forLabel: "oai-events", configuration: RTCDataChannelConfiguration())
-        guard let channel else { throw RPCFailure("Impossible de préparer GPT-Live.") }
+        guard let channel else { throw RPCFailure(L("Impossible de préparer GPT-Live.")) }
         self.channel = channel; channel.delegate = self
         let offer: String = try await withCheckedThrowingContinuation { continuation in
-            peer.offer(for: RTCMediaConstraints(mandatoryConstraints: ["OfferToReceiveAudio": "true"], optionalConstraints: nil)) { description, error in
+            peer.offer(for: RTCMediaConstraints(mandatoryConstraints: [L("OfferToReceiveAudio"): "true"], optionalConstraints: nil)) { description, error in
                 if let description { continuation.resume(returning: description.sdp) }
-                else { continuation.resume(throwing: RPCFailure(error?.localizedDescription ?? "Offre audio indisponible.")) }
+                else { continuation.resume(throwing: RPCFailure(error?.localizedDescription ?? L("Offre audio indisponible."))) }
             }
         }
         try check()
@@ -90,15 +90,15 @@ final class VoiceLiveTransport: NSObject {
         while peer.iceGatheringState != .complete && Date() < deadline {
             try await Task.sleep(for: .milliseconds(50)); try check()
         }
-        guard let sdp = peer.localDescription?.sdp else { throw RPCFailure("Offre audio indisponible.") }
+        guard let sdp = peer.localDescription?.sdp else { throw RPCFailure(L("Offre audio indisponible.")) }
         let result = try await exchange(["sdp": .string(sdp), "history": history])
         try check()
-        guard result["ok"].bool, !result["transport"]["sdp"].string.isEmpty else { throw RPCFailure("Hermes n’a pas pu ouvrir GPT-Live.") }
+        guard result["ok"].bool, !result["transport"]["sdp"].string.isEmpty else { throw RPCFailure(L("Hermes n’a pas pu ouvrir GPT-Live.")) }
         try await setDescription(result["transport"]["sdp"].string, local: false)
         let readyDeadline = Date().addingTimeInterval(30)
         while !started {
             try check()
-            guard Date() < readyDeadline else { throw RPCFailure("GPT-Live n’a pas démarré. Vérifiez la connexion et l’accès au modèle sur le serveur.") }
+            guard Date() < readyDeadline else { throw RPCFailure(L("GPT-Live n’a pas démarré. Vérifiez la connexion et l’accès au modèle sur le serveur.")) }
             try await Task.sleep(for: .milliseconds(50))
         }
     }
@@ -121,7 +121,7 @@ final class VoiceLiveTransport: NSObject {
         try check()
         guard started, let channel, channel.readyState == .open,
               channel.bufferedAmount < 256_000, channel.sendData(RTCDataBuffer(data: try event.data(), isBinary: false)) else {
-            throw RPCFailure("La liaison vocale a été interrompue. La réponse d’Hermes reste dans le chat.")
+            throw RPCFailure(L("La liaison vocale a été interrompue. La réponse d’Hermes reste dans le chat."))
         }
         receipts.sent(event, now: ProcessInfo.processInfo.systemUptime)
         if event["type"].string == "session.commentary.append" { mark("commentary_sent") }
@@ -150,7 +150,7 @@ final class VoiceLiveTransport: NSObject {
         receipts.receive(event)
         switch event["type"].string {
         case "session.started": started = true
-        case "session.closed": failure = "La conversation GPT-Live est terminée. Réactivez le micro pour reprendre."
+        case "session.closed": failure = L("La conversation GPT-Live est terminée. Réactivez le micro pour reprendre.")
         case "session.commentary.appended": mark("commentary_received")
         case "session.output_transcript.delta": mark("spoken_transcript")
         case "session.delegation.created": mark("delegation_received")
@@ -168,7 +168,7 @@ extension VoiceLiveTransport: RTCDataChannelDelegate, RTCPeerConnectionDelegate 
         let ended = dataChannel.readyState == .closed
         Task { @MainActor [weak self] in
             guard let self, !self.closed, ended else { return }
-            self.failure = "La liaison GPT-Live a été fermée."
+            self.failure = L("La liaison GPT-Live a été fermée.")
         }
     }
     nonisolated func dataChannel(_ dataChannel: RTCDataChannel, didReceiveMessageWith buffer: RTCDataBuffer) {
@@ -179,7 +179,7 @@ extension VoiceLiveTransport: RTCDataChannelDelegate, RTCPeerConnectionDelegate 
         let failed = state == .failed || state == .disconnected
         Task { @MainActor [weak self] in
             guard let self, !self.closed, failed else { return }
-            self.failure = "La connexion audio GPT-Live a été interrompue."
+            self.failure = L("La connexion audio GPT-Live a été interrompue.")
         }
     }
     nonisolated func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}

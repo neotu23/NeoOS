@@ -16,9 +16,9 @@ struct AttachPanel: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            item("Appareil photo", symbol: "camera", enabled: cameraAvailable && remaining > 0, id: "attach-camera") { choose(.camera) }
-            item("Photos", symbol: "photo.on.rectangle", enabled: remaining > 0, id: "attach-photos") { choose(.photos) }
-            item("Fichiers", symbol: "doc", enabled: remaining > 0, id: "attach-files") { choose(.files) }
+            item(L("Appareil photo"), symbol: "camera", enabled: cameraAvailable && remaining > 0, id: "attach-camera") { choose(.camera) }
+            item(L("Photos"), symbol: "photo.on.rectangle", enabled: remaining > 0, id: "attach-photos") { choose(.photos) }
+            item(L("Fichiers"), symbol: "doc", enabled: remaining > 0, id: "attach-files") { choose(.files) }
         }
         .padding(10)
         .background(AppTheme.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))

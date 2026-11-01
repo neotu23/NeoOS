@@ -28,7 +28,7 @@ final class VoiceBench {
     ]
 
     private static let chunk = 0.02
-    private(set) var status = "Prêt"
+    private(set) var status = L("Prêt")
 
     /// `--voice-bench [--bench-profile name] [--bench-repeats n] [--bench-hold] [--bench-only id,id]`
     static func autorun(_ app: AppModel) async {
@@ -50,12 +50,12 @@ final class VoiceBench {
         metrics.holdingLineEnabled = holding
         let deadline = Date().addingTimeInterval(60)
         while app.state != .connected, Date() < deadline { try? await Task.sleep(for: .milliseconds(250)) }
-        guard app.state == .connected else { await finish("Échec : pas de connexion à Hermes."); return }
+        guard app.state == .connected else { await finish(L("Échec : pas de connexion à Hermes.")); return }
         if let profile, profile != app.profile { await app.changeProfile(profile) }
         let name = app.profile
         let conversation = VoiceConversation(app)
         conversation.start(standardMode: true)
-        guard await wait(timeout: 40, { conversation.phase == .listening }) else { await finish("Échec : la conversation vocale ne démarre pas."); conversation.pause(); return }
+        guard await wait(timeout: 40, { conversation.phase == .listening }) else { await finish(L("Échec : la conversation vocale ne démarre pas.")); conversation.pause(); return }
         conversation.audio.engine.setBenchInput(true)
         let rate = conversation.audio.engine.inputSampleRate
         let list = Self.scenarios.filter { ($0.onlyFor == nil || $0.onlyFor == name) && (only == nil || only!.contains($0.id)) }

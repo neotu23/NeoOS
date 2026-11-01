@@ -55,15 +55,15 @@ final class HermesHTTP {
         }
         try Task.checkCancellation()
         let (data, response) = try await session.data(for: request)
-        guard let response = response as? HTTPURLResponse else { throw RPCFailure("Réponse Hermes invalide.") }
+        guard let response = response as? HTTPURLResponse else { throw RPCFailure(L("Réponse Hermes invalide.")) }
         if response.statusCode == 401 || response.statusCode == 403 {
-            throw RPCFailure(path == "/auth/password-login" ? "Identifiants Hermes incorrects." : "Votre connexion Hermes a expiré. Reconnectez-vous dans les réglages.", code: 401)
+            throw RPCFailure(path == "/auth/password-login" ? L("Identifiants Hermes incorrects.") : L("Votre connexion Hermes a expiré. Reconnectez-vous dans les réglages."), code: 401)
         }
         guard (200...299).contains(response.statusCode) else {
             let failure = try? JSONValue.decode(data)
             let detail = failure?["detail"].string ?? ""
-            let message = detail.isEmpty ? "Hermes a répondu HTTP \(response.statusCode)." : String(detail.prefix(600))
-            throw RPCFailure(response.statusCode == 429 ? "Trop de tentatives. Réessayez dans un instant." : message, code: response.statusCode)
+            let message = detail.isEmpty ? L("Hermes a répondu HTTP %lld.", response.statusCode) : String(detail.prefix(600))
+            throw RPCFailure(response.statusCode == 429 ? L("Trop de tentatives. Réessayez dans un instant.") : message, code: response.statusCode)
         }
         try persistCookies()
         guard !data.isEmpty else { return .object([:]) }
@@ -77,7 +77,7 @@ final class HermesHTTP {
     }
 
     func useToken(_ value: String) throws {
-        guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw RPCFailure("Entrez le jeton de session Hermes.") }
+        guard !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw RPCFailure(L("Entrez le jeton de session Hermes.")) }
         token = value.trimmingCharacters(in: .whitespacesAndNewlines)
         try Keychain.save(Data(token!.utf8), key: connection.id.uuidString)
     }
@@ -87,7 +87,7 @@ final class HermesHTTP {
         do {
             // A single-use ticket keeps long-lived credentials out of WebSocket URLs (and proxy logs).
             let response = try await request("/api/auth/ws-ticket", method: "POST", body: [:])
-            guard !response["ticket"].string.isEmpty else { throw RPCFailure("Hermes n’a pas fourni de ticket WebSocket.") }
+            guard !response["ticket"].string.isEmpty else { throw RPCFailure(L("Hermes n’a pas fourni de ticket WebSocket.")) }
             url = connection.endpoint.socket(ticket: response["ticket"].string, path: path, query: query)
         } catch let failure as RPCFailure where token != nil && [401, 404, 405].contains(failure.code) {
             // Loopback/insecure gateways have no ticket route: only they still take `?token=`.
