@@ -87,20 +87,26 @@ final class FakeHermes: HermesExecuting, @unchecked Sendable {
 final class FakeMailbox: MailboxTransport, @unchecked Sendable {
     private let lock = NSLock()
     private var _published: [OutboundRecord] = []
+    private var _operations: [String] = []
     var synchronizeError: Error?
+    var publishError: Error?
 
     var published: [OutboundRecord] { lock.withLock { _published } }
+    var operations: [String] { lock.withLock { _operations } }
 
     func accountScope() async throws -> AccountScope {
         AccountScope(containerID: "iCloud.test.NeoOS", environment: "development", userRecordName: "_user")
     }
 
     func synchronize() async throws -> SyncSummary {
+        lock.withLock { _operations.append("synchronize") }
         if let synchronizeError { throw synchronizeError }
         return SyncSummary()
     }
 
     func publish(_ record: OutboundRecord) async throws -> PublishReceipt {
+        lock.withLock { _operations.append("publish") }
+        if let publishError { throw publishError }
         lock.withLock { _published.append(record) }
         return PublishReceipt(recordName: record.recordName, confirmedAt: Date())
     }
@@ -334,6 +340,46 @@ final class BridgeControllerTests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    func testRefreshPublishesDeviceAfterMailboxInitialization() async throws {
+        let controller = makeController()
+        await controller.refresh()
+
+        XCTAssertEqual(mailbox.operations, ["synchronize", "publish"])
+        XCTAssertEqual(mailbox.published.map(\.kind), [.device])
+        XCTAssertEqual(controller.lastHeartbeatAt, epoch)
+        let record = try XCTUnwrap(mailbox.published.first)
+        let codec = CloudRecordCodec(scope: RecordScope(bridgeID: nil, profileID: nil))
+        guard case .change(.device(let device)) = codec.decode(recordName: record.recordName, body: record.payload) else {
+            return XCTFail("the phone must be able to discover the published Mac")
+        }
+        XCTAssertEqual(device.bridgeID, bridgeID)
+        XCTAssertEqual(device.name, "测试 Mac")
+    }
+
+    func testFailedDevicePublicationIsReportedAndRetried() async throws {
+        let controller = makeController()
+        mailbox.publishError = MailboxError.transport("device upload failed", retryAfter: nil)
+        await controller.refresh()
+        XCTAssertEqual(controller.lastError, "device upload failed")
+        XCTAssertTrue(mailbox.published.isEmpty)
+        XCTAssertNil(controller.lastHeartbeatAt)
+
+        mailbox.publishError = nil
+        await controller.refresh()
+        XCTAssertEqual(mailbox.operations, ["synchronize", "publish", "synchronize", "publish"])
+        XCTAssertEqual(mailbox.published.map(\.kind), [.device])
+        XCTAssertNil(controller.lastError)
+        XCTAssertEqual(controller.lastHeartbeatAt, epoch)
+    }
+
+    func testSynchronizationFailureDoesNotPublishDevice() async throws {
+        let controller = makeController()
+        mailbox.synchronizeError = MailboxError.transport("sync failed", retryAfter: nil)
+        await controller.refresh()
+        XCTAssertEqual(mailbox.operations, ["synchronize"])
+        XCTAssertEqual(controller.lastError, "sync failed")
+    }
 
     private func makeController() -> BridgeController {
         BridgeController(store: store, mailbox: mailbox, hermes: hermes,

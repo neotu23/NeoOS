@@ -42,11 +42,7 @@ public struct CloudRecordCodec: Sendable {
     }
 
     private func envelope(_ kind: CloudRecordKind, bridgeID: UUID?, profileID: String?, payload: Data) throws -> Data {
-        let envelope = Envelope(schemaVersion: CloudSchema.version, recordType: kind.rawValue,
-                                bridgeID: bridgeID?.uuidString, profileID: profileID, payload: payload)
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-        return try encoder.encode(envelope)
+        try RecordCoding.cloudBody(kind, bridgeID: bridgeID, profileID: profileID, payload: payload)
     }
 
     // MARK: - Encoding
@@ -109,7 +105,7 @@ public struct CloudRecordCodec: Sendable {
 
     public func decode(recordName: String, body: Data) -> DecodedRecord {
         guard let envelope = try? JSONDecoder().decode(Envelope.self, from: body) else {
-            return .quarantined(recordName: recordName, reason: .malformedBody, raw: body)
+            return decodeLegacy(recordName: recordName, body: body)
         }
         // Version first: a newer writer may have changed every other field, and guessing would be
         // worse than ignoring it.
@@ -180,9 +176,48 @@ public struct CloudRecordCodec: Sendable {
         }
     }
 
+    /// Early builds wrote bare domain JSON into their durable outboxes. Accept only those two
+    /// exact shapes; malformed/new-version envelopes must never fall back to a legacy decode.
+    private func decodeLegacy(recordName: String, body: Data) -> DecodedRecord {
+        let invalid = DecodedRecord.quarantined(recordName: recordName, reason: .malformedBody, raw: body)
+        guard let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+              object["schemaVersion"] == nil, object["recordType"] == nil else { return invalid }
+        let decoder = RecordCoding.decoder()
+        if let request = try? decoder.decode(BridgeRequest.self, from: body),
+           recordName == CloudRecordKind.request.recordNamePrefix + request.messageID.uuidString,
+           matchesScope(request.bridgeID, request.profileID), (try? request.validated()) != nil {
+            return .change(.request(request))
+        }
+        if let result = try? decoder.decode(BridgeResult.self, from: body),
+           recordName == CloudRecordKind.result.recordNamePrefix + result.messageID.uuidString,
+           result.role == .assistant, matchesScope(result.bridgeID, nil), (try? result.validated()) != nil {
+            return .change(.result(result))
+        }
+        return invalid
+    }
+
     private func matchesScope(_ bridgeID: UUID, _ profileID: String?) -> Bool {
         if let expected = scope.bridgeID, expected != bridgeID { return false }
         if let expected = scope.profileID, let profileID, expected != profileID { return false }
+        return true
+    }
+}
+
+/// Execution journals are mutable, but a delayed upload must never roll a newer revision back.
+enum MutableRecordPolicy {
+    static func shouldReplace(_ existing: AdapterRecord, with incoming: OutboundRecord) throws -> Bool {
+        guard incoming.kind == .execution else { return true }
+        let codec = CloudRecordCodec()
+        guard case .change(.execution(let current)) = codec.decode(recordName: existing.recordName, body: existing.body),
+              case .change(.execution(let next)) = codec.decode(recordName: incoming.recordName, body: incoming.payload),
+              current.messageID == next.messageID else { throw MailboxError.conflict(incoming.recordName) }
+        if current.revision > next.revision { return false }
+        if current.revision == next.revision {
+            guard CloudMailbox.businessContentMatches(existing.body, incoming.payload) else {
+                throw MailboxError.conflict(incoming.recordName)
+            }
+            return false
+        }
         return true
     }
 }

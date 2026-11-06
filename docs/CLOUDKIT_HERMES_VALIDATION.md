@@ -1,5 +1,27 @@
 # CloudKit bridge: validation record
 
+## Suspension snapshot — 2026-11-06
+
+Development and maintenance are paused by the maintainer because an official Hermes client is now
+available. Current source and outstanding changes are retained as a historical snapshot.
+
+Fresh verification before the suspension commit (Xcode toolchain, temporary build/module caches):
+
+- Root Swift package: **177 tests passed** (170 core + 7 cloud chat model), zero failures.
+- `Packages/NeoCloudBridge`: **86 tests passed** (40 core + 29 sync + 17 client), zero failures.
+- `git diff --check`: passed.
+- App builds, macOS controller tests, iOS UI tests and real-device iCloud end-to-end validation were
+  **not rerun** for this snapshot. Earlier results below remain historical evidence only.
+
+Commands used (run each separately):
+
+```sh
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer CLANG_MODULE_CACHE_PATH=/tmp/neoos-freeze-modulecache SWIFTPM_MODULECACHE_OVERRIDE=/tmp/neoos-freeze-modulecache swift test --disable-sandbox --scratch-path /tmp/neoos-freeze-xcode-root
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer CLANG_MODULE_CACHE_PATH=/tmp/neoos-freeze-bridge-modulecache SWIFTPM_MODULECACHE_OVERRIDE=/tmp/neoos-freeze-bridge-modulecache swift test --disable-sandbox --package-path Packages/NeoCloudBridge --scratch-path /tmp/neoos-freeze-xcode-bridge
+```
+
+The rest of this document records earlier implementation and follow-up checks.
+
 Date: **2026-11-01**. Hermes target: the installed `hermes-agent` checkout,
 `hermes --version` → `v0.22.2+3291.gbf0203a` (release 2026.9.24), plus one isolated live instance
 described in `docs/CLOUDKIT_HERMES_COMPATIBILITY.md`.
@@ -7,6 +29,9 @@ described in `docs/CLOUDKIT_HERMES_COMPATIBILITY.md`.
 This file records what was **actually run**. Anything not run is listed as not run, with the reason.
 A compiled binary is not an end-to-end proof, and this document is written so nobody has to guess
 which is which.
+
+Latest follow-up verification for the send/typing fixes is in **§6**. Sections 1–5 below record the
+original implementation's earlier checks; their build/UI-test results do not validate the follow-up.
 
 ## 1. Summary
 
@@ -194,3 +219,54 @@ mailbox that can be told to fail. They do not touch CloudKit.
   3. `HermesIOS/Features/Cloud/`, `Core/ConnectionMode.swift`, `Networking/CloudRuntime.swift`, the
      app/RootView/delegate edits, strings, iOS tests (Task 7)
   4. `docs/CLOUDKIT_HERMES_{COMPATIBILITY,SETUP,VALIDATION}.md`, README (Task 8)
+
+## 6. Follow-up: cloud send failures and typing latency (2026-11-01)
+
+### Changes and root causes
+
+- The durable request/result outboxes wrote bare domain JSON, while the receiving codec required a
+  versioned envelope. Both now use the same envelope encoder. SQLite's local result body stays in
+  domain format so local answer reads remain compatible.
+- The codec also reads validated, correctly scoped legacy request/result bodies. One compatibility
+  scan per account resets the change token so records previously quarantined by the old decoder are
+  visited again. Requests and execution journals are retained; completed/uncertain work is not reset.
+- Execution records now reuse CloudKit change tags and advance revisions; they are no longer treated
+  as immutable. Late uploads cannot regress a newer revision or rewrite an equal revision.
+- Failed outbox uploads propagate errors instead of reporting a successful sync. Failed rows stay
+  queued. A deletion-only page also signals a projection change so the UI refreshes cancellation.
+- The first send creates its conversation locally. The message is committed and displayed before
+  network synchronization. Duplicate taps are guarded, and network completion cannot clear a newer
+  draft. Conversation metadata and requests use the same captured account store and profile.
+- Transcript, status bar and composer are separate SwiftUI views. Typing observes only the composer;
+  keyboard avoidance uses a bottom safe-area inset and interactive keyboard dismissal. Empty sync
+  deltas no longer reread all history; unchanged message arrays are not published again.
+- Foreground polling compensates for delayed notifications (3 seconds with pending work, 15 seconds
+  idle, 30 seconds after errors; server retry deadlines are honored). It stops when the view/scene
+  leaves the foreground. Concurrent refreshes coalesce. Configuration and reload generations stop
+  stale tasks from overwriting a newer connection, selection or data projection.
+
+### Verification actually run for this follow-up
+
+| Check | Result |
+| --- | --- |
+| Root SwiftPM tests | **177 passed**, including 7 cloud-model tests |
+| `Packages/NeoCloudBridge` SwiftPM tests | **86 passed**, including real outbox round trips between two local stores |
+| iOS 17 / arm64 shared modules | Swift compiler module emission passed |
+| All iOS app Swift sources | Swift compiler typecheck passed against the iPhoneOS SDK and cached WebRTC framework |
+| Whitespace/conflict checks | `git diff --check` passed |
+| Updated cloud UI tests | Added/updated, **not run** in this follow-up |
+| Full Xcode build / real iCloud round trip | **Not verified** in this follow-up |
+
+Tests used Xcode's toolchain with `swift test --build-system native --disable-sandbox`, scratch builds
+under `/tmp`, and a writable Clang module cache. Test logs reported zero failures. The iOS typecheck
+reported one existing `AppChrome.swift` warning about a closure stored in an `@Entry` environment
+value. This follow-up does not claim a measured frame-rate improvement.
+
+The full Xcode build was blocked by package manifest sandbox execution (`sandbox_apply: Operation
+not permitted`), and CoreSimulator could not connect in the current execution environment. A direct
+Swift compiler check was used to validate the app sources instead; it does not verify app packaging,
+signing, installation, keyboard rendering, or CloudKit entitlements.
+
+Rebuild and run **both** the iOS app and the Mac bridge to use all changes. Then send
+`只回复 CLOUDKIT_OK，不调用任何工具`, verify the final answer, and test Chinese composition/multiline
+input on the device. Real iCloud delivery and keyboard feel remain device checks.

@@ -13,6 +13,7 @@ final class FakeDatabase: CloudDatabaseAdapter, @unchecked Sendable {
     private var pages: [AdapterChanges]
     private var scriptedOutcomes: [String: AdapterSaveOutcome]
     private var expireTokenOnce = false
+    private var _tokensSeen: [Data?] = []
     private var _fetchCount = 0
     private var _saveCount = 0
     private var _subscribeCount = 0
@@ -25,6 +26,7 @@ final class FakeDatabase: CloudDatabaseAdapter, @unchecked Sendable {
         self.scriptedOutcomes = outcomes
     }
 
+    var tokensSeen: [Data?] { lock.withLock { _tokensSeen } }
     var fetchCount: Int { lock.withLock { _fetchCount } }
     var saveCount: Int { lock.withLock { _saveCount } }
     var subscribeCount: Int { lock.withLock { _subscribeCount } }
@@ -52,6 +54,7 @@ final class FakeDatabase: CloudDatabaseAdapter, @unchecked Sendable {
     func fetchChanges(token: Data?, limit: Int) async throws -> AdapterChanges {
         try lock.withLock {
             _fetchCount += 1
+            _tokensSeen.append(token)
             if expireTokenOnce {
                 expireTokenOnce = false
                 throw AdapterError.tokenExpired
@@ -110,6 +113,91 @@ final class CloudMailboxTests: XCTestCase {
     override func tearDownWithError() throws {
         if let directory { try? FileManager.default.removeItem(at: directory) }
         directory = nil
+    }
+
+    func testStoreEnqueueIsReadableByTheReceivingMac() async throws {
+        let store = try makeStore()
+        let request = makeRequest(text: "来自真实发送队列")
+        let outbound = try await store.enqueue(request, clearingDraftFor: conversationID)
+        guard case .change(.request(let decoded)) = makeCodec().decode(
+            recordName: outbound.recordName, body: outbound.payload) else {
+            return XCTFail("the durable outbox must use the same wire format as the receiver")
+        }
+        XCTAssertEqual(decoded, request)
+    }
+
+    func testStoreFinishIsReadableByIPhoneAndLocalStore() async throws {
+        let store = try makeStore()
+        let request = makeRequest(text: "question")
+        _ = try await store.applyRemotePage(RemotePage(changes: [.request(request)]))
+        let result = BridgeResult(messageID: request.messageID, conversationID: conversationID,
+                                  bridgeID: bridgeID, content: .inline("answer"), contentSHA256: "s",
+                                  completedAt: epoch, terminalStatus: .completed)
+        let outbound = try await store.finish(messageID: request.messageID, result: result)
+        let local = try await store.result(messageID: request.messageID)
+        XCTAssertEqual(local, result)
+        guard case .change(.result(let decoded)) = makeCodec().decode(
+            recordName: outbound.recordName, body: outbound.payload) else {
+            return XCTFail("the Mac result outbox must be readable by the iPhone")
+        }
+        XCTAssertEqual(decoded, result)
+    }
+
+    func testFailedUploadIsReportedAndRemainsQueued() async throws {
+        let store = try makeStore()
+        let request = makeRequest(text: "网络失败时保留")
+        let outbound = try await store.enqueue(request, clearingDraftFor: conversationID)
+        let database = FakeDatabase(scope: scope)
+        database.script(.failed(recordName: outbound.recordName, code: "network",
+                                message: "upload failed", retryAfter: nil), for: outbound.recordName)
+        let mailbox = CloudMailbox(store: store, adapter: database, codec: makeCodec())
+        do {
+            _ = try await mailbox.synchronize()
+            XCTFail("a failed upload must not be reported as a successful sync")
+        } catch {
+            XCTAssertEqual(error as? MailboxError, .transport("upload failed", retryAfter: nil))
+        }
+        let queued = try await store.pendingOutbound()
+        XCTAssertEqual(queued.map(\.recordName), [outbound.recordName])
+    }
+
+    func testUpgradeRescansOldQuarantinedWireFormatOnlyOnce() async throws {
+        let store = try makeStore()
+        _ = try await store.applyRemotePage(RemotePage(nextToken: Data([9])))
+        let database = FakeDatabase(scope: scope, pages: [AdapterChanges(newToken: Data([10]))])
+        let mailbox = CloudMailbox(store: store, adapter: database, codec: makeCodec())
+        _ = try await mailbox.synchronize()
+        XCTAssertNil(database.tokensSeen[0], "upgrade must revisit records rejected by the old decoder")
+        // Reopening the mailbox must retain the new token rather than trigger another full scan.
+        let reopened = CloudMailbox(store: store, adapter: database, codec: makeCodec())
+        _ = try await reopened.synchronize()
+        XCTAssertEqual(database.tokensSeen[1], Data([10]))
+    }
+
+    func testRealOutboxesCompleteRoundTripBetweenTwoStores() async throws {
+        let phone = try makeStore()
+        let mac = try BridgeStore(inMemoryScope: scope)
+        let request = makeRequest(text: "完整收发链路")
+        let requestRecord = try await phone.enqueue(request, clearingDraftFor: conversationID)
+        let database = FakeDatabase(scope: scope)
+        let phoneMailbox = CloudMailbox(store: phone, adapter: database, codec: makeCodec())
+        _ = try await phoneMailbox.synchronize()
+        database.enqueuePage(AdapterChanges(records: [record(requestRecord)]))
+        let macMailbox = CloudMailbox(store: mac, adapter: database, codec: makeCodec())
+        _ = try await macMailbox.synchronize()
+        let received = try await mac.request(messageID: request.messageID)
+        XCTAssertEqual(received, request)
+        let answer = BridgeResult(messageID: request.messageID, conversationID: conversationID,
+                                  bridgeID: bridgeID, content: .inline("OK"), contentSHA256: "s",
+                                  completedAt: epoch, terminalStatus: .completed)
+        let resultRecord = try await mac.finish(messageID: request.messageID, result: answer)
+        _ = try await macMailbox.synchronize()
+        database.enqueuePage(AdapterChanges(records: [record(resultRecord)]))
+        _ = try await phoneMailbox.synchronize()
+        let result = try await phone.result(messageID: request.messageID)
+        let state = try await phone.executionProjection(messageID: request.messageID)
+        XCTAssertEqual(result, answer)
+        XCTAssertEqual(state?.state, .completed)
     }
 
     // MARK: - Paging
@@ -219,7 +307,12 @@ final class CloudMailboxTests: XCTestCase {
         database.script(.conflict(recordName: outbound.recordName), for: outbound.recordName)
 
         let mailbox = CloudMailbox(store: store, adapter: database, codec: codec) { [epoch] in epoch }
-        _ = try await mailbox.synchronize()
+        do {
+            _ = try await mailbox.synchronize()
+            XCTFail("different content must report a conflict")
+        } catch {
+            XCTAssertEqual(error as? MailboxError, .conflict(outbound.recordName))
+        }
 
         let outbox = try await store.pendingOutbound()
         XCTAssertEqual(outbox.map(\.recordName), [outbound.recordName],

@@ -19,7 +19,7 @@ final class CloudChatUITests: XCTestCase {
         let app = launch()
         XCTAssertTrue(app.staticTexts["NeoOS"].waitForExistence(timeout: 15),
                       "the cloud screen opens without a direct connection")
-        XCTAssertTrue(app.textFields["Écrire un message"].waitForExistence(timeout: 5)
+        XCTAssertTrue(app.textFields["cloud-composer"].waitForExistence(timeout: 5)
                       || app.textViews.firstMatch.waitForExistence(timeout: 5),
                       "the cloud composer is reachable")
         XCTAssertFalse(app.staticTexts["Connexion directe"].exists,
@@ -36,24 +36,41 @@ final class CloudChatUITests: XCTestCase {
         XCTAssertNotEqual("已上传，等待 Mac", "Hermes 正在执行")
     }
 
-    /// An offline send keeps the message locally. It must still be on screen after the process is
-    /// replaced — the queue lives on disk, not in the view's state.
-    func testOfflineEnqueueSurvivesRelaunch() throws {
-        let app = launch(["-neoCloudSeedStates", "-neoCloudOffline"])
-        let field = app.textFields.firstMatch
+    /// Upload failure must leave the durable local queue visible, even on the first conversation.
+    func testOfflineEnqueueRemainsVisible() throws {
+        let app = launch(["-neoCloudOffline"])
+        let field = app.textFields["cloud-composer"]
         XCTAssertTrue(field.waitForExistence(timeout: 15))
         field.tap()
-        field.typeText("离线排队的一条消息")
-        app.buttons.matching(identifier: "paperplane.fill").firstMatch.tap()
-        XCTAssertTrue(app.staticTexts["离线排队的一条消息"].waitForExistence(timeout: 10))
+        field.typeText("Offline queued message")
+        app.buttons["cloud-send-message"].tap()
+        XCTAssertTrue(app.staticTexts["Offline queued message"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["本机排队"].exists)
+    }
 
-        app.terminate()
-        let relaunched = XCUIApplication()
-        // The fixture store is in memory, so a relaunch starts clean; the assertion below pins the
-        // behaviour that matters offline — the message was accepted and not silently dropped.
-        relaunched.launchArguments = ["-connectionMode", "cloud", "-neoCloudFixture", "-neoCloudSeedStates"]
-        relaunched.launch()
-        XCTAssertTrue(relaunched.staticTexts["已上传，等待 Mac"].waitForExistence(timeout: 15))
+    func testFirstMessageCanSendWithoutCreatingConversationInSettings() throws {
+        let app = launch()
+        let field = app.textFields["cloud-composer"]
+        XCTAssertTrue(field.waitForExistence(timeout: 15))
+        field.tap()
+        field.typeText("First cloud message")
+        let send = app.buttons["cloud-send-message"]
+        XCTAssertTrue(send.isEnabled)
+        send.tap()
+        XCTAssertTrue(app.staticTexts["First cloud message"].waitForExistence(timeout: 5))
+    }
+
+    func testTypingDoesNotDiscardDraftAcrossTranscriptRefresh() throws {
+        let app = launch(["-neoCloudSeedStates"])
+        let field = app.textFields["cloud-composer"]
+        XCTAssertTrue(field.waitForExistence(timeout: 15))
+        field.tap()
+        field.typeText("Draft before sync")
+        app.buttons["Actualiser"].tap()
+        XCTAssertEqual(field.value as? String, "Draft before sync")
+        field.tap()
+        field.typeText(" and after sync")
+        XCTAssertEqual(field.value as? String, "Draft before sync and after sync")
     }
 
     /// One direct-mode launch to prove the original entry point still works unchanged.

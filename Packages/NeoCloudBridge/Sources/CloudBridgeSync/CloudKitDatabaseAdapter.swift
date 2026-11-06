@@ -211,11 +211,32 @@ public final class CloudKitDatabaseAdapter: CloudDatabaseAdapter, @unchecked Sen
 
     public func save(_ records: [OutboundRecord]) async throws -> [AdapterSaveOutcome] {
         guard !records.isEmpty else { return [] }
-        let toSave = records.map { outbound -> CKRecord in
+        var toSave: [CKRecord] = []
+        var unchanged: [String: AdapterSaveOutcome] = [:]
+        for outbound in records {
             let recordID = CKRecord.ID(recordName: outbound.recordName, zoneID: zoneID)
-            let record = CKRecord(recordType: outbound.kind.rawValue, recordID: recordID)
+            var existingRecord: CKRecord?
+            if outbound.kind == .device || outbound.kind == .execution {
+                // Heartbeats and execution journals are mutable. Carry the server change tag so
+                // advancing dispatching → running does not conflict with our own previous write.
+                do {
+                    existingRecord = try await database.record(for: recordID)
+                } catch let error as CKError where error.code == .unknownItem {
+                    // First announcement for this Mac.
+                } catch let error as CKError {
+                    throw Self.map(error)
+                }
+            }
+            if let existingRecord, let body = existingRecord["body"] as? Data,
+               try !MutableRecordPolicy.shouldReplace(
+                AdapterRecord(recordName: outbound.recordName, body: body), with: outbound) {
+                unchanged[outbound.recordName] = .saved(recordName: outbound.recordName,
+                                                       changeTag: existingRecord.recordChangeTag ?? "")
+                continue
+            }
+            let record = existingRecord ?? CKRecord(recordType: outbound.kind.rawValue, recordID: recordID)
             record["body"] = outbound.payload as NSData
-            return record
+            toSave.append(record)
         }
 
         final class Collector: @unchecked Sendable {
@@ -223,10 +244,13 @@ public final class CloudKitDatabaseAdapter: CloudDatabaseAdapter, @unchecked Sen
             var transport: CKError?
         }
         let collector = Collector()
+        collector.outcomes = unchanged
+        if toSave.isEmpty { return records.compactMap { unchanged[$0.recordName] } }
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let operation = CKModifyRecordsOperation(recordsToSave: toSave, recordIDsToDelete: nil)
-            // Never overwrite somebody else's copy: a conflict is read back and compared instead.
+            // A fetched heartbeat carries its change tag; concurrent edits still conflict.
+            // Immutable requests and results stay write-once and are compared on conflicts.
             operation.savePolicy = .ifServerRecordUnchanged
             operation.perRecordSaveBlock = { recordID, result in
                 switch result {

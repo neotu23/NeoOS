@@ -97,6 +97,7 @@ public final class BridgeController {
     public private(set) var waitingMessageID: UUID?
     public private(set) var waitingReason: String?
     public private(set) var lastSyncAt: Date?
+    public private(set) var lastHeartbeatAt: Date?
     public private(set) var lastError: String?
     public private(set) var tasks: [BridgeTaskSummary] = []
     public private(set) var accountSummary: String = ""
@@ -200,6 +201,9 @@ public final class BridgeController {
     public func refresh() async {
         do {
             let summary = try await mailbox.synchronize()
+            // The first sync creates the custom zone. Publishing before it silently loses the
+            // device announcement on a fresh account. Retrying here also recovers failed uploads.
+            try await heartbeat()
             lastSyncAt = clock.now()
             lastError = nil
             if let scope = try? await mailbox.accountScope() {
@@ -464,12 +468,12 @@ public final class BridgeController {
         _ = try? await mailbox.publish(record)
     }
 
-    public func heartbeat() async {
+    public func heartbeat() async throws {
         let device = BridgeDevice(bridgeID: bridgeID, name: bridgeName,
                                   capabilities: ["text"], lastSeenAt: clock.now(), profileID: profileID)
-        if let record = try? codec.encode(device) {
-            _ = try? await mailbox.publish(record)
-        }
+        let record = try codec.encode(device)
+        _ = try await mailbox.publish(record)
+        lastHeartbeatAt = device.lastSeenAt
     }
 
     public func refreshTasks() async {

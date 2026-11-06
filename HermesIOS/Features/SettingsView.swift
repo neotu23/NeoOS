@@ -10,6 +10,9 @@ struct ConnectionsView: View {
     var body: some View {
         List {
             Section {
+                CloudConnectionButton()
+            }
+            Section {
                 ForEach(model.connections) { connection in
                     VStack(alignment: .leading, spacing: 9) {
                         Button { Task { await model.activate(connection) } } label: {

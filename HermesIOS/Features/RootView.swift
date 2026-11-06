@@ -22,6 +22,7 @@ struct RootView: View {
                 ChatView(model: model).id(model.navigationRevision)
             }
         }
+        .environment(cloudSettings)
         .id(localizer.language)
         .background(AppTheme.background)
         .overlay(alignment: .top) { ToastBanner(model: model) }

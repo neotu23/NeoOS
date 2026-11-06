@@ -164,7 +164,9 @@ public actor BridgeStore {
         try request.validated()
         let record = OutboundRecord(recordName: try Self.recordName(for: request),
                                     kind: .request,
-                                    payload: try RecordCoding.encoder().encode(request))
+                                    payload: try RecordCoding.cloudBody(.request, bridgeID: request.bridgeID,
+                                                                        profileID: request.profileID,
+                                                                        payload: RecordCoding.encoder().encode(request)))
         try database.transaction {
             if armedFaults.contains(.beforeEnqueueCommit) { throw StoreError.injected(.beforeEnqueueCommit) }
 
@@ -199,6 +201,30 @@ public actor BridgeStore {
             try clearDraft(conversationID)
         }
         return record
+    }
+
+    /// Conversation metadata is durable before the first network call, including offline creation.
+    public func enqueueConversation(_ conversation: BridgeConversation, now: Date = Date()) throws {
+        let record = OutboundRecord(recordName: Self.recordName(for: conversation), kind: .conversation,
+                                    payload: try RecordCoding.cloudBody(.conversation,
+                                        bridgeID: conversation.bridgeID, profileID: conversation.profileID,
+                                        payload: RecordCoding.encoder().encode(conversation)))
+        try database.transaction {
+            try upsertConversation(conversation)
+            try upsertOutbox(record, now: now)
+        }
+    }
+
+    public func conversation(_ id: UUID) throws -> BridgeConversation? {
+        let statement = try database.prepare("""
+            SELECT bridge_id, profile_id, source_device_id, title, created_at FROM conversations
+            WHERE scope_key = ? AND conversation_id = ?
+            """)
+        statement.bind(1, scopeKey); statement.bind(2, id.uuidString)
+        guard try statement.step(), let raw = statement.text(0), let bridgeID = UUID(uuidString: raw) else { return nil }
+        return BridgeConversation(conversationID: id, bridgeID: bridgeID, profileID: statement.text(1) ?? "default",
+                                  sourceDeviceID: statement.text(2) ?? "", title: statement.text(3) ?? "NeoOS",
+                                  createdAt: Date(timeIntervalSince1970: statement.double(4) ?? 0))
     }
 
     /// The iPhone only clears a draft once the enqueue committed.
@@ -338,6 +364,7 @@ public actor BridgeStore {
             }
             for name in page.deletedRecordNames {
                 try applyDeletion(recordName: name)
+                summary.saved += 1
             }
             if let token = page.nextToken {
                 let statement = try database.prepare("""
@@ -349,6 +376,24 @@ public actor BridgeStore {
             }
         }
         return summary
+    }
+
+    /// One compatibility scan per account after upgrading the bare-JSON outbox writer. Previously
+    /// quarantined records were already behind the change token. Message IDs and execution journals
+    /// remain intact, so this scan cannot reopen a completed or uncertain execution.
+    public func prepareEnvelopeCompatibilityScan() throws {
+        let key = "envelopeCompatibilityScanV1.\(scopeKey)"
+        let check = try database.prepare("SELECT value FROM meta WHERE key = ?")
+        check.bind(1, key)
+        if try check.step() { return }
+        try database.transaction {
+            let clear = try database.prepare("DELETE FROM tokens WHERE scope_key = ?")
+            clear.bind(1, scopeKey)
+            try clear.run()
+            let mark = try database.prepare("INSERT INTO meta (key, value) VALUES (?, '1')")
+            mark.bind(1, key)
+            try mark.run()
+        }
     }
 
     public func changeToken(key: String = "zone") throws -> Data? {
@@ -628,7 +673,8 @@ public actor BridgeStore {
         try result.validated()
         let record = OutboundRecord(recordName: try Self.recordName(for: result),
                                     kind: .result,
-                                    payload: try RecordCoding.encoder().encode(result))
+                                    payload: try RecordCoding.cloudBody(.result, bridgeID: result.bridgeID, profileID: nil,
+                                                                        payload: RecordCoding.encoder().encode(result)))
         try database.transaction {
             if armedFaults.contains(.beforeFinishCommit) { throw StoreError.injected(.beforeFinishCommit) }
 
@@ -637,7 +683,7 @@ public actor BridgeStore {
                 ON CONFLICT (scope_key, message_id) DO NOTHING
                 """)
             insert.bind(1, scopeKey); insert.bind(2, messageID.uuidString)
-            insert.bind(3, record.payload); insert.bind(4, result.completedAt.timeIntervalSince1970)
+            insert.bind(3, try RecordCoding.encoder().encode(result)); insert.bind(4, result.completedAt.timeIntervalSince1970)
             try insert.run()
 
             let current = try executionProjection(messageID: messageID)

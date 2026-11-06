@@ -1,5 +1,13 @@
 # NeoOS
 
+> **项目状态：封存暂停 / Development paused — 2026-11-06**
+>
+> 本项目原计划作为 Hermes 的 iOS 客户端。根据维护者的决定，由于官方已开发客户端，本项目暂停开发与维护，保留当前源码、iCloud 桥接实现、测试和文档作为历史快照，供后续查阅或恢复开发。
+>
+> 以下功能和验证说明反映暂停时的开发状态，不代表持续维护或与新版 Hermes 的兼容性承诺。真实设备上的 iCloud 端到端流程仍未完成验证，详见 [CloudKit 验证记录](docs/CLOUDKIT_HERMES_VALIDATION.md)。
+>
+> Development and maintenance are paused following the maintainer's decision to use the official client. The source, iCloud bridge, tests and documentation are retained as a historical snapshot. The sections below describe the state at suspension; real-device iCloud end-to-end validation remains incomplete.
+
 **A quiet, native iOS home for your Hermes agent.**
 
 NeoOS is a customized version of [Hermès iOS](https://github.com/Molliex05/hermes-ios).

@@ -20,6 +20,18 @@ final class BridgeStoreTests: XCTestCase {
         directory = nil
     }
 
+    func testDeletionOnlyPageReportsProjectionChange() async throws {
+        let store = try makeStore()
+        let request = makeRequest(conversationID: UUID(), text: "未执行的请求")
+        _ = try await store.applyRemotePage(RemotePage(changes: [.request(request)]))
+        let summary = try await store.applyRemotePage(RemotePage(
+            deletedRecordNames: ["request_\(request.messageID.uuidString)"]))
+        let execution = try await store.executionProjection(messageID: request.messageID)
+        XCTAssertEqual(execution?.state, .cancelled)
+        XCTAssertGreaterThan(summary.saved + summary.received + summary.failed, 0,
+                             "the UI must be told to reload after a deletion-only page")
+    }
+
     // MARK: - Enqueue
 
     func testEnqueueAndDraftClearAreAtomic() async throws {

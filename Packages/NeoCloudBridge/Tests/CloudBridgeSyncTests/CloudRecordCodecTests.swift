@@ -47,6 +47,48 @@ final class CloudRecordCodecTests: XCTestCase {
         XCTAssertEqual(decoded.terminalStatus, .completed)
     }
 
+    func testLegacyDurableRequestIsReadableWithoutLosingScopeChecks() throws {
+        let request = makeRequest(text: "旧版本已上传的消息")
+        let name = "request_\(request.messageID.uuidString)"
+        let body = try RecordCoding.encoder().encode(request)
+        XCTAssertEqual(codec.decode(recordName: name, body: body), .change(.request(request)))
+        let other = CloudRecordCodec(scope: RecordScope(bridgeID: UUID()))
+        guard case .quarantined = other.decode(recordName: name, body: body) else {
+            return XCTFail("legacy support must still enforce the selected bridge")
+        }
+        guard case .quarantined = codec.decode(recordName: "request_\(UUID().uuidString)", body: body) else {
+            return XCTFail("legacy record name must match the payload ID")
+        }
+    }
+
+    func testLegacyDurableResultIsReadable() throws {
+        let result = BridgeResult(messageID: UUID(), conversationID: conversationID, bridgeID: bridgeID,
+                                  content: .inline("旧版回复"), contentSHA256: "s", completedAt: epoch,
+                                  terminalStatus: .completed)
+        let body = try RecordCoding.encoder().encode(result)
+        XCTAssertEqual(codec.decode(recordName: "result_\(result.messageID.uuidString)", body: body),
+                       .change(.result(result)))
+    }
+
+    func testExecutionRecordCanAdvanceButCannotRegressOrRewriteSameRevision() throws {
+        let messageID = UUID()
+        let first = try codec.encode(ExecutionUpdate(messageID: messageID, state: .dispatching,
+                                                    revision: 1, updatedAt: epoch),
+                                     bridgeID: bridgeID, profileID: nil)
+        let next = try codec.encode(ExecutionUpdate(messageID: messageID, state: .running,
+                                                   revision: 2, updatedAt: epoch),
+                                    bridgeID: bridgeID, profileID: nil)
+        let existingFirst = AdapterRecord(recordName: first.recordName, body: first.payload)
+        let existingNext = AdapterRecord(recordName: next.recordName, body: next.payload)
+        XCTAssertTrue(try MutableRecordPolicy.shouldReplace(existingFirst, with: next))
+        XCTAssertFalse(try MutableRecordPolicy.shouldReplace(existingNext, with: first))
+        XCTAssertFalse(try MutableRecordPolicy.shouldReplace(existingNext, with: next))
+        let conflicting = try codec.encode(ExecutionUpdate(messageID: messageID, state: .failed,
+                                                          revision: 2, updatedAt: epoch),
+                                           bridgeID: bridgeID, profileID: nil)
+        XCTAssertThrowsError(try MutableRecordPolicy.shouldReplace(existingNext, with: conflicting))
+    }
+
     // MARK: - Quarantine
 
     func testUnknownSchemaIsQuarantined() throws {

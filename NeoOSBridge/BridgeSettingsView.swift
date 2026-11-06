@@ -72,6 +72,18 @@ struct BridgeSettingsView: View {
                 if let message = environment.statusMessage {
                     Text(message).font(.caption)
                 }
+                if let error = environment.controller?.lastError {
+                    Label("CloudKit 同步失败：\(error)", systemImage: "exclamationmark.icloud")
+                        .font(.caption).foregroundStyle(.red)
+                        .textSelection(.enabled)
+                } else if let last = environment.controller?.lastHeartbeatAt {
+                    Label("设备信息已发布到 iCloud · \(last.formatted(date: .omitted, time: .standard))",
+                          systemImage: "checkmark.icloud")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else if environment.isRunning {
+                    Label("正在连接 iCloud，等待发布设备信息…", systemImage: "icloud")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
             }
         }
         .formStyle(.grouped)

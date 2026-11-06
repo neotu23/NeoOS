@@ -41,6 +41,8 @@ struct OnboardingView: View {
                             Spacer(minLength: 14)
                             VStack(spacing: 18) {
                                 PrimaryButton(title: L("Rencontrer mon Hermes")) { withAnimation { step = 1 } }
+                                CloudConnectionButton()
+                                    .font(.subheadline)
                                 Button(L("Découvrir l’interface")) { model.loadDemo() }
                                     .font(.subheadline).foregroundStyle(.secondary).padding(.bottom, 8)
                             }
@@ -73,6 +75,8 @@ struct OnboardingView: View {
                             PrimaryButton(title: L("Connecter mon agent"), symbol: "link", busy: busy) { connect() }
                                 .disabled(address.isEmpty || (mode == "basic" ? password.isEmpty || username.isEmpty : token.isEmpty))
                                 .accessibilityIdentifier("connect-agent")
+                            CloudConnectionButton()
+                                .font(.subheadline).frame(maxWidth: .infinity)
                             Button { showGuide = true } label: {
                                 Label(L("Où trouver ces informations ?"), systemImage: "questionmark.circle")
                                     .font(.subheadline).frame(maxWidth: .infinity)

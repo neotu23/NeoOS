@@ -514,6 +514,21 @@ public struct HermesBridgeEvent: Hashable, Codable, Sendable {
 /// by both sides, is what keeps a value written on the iPhone byte-identical when the Mac or a
 /// fixture reads it back.
 public enum RecordCoding {
+    /// The durable outbox and network codec must write exactly the same envelope.
+    public static func cloudBody(_ kind: CloudRecordKind, bridgeID: UUID?, profileID: String?,
+                                 payload: Data) throws -> Data {
+        struct Envelope: Encodable {
+            let schemaVersion: Int
+            let recordType: String
+            let bridgeID: String?
+            let profileID: String?
+            let payload: Data
+        }
+        return try encoder().encode(Envelope(schemaVersion: CloudSchema.version, recordType: kind.rawValue,
+                                             bridgeID: bridgeID?.uuidString, profileID: profileID,
+                                             payload: payload))
+    }
+
     public static func encoder() -> JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .secondsSince1970

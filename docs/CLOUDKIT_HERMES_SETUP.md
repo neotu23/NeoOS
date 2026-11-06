@@ -24,6 +24,8 @@ parts of this feature that cannot be done from the repository.
    that built the project; replace them with yours.
 3. **Schema** in the container's development environment. Record types and fields are listed in §3.
 4. **Same iCloud user** signed in on the Mac and the iPhone, and both apps allowed to use iCloud.
+   Each iOS Simulator needs its own sign-in inside its **Settings** app; it does not inherit the
+   Mac's iCloud login.
 5. **Push notifications** on both apps if you want pushes to trigger a pull. The feature works
    without them — a foreground pull and the 30-second fallback converge — it is just slower.
 6. Before distributing a TestFlight or App Store build, **deploy the schema** to production and
@@ -54,8 +56,15 @@ database, and neither embeds a server-to-server key.
      lookup. On Hermes 0.22.2 it will say it does not — see
      `docs/CLOUDKIT_HERMES_COMPATIBILITY.md`.
    - **开始** starts bridging.
-4. On the iPhone: Settings → mode → *Connexion iCloud (asynchrone)* → **连接并同步** → pick the Mac
-   → **新建对话**.
+   - Check for **设备信息已发布到 iCloud**. A successful **测试连接** only proves the local Hermes
+     connection; CloudKit errors are shown separately below it. Device publication happens after
+     mailbox initialization and is retried with each 30-second synchronization cycle.
+4. On the iPhone: tap **iCloud 异步连接** on the welcome/connection screen, or go to
+   **Menu → Connections → iCloud 异步连接** if a direct server is already configured. This switches
+   to cloud mode and opens its settings. Confirm the container and environment, then tap
+   **连接并同步** → pick the Mac → **新建对话**. The settings close and the cloud chat opens.
+   The cloud icon at the top left reopens these settings; choose **Connexion directe** there to
+   return to the existing direct connection.
 
 ### What the Mac does
 
@@ -110,6 +119,7 @@ conflict is read back and compared field by field, never overwritten.
 | Symptom | Likely cause | Check |
 | --- | --- | --- |
 | `iCloud 不可用` on the phone | not signed in, or the app has no iCloud capability | System Settings → Apple ID; the app's iCloud switch |
+| No Mac discovered | device publication failed, simulator not signed in, or a different iCloud account | Check the phone's sync error and the Mac's **设备信息已发布到 iCloud** / **CloudKit 同步失败** status; sign in inside Simulator Settings |
 | Mac listed but nothing happens | Mac app not bridging, or a different profile | Bridge 设置 → 状态; the profile field on both sides |
 | Message stays `已上传，等待 Mac` | the Mac has not pulled yet | press **刷新** on the Mac, or wait for the 30 s fallback |
 | Message shows `不确定` | the connection dropped after the send | this is intentional; see the compatibility doc. Do not "retry" — the bridge refuses to replay |

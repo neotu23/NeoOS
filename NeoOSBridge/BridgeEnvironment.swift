@@ -165,7 +165,6 @@ final class BridgeEnvironment {
             isConfigured = true
             defaults.set(true, forKey: "configured")
             await controller.refreshTasks()
-            await controller.heartbeat()
             if start { controller.start() }
         } catch {
             statusMessage = "无法启动桥接：\(error)"

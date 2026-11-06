@@ -168,6 +168,7 @@ public actor CloudMailbox: MailboxTransport {
             throw MailboxError.accountChanged
         }
 
+        try await store.prepareEnvelopeCompatibilityScan()
         try await adapter.ensureZone()
         if !didSubscribe {
             // A subscription only triggers a pull; it is never a task queue of its own.
@@ -224,6 +225,7 @@ public actor CloudMailbox: MailboxTransport {
 
     private func pushOutbox() async throws -> Int {
         var uploaded = 0
+        var firstError: (any Error)?
         for record in try await store.pendingOutbound() {
             try await assertScopeUnchanged()
             do {
@@ -235,11 +237,13 @@ public actor CloudMailbox: MailboxTransport {
                 // One bad record must not stop the others, and it must not hide behind a retry loop
                 // here: the caller decides when to try again.
                 consecutiveFailures += 1
+                if firstError == nil { firstError = error }
                 if case MailboxError.transport(_, let retryAfter) = error, retryAfter != nil {
                     throw error
                 }
             }
         }
+        if let firstError { throw firstError }
         return uploaded
     }
 

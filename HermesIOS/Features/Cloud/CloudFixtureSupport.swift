@@ -33,7 +33,7 @@ extension CloudChatModel {
     /// Build the model against an in-memory store, optionally pre-seeded with one message per state so
     /// the labels can be compared without waiting for a real pipeline.
     static func fixture(offline: Bool, seedStates: Bool) async -> CloudChatModel {
-        let model = CloudChatModel()
+        let model = CloudChatModel(defaults: UserDefaults(suiteName: "NeoOS.CloudFixture")!)
         let scope = AccountScope(containerID: "iCloud.fixture.NeoOS", environment: "development",
                                  userRecordName: "_fixture")
         guard let store = try? BridgeStore(inMemoryScope: scope) else { return model }
